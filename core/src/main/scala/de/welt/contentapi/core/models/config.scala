@@ -115,11 +115,9 @@ object writes {
   }
 }
 
-
   object ChannelFormatNoChildren {
     implicit lazy val channelFormat: Format[Channel] = Format(reads.PartialChannelReads.noChildrenReads, PartialChannelWrites.noChildrenWrites)
   }
-
 
 object SimpleFormats {
   implicit lazy val idFormat: Format[ChannelId] = Json.format[ChannelId]

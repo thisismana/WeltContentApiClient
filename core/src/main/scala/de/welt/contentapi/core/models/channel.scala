@@ -24,6 +24,14 @@ case class Channel(id: ChannelId,
 
   }
 
+  def getAdTag: Option[String] = {
+    if (data.adData.definesAdTag) {
+      Some(id.path)
+    } else {
+      parent.flatMap(_.getAdTag)
+    }
+  }
+
   final def findByEce(ece: Long): Option[Channel] = {
     if (id.ece == ece) {
       Some(this)

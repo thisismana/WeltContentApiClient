@@ -2,7 +2,6 @@ package de.welt.contentapi.core.models
 
 import play.api.libs.json._
 
-
   case class ApiResponse(content: ApiContent,
                          related: Option[List[ApiContent]] = None) {
     private[this] def relatedFilteredBy(`type`: String): List[ApiContent] = unwrappedRelated.filter(_.unwrappedRoles.contains(`type`))
@@ -150,7 +149,6 @@ import play.api.libs.json._
     implicit lazy val apiListsWrites = Json.writes[ApiLists]
     implicit lazy val apiResponseWrites = Json.writes[ApiResponse]
 
-
   }
 
 object ApiFormats {
@@ -166,6 +164,5 @@ object ApiFormats {
   implicit lazy val apiSectionWrites = Json.format[ApiSection]
   implicit lazy val apiListsWrites = Json.format[ApiLists]
   implicit lazy val apiResponseWrites = Json.format[ApiResponse]
-
 
 }

@@ -19,7 +19,7 @@ case class Stage(
 
 object StageFormats {
 
-  import de.welt.contentapi.core.models.pressed.PressedFormats.SectionReferenceFormat
+  import de.welt.contentapi.core.models.pressed.PressedFormats.sectionReferenceFormat
 
   implicit lazy val stageFormat: Format[Stage] = Json.format[Stage]
   // Data Sources

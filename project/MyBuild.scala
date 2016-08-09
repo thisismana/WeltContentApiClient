@@ -8,13 +8,13 @@ import org.scalastyle.sbt.ScalastylePlugin._
 object MyBuild extends Build {
 
   scalaVersion := "2.11.8"
-  val playVersion = "2.5.4"
+  val playVersion = "2.4.8"
   def withTests(project: Project) = project % "test->test;compile->compile"
 
   val frontendCompilationSettings = Seq(
     organization := "de.welt",
     scalaVersion := "2.11.8",
-    version := "0.3.0",
+    version := "0.3.0_2.4.0-SNAPSHOT",
 
     licenses +=("MIT", url("http://opensource.org/licenses/MIT")),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
@@ -48,7 +48,8 @@ object MyBuild extends Build {
       "com.amazonaws" % "aws-java-sdk-s3" % "1.11.13",
 
       // this is a temporary fix until the original maintainer releases the 2.5 version of this plugin
-      "de.threedimensions" %% "metrics-play" % "2.5.13",
+      // "de.threedimensions" %% "metrics-play" % "2.5.13", // for Play 2.5.x
+      "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1", // for Play 2.4.x
 
       "com.typesafe" % "config" % "1.3.0" % Provided,
 

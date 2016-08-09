@@ -1,28 +1,51 @@
 package de.welt.contentapi.core.models
 
-import play.api.libs.json.Json
-
 object pressed {
 
   case class SectionPage(config: SectionPageConfig, stages: Seq[ContentStage] = Seq.empty)
 
-  case class SectionPageConfig(label: String,
+  case class SectionPageConfig(displayName: String,
                                adZone: String,
                                path: String,
-                               theme: SectionPageTheme)
+                               theme: SectionPageTheme,
+                               keywords: Option[String],
+                               description: Option[String],
+                               title: Option[String]
+                              )
 
-  case class SectionPageTheme(name: String = "default")
+  object SectionPageConfig {
+    def fromChannel(channel: Channel) = SectionPageConfig(
+      displayName = channel.data.label,
+      adZone = channel.getAdTag.getOrElse("home").stripPrefix("/").stripSuffix("/") + "_index",
+      path = channel.id.path,
+      theme = SectionPageTheme(),
+      keywords = channel.data.fields.flatMap(_.get("keywords")),
+      description = channel.data.fields.flatMap(_.get("description")),
+      title = channel.data.fields.flatMap(_.get("description"))
+    )
+  }
+
+  case class SectionPageTheme(name: String = "default",
+                              sectionGap: Option[String] = None,
+                              bgColor: Option[String] = None
+                             )
 
   case class ContentStage(config: StageConfig, content: Seq[PressedContent])
 
-  case class StageConfig(id: String= "default",
-                         theme: StageMetadata = StageMetadata(),
-                         headline: Option[String] = None,
+  case class StageConfig(id: String = "default",
+                         theme: StageTheme = StageTheme(),
+                         headlineTheme: Option[HeadlineTheme] = None,
                          path: Option[String] = None,
+                         sectionReferences: Seq[SectionReference] = Nil,
                          lazyLoaded: Boolean = false
                         )
 
-  case class StageMetadata(name: String = "default", sectionReferences: Seq[SectionReference] = Nil)
+  case class HeadlineTheme(headline: String,
+                           size: Option[String],
+                           weight: Option[String],
+                           color: Option[String])
+
+  case class StageTheme(name: String = "default", itemGap: Option[String] = None)
 
   case class SectionReference(path: String, label: String)
 
@@ -32,21 +55,22 @@ object pressed {
 
 
   object PressedFormats {
-    import SectionDataFormats._
-    import ApiFormats._
-    // reads
-    implicit lazy val SectionReferenceReads = Json.reads[SectionReference]
 
-    // writes
-    implicit lazy val PressedContentConfigFormat = Json.format[PressedContentConfig]
-    implicit lazy val PressedContentFormat = Json.format[PressedContent]
-    implicit lazy val SectionReferenceFormat = Json.format[SectionReference]
-    implicit lazy val StageMetadataFormat = Json.format[StageMetadata]
-    implicit lazy val StageConfigWrites = Json.format[StageConfig]
-    implicit lazy val ContentStageWrites = Json.format[ContentStage]
-    implicit lazy val SectionPageThemeWrites = Json.format[SectionPageTheme]
-    implicit lazy val SectionPageConfigWrites = Json.format[SectionPageConfig]
-    implicit lazy val SectionPageWrites = Json.format[SectionPage]
+    import play.api.libs.json._
+    import de.welt.contentapi.core.models.SectionDataFormats._
+    import de.welt.contentapi.core.models.ApiFormats._
+
+    // formats
+    implicit lazy val pressedContentConfigFormat: Format[PressedContentConfig] = Json.format[PressedContentConfig]
+    implicit lazy val pressedContentFormat: Format[PressedContent] = Json.format[PressedContent]
+    implicit lazy val sectionReferenceFormat: Format[SectionReference] = Json.format[SectionReference]
+    implicit lazy val stageMetadataFormat: Format[StageTheme] = Json.format[StageTheme]
+    implicit lazy val headlineThemeFormat: Format[HeadlineTheme] = Json.format[HeadlineTheme]
+    implicit lazy val stageConfigWrites: Format[StageConfig] = Json.format[StageConfig]
+    implicit lazy val contentStageWrites: Format[ContentStage] = Json.format[ContentStage]
+    implicit lazy val sectionPageThemeWrites: Format[SectionPageTheme] = Json.format[SectionPageTheme]
+    implicit lazy val sectionPageConfigWrites: Format[SectionPageConfig] = Json.format[SectionPageConfig]
+    implicit lazy val sectionPageWrites: Format[SectionPage] = Json.format[SectionPage]
   }
 
 }
