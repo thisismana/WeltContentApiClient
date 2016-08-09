@@ -21,7 +21,7 @@ object pressed {
       theme = SectionPageTheme(),
       keywords = channel.data.fields.flatMap(_.get("keywords")),
       description = channel.data.fields.flatMap(_.get("description")),
-      title = channel.data.fields.flatMap(_.get("description"))
+      title = channel.data.fields.flatMap(_.get("title"))
     )
   }
 

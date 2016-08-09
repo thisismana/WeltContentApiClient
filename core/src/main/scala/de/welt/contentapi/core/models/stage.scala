@@ -2,25 +2,30 @@ package de.welt.contentapi.core.models
 
 import de.welt.contentapi.core.models.Datasource.{CuratedSource, SearchSource}
 import de.welt.contentapi.core.models.Query.{FlagQuery, SectionQuery, SubTypeQuery, TypeQuery}
-import de.welt.contentapi.core.models.pressed.SectionReference
+import de.welt.contentapi.core.models.pressed.{HeadlineTheme, SectionReference}
 import play.api.libs.json._
 
-case class Stage(
-                  id: String = "default",
-                  maxSize: Option[Int] = None,
-                  sources: Seq[Datasource],
-                  layout: Option[String] = None, // fixed, dynamic todo
-                  lazyLoaded: Boolean = false,
-                  headline: Option[String] = None,
-                  path: Option[String] = None,
-                  sectionReferences: Seq[SectionReference] = Seq.empty
-                ) {}
+case class Stage(id: String = "default",
+                 maxSize: Option[Int] = None,
+                 sources: Seq[Datasource],
+                 lazyLoaded: Boolean = false,
+                 headlineTheme: Option[HeadlineTheme] = None,
+                 path: Option[String] = None,
+                 sectionReferences: Seq[SectionReference] = Seq.empty,
+                 config: StageConfig) {}
 
+case class StageConfig(sectionGap: Option[String] = None,
+                       bgColor: Option[String] = None,
+                       itemGap: Option[String] = None,
+                       hasCommercialOfType: Option[String] = None,
+                       layout: Option[String] = None,
+                       frameless: Boolean = false)
 
 object StageFormats {
 
-  import de.welt.contentapi.core.models.pressed.PressedFormats.sectionReferenceFormat
+  import de.welt.contentapi.core.models.pressed.PressedFormats._
 
+  implicit lazy val stageConfigFormat: Format[StageConfig] = Json.format[StageConfig]
   implicit lazy val stageFormat: Format[Stage] = Json.format[Stage]
   // Data Sources
   implicit lazy val datasourceFormat: Format[Datasource] = Json.format[Datasource]
