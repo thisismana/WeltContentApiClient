@@ -2,7 +2,6 @@ package de.welt.contentapi.core.models
 
 import de.welt.contentapi.core.models.Datasource.{CuratedSource, SearchSource}
 import de.welt.contentapi.core.models.Query.{FlagQuery, SectionQuery, SubTypeQuery, TypeQuery}
-import play.api.libs.json._
 
 case class Stage(id: String = "default",
                  maxSize: Option[Int] = None,
@@ -40,12 +39,13 @@ case class SectionReference(path: String,
 
 object StageFormats {
 
-  import de.welt.contentapi.core.models.pressed.PressedFormats._
+  import play.api.libs.json._
 
   implicit lazy val headlineThemeFormat: Format[HeadlineTheme] = Json.format[HeadlineTheme]
   implicit lazy val commercialFormat: Format[Commercial] = Json.format[Commercial]
-  implicit lazy val stageConfigWrites: Format[StageConfig] = Json.format[StageConfig]
-
+  implicit lazy val stageThemeFormat: Format[StageTheme] = Json.format[StageTheme]
+  implicit lazy val stageConfigFormat: Format[StageConfig] = Json.format[StageConfig]
+  implicit lazy val sectionReferenceFormat: Format[SectionReference] = Json.format[SectionReference]
   implicit lazy val stageFormat: Format[Stage] = Json.format[Stage]
   // Data Sources
   implicit lazy val datasourceFormat: Format[Datasource] = Json.format[Datasource]
@@ -68,6 +68,8 @@ sealed trait Query {
 }
 
 object Query {
+
+  import play.api.libs.json._
 
   object QueryTypes {
     val typesQuery: String = "type"
@@ -139,6 +141,9 @@ object DatasourceTypes {
 }
 
 object Datasource {
+
+  import play.api.libs.json._
+
   def unapply(datasource: Datasource): Option[(String, JsValue)] = {
     val (typ: String, sub) = datasource.typ match {
       case DatasourceTypes.curatedSource =>
