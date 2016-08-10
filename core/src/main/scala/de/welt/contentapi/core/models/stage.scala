@@ -2,50 +2,43 @@ package de.welt.contentapi.core.models
 
 import de.welt.contentapi.core.models.Datasource.{CuratedSource, SearchSource}
 import de.welt.contentapi.core.models.Query.{FlagQuery, SectionQuery, SubTypeQuery, TypeQuery}
+import de.welt.contentapi.core.models.pressed.SectionReference
 
 case class Stage(id: String = "default",
-                 maxSize: Option[Int] = None,
                  sources: Seq[Datasource],
-                 lazyLoaded: Boolean = false,
-                 path: Option[String] = None,
-                 sectionReferences: Seq[SectionReference] = Seq.empty,
                  config: StageConfig) {}
 
-case class StageConfig(id: String = "default",
-                       stageTheme: StageTheme = StageTheme(),
+case class StageConfig(maxSize: Option[Int] = None,
                        path: Option[String] = None,
+                       stageTheme: StageTheme = StageTheme(),
+                       headlineTheme: Option[HeadlineTheme] = None,
+                       isHidden: Option[Boolean] = None,
+                       lazyLoaded: Option[Boolean] = None,
                        sectionReferences: Seq[SectionReference] = Nil,
-                       lazyLoaded: Boolean = false,
                        commercial: Option[Commercial] = None)
 
 case class Commercial(typ: String)
 
 case class HeadlineTheme(headline: String,
                          size: Option[String],
-                         weight: Option[String],
-                         color: Option[String])
+                         weight: Option[String])
 
 case class StageTheme(name: String = "default",
-                      headlineTheme: Option[HeadlineTheme] = None,
                       itemGap: Option[String] = None,
                       sectionGap: Option[String] = None,
                       bgColor: Option[String] = None,
-                      frameless : Boolean = false)
-
-case class SectionReference(path: String,
-                            label: String)
-
+                      frameless : Option[Boolean] = None)
 
 
 object StageFormats {
 
   import play.api.libs.json._
+  import pressed.PressedFormats.sectionReferenceFormat
 
   implicit lazy val headlineThemeFormat: Format[HeadlineTheme] = Json.format[HeadlineTheme]
   implicit lazy val commercialFormat: Format[Commercial] = Json.format[Commercial]
   implicit lazy val stageThemeFormat: Format[StageTheme] = Json.format[StageTheme]
   implicit lazy val stageConfigFormat: Format[StageConfig] = Json.format[StageConfig]
-  implicit lazy val sectionReferenceFormat: Format[SectionReference] = Json.format[SectionReference]
   implicit lazy val stageFormat: Format[Stage] = Json.format[Stage]
   // Data Sources
   implicit lazy val datasourceFormat: Format[Datasource] = Json.format[Datasource]
