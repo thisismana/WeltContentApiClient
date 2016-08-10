@@ -213,6 +213,7 @@ case class ChannelData(label: String,
                        adData: ChannelAdData = ChannelAdData(),
                        metadata: ChannelMetadata = ChannelMetadata(), // @deprecated
                        siteBuilding: Option[ChannelSiteBuilding] = None,
+                       bgColor: Option[String] = None,
                        fields: Option[Map[String, String]] = None // todo, remove option when changes have been applied everywhere
                       )
 
