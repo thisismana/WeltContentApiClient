@@ -28,7 +28,6 @@ object pressed {
   }
 
   case class SectionPageTheme(name: String = "default",
-                              sectionGap: Option[String] = None,
                               bgColor: Option[String] = None
                              )
 
