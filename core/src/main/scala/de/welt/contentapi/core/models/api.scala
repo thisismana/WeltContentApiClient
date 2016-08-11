@@ -102,8 +102,8 @@ import play.api.libs.json._
 
   case class ApiTag(id: Option[String], value: Option[String])
 
-  case class ContentApiQuery(path: Option[String],
-                             excludePaths: Option[String],
+  case class ContentApiQuery(path: Option[String] = None,
+                             excludePaths: Option[String] = None,
                              typ: Option[String] = None,
                              subType: Option[String] = None,
                              subTypeExcludes: Iterable[String] = Iterable.empty,
