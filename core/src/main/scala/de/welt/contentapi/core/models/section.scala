@@ -18,6 +18,6 @@ object SectionDataFormats {
   import de.welt.contentapi.core.models.ApiFormats._
   import de.welt.contentapi.core.models.ChannelFormatNoChildren.channelFormat
 
-  implicit lazy val sectionDataWrites: Format[SectionData] = Json.format[SectionData]
-  implicit lazy val EnrichedApiContentWrites: Format[EnrichedApiContent] = Json.format[EnrichedApiContent]
+  implicit lazy val sectionDataFormat: Format[SectionData] = Json.format[SectionData]
+  implicit lazy val EnrichedApiContentFormat: Format[EnrichedApiContent] = Json.format[EnrichedApiContent]
 }

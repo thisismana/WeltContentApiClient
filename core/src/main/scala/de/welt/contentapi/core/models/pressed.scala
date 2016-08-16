@@ -59,6 +59,11 @@ object pressed {
 
   case class PressedContent(config: PressedContentConfig, content: EnrichedApiContent)
 
+  /**
+    * Defines how a single Content should be displayed
+    * @param profile The view profile, one of ```[tiny, small, half, medium, wide]```
+    * @param `type` Specifies the teaser Type, one of ```[Hero, Mediahero, Default, DefaultIcon, Simple, Upright, Inline, Cluster, Counter, Newsticker]```
+    */
   case class PressedContentConfig(profile: String = "wide", `type`: String = "Default")
 
 
