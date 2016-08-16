@@ -38,7 +38,7 @@ object pressed {
                          headlineTheme: Option[HeadlineTheme] = None,
                          path: Option[String] = None,
                          sectionReferences: Seq[SectionReference] = Nil,
-                         color: Option[String],
+                         color: Option[String] = None,
                          stageGap: Option[String] = None,
                          isHidden: Boolean = false,
                          isFrameless: Boolean = true,
