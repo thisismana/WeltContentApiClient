@@ -34,14 +34,10 @@ object pressed {
   case class ContentStage(config: StageConfig, content: Seq[PressedContent])
 
   case class StageConfig(id: String = "default",
-                         theme: StageTheme = StageTheme(),
+                         theme: Option[StageTheme] = None,
                          headlineTheme: Option[HeadlineTheme] = None,
                          path: Option[String] = None,
                          sectionReferences: Seq[SectionReference] = Nil,
-                         color: Option[String] = None,
-                         stageGap: Option[String] = None,
-                         isHidden: Boolean = false,
-                         isFrameless: Boolean = true,
                          lazyLoaded: Boolean = false,
                          commercial: Option[String] = None
                         )
@@ -52,8 +48,11 @@ object pressed {
                            )
 
   case class StageTheme(name: String = "default",
-                        color: String = "light",
-                        itemGap: Option[String] = None)
+                        bgColor: Option[String] = None,
+                        itemGap: Option[String] = None,
+                        stageGap: Option[String] = None,
+                        isHidden: Boolean = false,
+                        isFrameless: Boolean = true)
 
   case class SectionReference(path: String, label: String)
 

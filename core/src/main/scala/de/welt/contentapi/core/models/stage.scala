@@ -10,7 +10,7 @@ case class Stage(id: String = "default",
 
 case class StageConfig(maxSize: Option[Int] = None,
                        path: Option[String] = None,
-                       stageTheme: StageTheme = StageTheme(),
+                       stageTheme: Option[StageTheme] = None,
                        headlineTheme: Option[HeadlineTheme] = None,
                        isHidden: Option[Boolean] = None,
                        lazyLoaded: Option[Boolean] = None,
