@@ -13,7 +13,7 @@ case class StageConfig(maxSize: Option[Int] = None,
                        stageTheme: Option[StageTheme] = None,
                        headlineTheme: Option[HeadlineTheme] = None,
                        isHidden: Option[Boolean] = None,
-                       lazyLoaded: Option[Boolean] = None,
+                       typ: StageType = StageType("default"),
                        sectionReferences: Seq[SectionReference] = Nil,
                        commercial: Option[Commercial] = None)
 
@@ -28,6 +28,8 @@ case class StageTheme(name: String = "default",
                       sectionGap: Option[String] = None,
                       bgColor: Option[String] = None,
                       frameless : Option[Boolean] = None)
+
+case class StageType(typ: String)
 
 
 object StageFormats {
