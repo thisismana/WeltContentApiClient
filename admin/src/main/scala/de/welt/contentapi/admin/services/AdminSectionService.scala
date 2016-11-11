@@ -9,7 +9,9 @@ import de.welt.contentapi.client.services.contentapi.admin.LegacySectionService
 import de.welt.contentapi.client.services.contentapi.{SectionService, SectionServiceImpl}
 import de.welt.contentapi.client.services.s3.S3
 import de.welt.contentapi.core.models._
-import de.welt.contentapi.core.models.writes.FullChannelWrites
+import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ApiChannelMetadataNew, ChannelUpdate}
+import de.welt.contentapi.core.models.configuration.formats.writes.FullChannelWrites
+import de.welt.contentapi.core.models.section2.Stage
 import de.welt.contentapi.core.traits.Loggable
 import play.api.Environment
 import play.api.cache.CacheApi

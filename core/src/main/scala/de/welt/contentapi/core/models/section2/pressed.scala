@@ -1,7 +1,9 @@
-package de.welt.contentapi.core.models
+package de.welt.contentapi.core.models.section2
 
-import de.welt.contentapi.core.models.reads.FullChannelReads
-import de.welt.contentapi.core.models.writes.FullChannelWrites
+import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ApiChannelMetadataNew, ChannelId}
+import de.welt.contentapi.core.models.content.EnrichedApiContent
+import de.welt.contentapi.core.models.configuration.formats.reads.FullChannelReads
+import de.welt.contentapi.core.models.configuration.formats.writes.FullChannelWrites
 
 object pressed {
   
@@ -113,11 +115,6 @@ object pressed {
   object PressedFormats {
 
     import play.api.libs.json._
-    import SectionDataFormats._
-    import ApiFormats._
-    import StageFormats._
-    import SimpleFormats._
-    import ChannelFormatNoChildren.channelFormat
 
     implicit val channelFormatFullChildren: Format[ApiChannel] = Format(FullChannelReads.channelReads, FullChannelWrites.channelWrites)
 

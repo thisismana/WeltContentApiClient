@@ -1,4 +1,4 @@
-package de.welt.contentapi.core.models
+package de.welt.contentapi.core.models.content
 
 import play.api.libs.json._
 

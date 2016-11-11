@@ -4,7 +4,7 @@ import com.codahale.metrics.{MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
-import de.welt.contentapi.core.models.http.RequestHeaders
+import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import de.welt.contentapi.core.traits.Loggable
 import play.api.http.Status
 import play.api.libs.json.{JsError, JsLookupResult, JsResult, JsSuccess}

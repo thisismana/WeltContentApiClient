@@ -5,7 +5,7 @@ import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.client.services.contentapi.AbstractService
 import de.welt.contentapi.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
-import de.welt.contentapi.core.models.http.RequestHeaders
+import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import org.mockito.Matchers
 import org.mockito.Matchers.anyString
 import org.mockito.Mockito.{verify, when}

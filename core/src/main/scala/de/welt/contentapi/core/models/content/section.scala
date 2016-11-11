@@ -1,7 +1,8 @@
-package de.welt.contentapi.core.models
+package de.welt.contentapi.core.models.content
 
-import de.welt.contentapi.core.models.reads.FullChannelReads
-import de.welt.contentapi.core.models.writes.FullChannelWrites
+import de.welt.contentapi.core.models.configuration.ApiChannel
+import de.welt.contentapi.core.models.configuration.formats.reads.FullChannelReads
+import de.welt.contentapi.core.models.configuration.formats.writes.FullChannelWrites
 
 case class EnrichedApiContent(content: ApiContent, sectionData: Option[SectionData]) {
   def `type`: String = content.`type`
@@ -25,7 +26,6 @@ object SectionData {
 
 object SectionDataFormats {
   import play.api.libs.json._
-  import de.welt.contentapi.core.models.ApiFormats._
   implicit val channelFormatFullChildren: Format[ApiChannel] = Format(FullChannelReads.channelReads, FullChannelWrites.channelWrites)
 
   implicit lazy val sectionDataFormat: Format[SectionData] = Json.format[SectionData]

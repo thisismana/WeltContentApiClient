@@ -5,6 +5,8 @@ import java.time.Instant
 
 import de.welt.contentapi.core.models.Datasource._
 import de.welt.contentapi.core.models.Query.{QueryTypes, _}
+import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelAdData, ApiChannelData, ApiChannelMetadata, ChannelId}
+import de.welt.contentapi.core.models.section2.{ApiStageConfig, Stage}
 import org.apache.commons.io.FileUtils
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsValue, Json}
@@ -45,7 +47,7 @@ class StageModelTest extends PlaySpec {
         hasChildren = false,
         lastModifiedDate = Instant.now.toEpochMilli)
 
-      import de.welt.contentapi.core.models.writes._
+      import de.welt.contentapi.core.models.configuration.formats.writes._
       implicit val writes = FullChannelWrites.channelWrites
 
       val json: JsValue = Json.toJson(politicsChannel)
@@ -87,7 +89,7 @@ class StageModelTest extends PlaySpec {
         lastModifiedDate = Instant.now.toEpochMilli)
 
 
-      import de.welt.contentapi.core.models.writes._
+      import de.welt.contentapi.core.models.configuration.formats.writes._
       implicit val writes = FullChannelWrites.channelWrites
 
       val json: JsValue = Json.toJson(politikChannel)

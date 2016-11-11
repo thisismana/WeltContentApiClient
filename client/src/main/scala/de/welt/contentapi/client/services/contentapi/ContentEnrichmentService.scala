@@ -2,8 +2,8 @@ package de.welt.contentapi.client.services.contentapi
 
 import javax.inject.{Inject, Singleton}
 
-import de.welt.contentapi.core.models.EnrichedApiResponse
-import de.welt.contentapi.core.models.http.RequestHeaders
+import de.welt.contentapi.core.models.content.EnrichedApiResponse
+import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import de.welt.contentapi.core.traits.Loggable
 import play.api.mvc.Request
 

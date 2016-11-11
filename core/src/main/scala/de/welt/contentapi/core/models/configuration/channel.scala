@@ -1,7 +1,8 @@
-package de.welt.contentapi.core.models
+package de.welt.contentapi.core.models.configuration
 
 import java.time.Instant
 
+import de.welt.contentapi.core.models.section2.Stage
 import de.welt.contentapi.core.traits.Loggable
 
 import scala.annotation.tailrec
