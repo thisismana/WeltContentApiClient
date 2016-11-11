@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
-import de.welt.contentapi.core.models.content.{ApiContent, ContentApiQuery, EnrichedApiContent}
+import de.welt.contentapi.core.models.content2.{ApiContent, ContentApiQuery, EnrichedApiContent}
 import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import de.welt.contentapi.core.models.ContentApiQuery
 import play.api.libs.json.{JsLookupResult, JsResult}
@@ -27,7 +27,7 @@ class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
                                          sectionService: SectionService)
   extends AbstractService[Seq[ApiContent]] with ContentSearchService {
 
-  import de.welt.contentapi.core.models.content.ApiReads._
+  import de.welt.contentapi.core.models.content2.ApiReads._
 
   override def config: ServiceConfiguration = cfg.getServiceConfig(serviceName)
 

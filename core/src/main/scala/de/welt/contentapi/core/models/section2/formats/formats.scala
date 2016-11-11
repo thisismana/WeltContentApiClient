@@ -1,6 +1,6 @@
-import de.welt.contentapi.core.models.configuration.formats.{Datasource, Query}
-import de.welt.contentapi.core.models.configuration.formats.Datasource._
-import de.welt.contentapi.core.models.configuration.formats.Query._
+import de.welt.contentapi.core.models.configuration2.formats.{Datasource, Query}
+import de.welt.contentapi.core.models.configuration2.formats.Datasource._
+import de.welt.contentapi.core.models.configuration2.formats.Query._
 import de.welt.contentapi.core.models.section2._
 
 object formats {

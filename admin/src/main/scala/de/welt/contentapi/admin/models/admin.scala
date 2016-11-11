@@ -2,7 +2,7 @@ package de.welt.contentapi.admin.models
 
 import java.time.Instant
 
-import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ChannelId}
+import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ChannelId}
 import de.welt.contentapi.core.models.{ApiChannelData, ChannelId}
 
 case class SdpSectionData(url: String,

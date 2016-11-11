@@ -4,8 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import de.welt.contentapi.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.client.services.s3.S3
-import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ChannelId}
-import de.welt.contentapi.core.models.content.{ApiContent, EnrichedApiContent, SectionData}
+import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ChannelId}
+import de.welt.contentapi.core.models.content2.{ApiContent, EnrichedApiContent, SectionData}
 import de.welt.contentapi.core.models._
 import de.welt.contentapi.core.traits.Loggable
 import play.api.cache.CacheApi
@@ -58,7 +58,7 @@ class SectionServiceImpl @Inject()(config: ContentClientConfig,
 
   protected def root(implicit env: Env): Option[ApiChannel] = cache.getOrElse(env.toString, 10.minutes) {
 
-    import de.welt.contentapi.core.models.configuration.formats.reads.FullChannelReads._
+    import de.welt.contentapi.core.models.configuration2.formats.reads.FullChannelReads._
 
     s3.get(config.aws.s3.janus.bucket, objectKeyForEnv(env))
       .map { data ⇒ Json.parse(data).validate[ApiChannel] }

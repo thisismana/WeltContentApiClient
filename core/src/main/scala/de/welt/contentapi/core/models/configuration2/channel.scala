@@ -1,4 +1,4 @@
-package de.welt.contentapi.core.models.configuration
+package de.welt.contentapi.core.models.configuration2
 
 import java.time.Instant
 
@@ -26,7 +26,7 @@ case class ApiChannel(id: ChannelId,
   private val renameRootChannel: (ApiChannel) => ApiChannel = (root: ApiChannel) => {
     root.copy(data = root.data.copy(label = "Home"))
   }
-  
+
   final def updateParentRelations(newParent: Option[ApiChannel] = None): Unit = {
     this.parent = newParent
     children.foreach(_.updateParentRelations(Some(this)))

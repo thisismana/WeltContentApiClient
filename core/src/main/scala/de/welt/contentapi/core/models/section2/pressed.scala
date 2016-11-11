@@ -1,12 +1,12 @@
 package de.welt.contentapi.core.models.section2
 
-import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ApiChannelMetadataNew, ChannelId}
-import de.welt.contentapi.core.models.content.EnrichedApiContent
-import de.welt.contentapi.core.models.configuration.formats.reads.FullChannelReads
-import de.welt.contentapi.core.models.configuration.formats.writes.FullChannelWrites
+import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ApiChannelMetadataNew, ChannelId}
+import de.welt.contentapi.core.models.content2.EnrichedApiContent
+import de.welt.contentapi.core.models.configuration2.formats.reads.FullChannelReads
+import de.welt.contentapi.core.models.configuration2.formats.writes.FullChannelWrites
 
 object pressed {
-  
+
   /**
     * @param channelConfig channel configuration for the section [from@ConfigMcConfigFace]
     * @param stages all stages of the section
@@ -14,7 +14,7 @@ object pressed {
   case class ApiSectionPage(channelConfig: Option[ApiChannelConfig] = None, stages: Option[Seq[ApiContentStage]] = None) {
     lazy val unwrappedStages: Seq[ApiContentStage] = stages.getOrElse(Nil)
   }
-  
+
   /**
     * Short version of (root) ApiChannel just for a section page
     *
@@ -74,7 +74,7 @@ object pressed {
       content = Some(content)
     )
   }
-  
+
   /**
     * @param stageType rendering option for a stage (default, carousel, user-defined, hidden) [mapping@funkotron]
     * @param stageTheme theming options of the stage [mapping@funkotron]

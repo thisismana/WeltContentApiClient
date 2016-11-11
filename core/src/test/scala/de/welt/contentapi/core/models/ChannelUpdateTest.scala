@@ -1,6 +1,6 @@
 package de.welt.contentapi.core.models
 
-import de.welt.contentapi.core.models.configuration.ChannelUpdate
+import de.welt.contentapi.core.models.configuration2.ChannelUpdate
 import de.welt.meta.ChannelHelper
 import org.scalatestplus.play.PlaySpec
 

@@ -1,6 +1,6 @@
-package de.welt.contentapi.core.models.configuration.formats
+package de.welt.contentapi.core.models.configuration2.formats
 
-import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelAdData, ApiChannelData, ApiChannelMetadata, ApiChannelMetadataNew, ApiChannelTheme, ChannelId}
+import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelAdData, ApiChannelData, ApiChannelMetadata, ApiChannelMetadataNew, ApiChannelTheme, ChannelId}
 import de.welt.contentapi.core.models.StageFormats
 import de.welt.contentapi.core.models.section2.Stage
 import play.api.libs.functional.syntax._

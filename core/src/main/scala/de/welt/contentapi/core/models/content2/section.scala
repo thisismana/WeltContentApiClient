@@ -1,8 +1,8 @@
-package de.welt.contentapi.core.models.content
+package de.welt.contentapi.core.models.content2
 
-import de.welt.contentapi.core.models.configuration.ApiChannel
-import de.welt.contentapi.core.models.configuration.formats.reads.FullChannelReads
-import de.welt.contentapi.core.models.configuration.formats.writes.FullChannelWrites
+import de.welt.contentapi.core.models.configuration2.ApiChannel
+import de.welt.contentapi.core.models.configuration2.formats.reads.FullChannelReads
+import de.welt.contentapi.core.models.configuration2.formats.writes.FullChannelWrites
 
 case class EnrichedApiContent(content: ApiContent, sectionData: Option[SectionData]) {
   def `type`: String = content.`type`

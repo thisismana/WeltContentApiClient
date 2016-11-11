@@ -1,4 +1,4 @@
-package de.welt.contentapi.core.models.content
+package de.welt.contentapi.core.models.content2
 
 import play.api.libs.json._
 
@@ -103,7 +103,7 @@ import play.api.libs.json._
                       metadata: Option[ApiMetadata] = None,
                       index: Option[Int] = None) {
     def unwrappedFields = fields.getOrElse(Map.empty)
-  
+
     def unwrappedMetadata: Map[String, String] = metadata.map(_.asMap).getOrElse(Map.empty)
   }
 

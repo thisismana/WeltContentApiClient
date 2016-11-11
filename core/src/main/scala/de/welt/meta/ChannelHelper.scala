@@ -1,6 +1,6 @@
 package de.welt.meta
 
-import de.welt.contentapi.core.models.configuration.{ApiChannel, ApiChannelData, ChannelId}
+import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ChannelId}
 import de.welt.contentapi.core.models.{ApiChannelData, ChannelId}
 
 object ChannelHelper {
