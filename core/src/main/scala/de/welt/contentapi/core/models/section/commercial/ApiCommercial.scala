@@ -1,7 +1,6 @@
 package de.welt.contentapi.core.models.section.commercial
 
-import CommercialLibrary._
-import play.api.libs.json.Json
+import de.welt.contentapi.core.models.section.commercial.CommercialLibrary._
 
 case class ApiCommercial(format: String) {
   def apply(value: String): ApiCommercial = {
@@ -11,10 +10,6 @@ case class ApiCommercial(format: String) {
       case _ => ApiCommercial(format = value)
     }
   }
-}
-
-object format {
-  implicit val apiCommercialFormat = Json.format[ApiCommercial]
 }
 
 object CommercialLibrary {

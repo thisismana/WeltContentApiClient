@@ -11,6 +11,6 @@ case class LayoutTheme(name: String = "",
                        commercials: Option[Seq[ApiCommercial]] = None
                  )
 
-object format {
+object LayoutThemeFormats {
   implicit val layoutThemeFormat = Json.format[LayoutTheme]
 }
