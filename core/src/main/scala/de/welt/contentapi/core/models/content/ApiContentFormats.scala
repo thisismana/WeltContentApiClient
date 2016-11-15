@@ -8,6 +8,7 @@ import play.api.libs.json._
   * see: http://stackoverflow.com/q/26086815/
   */
 object ApiContentFormats {
+  implicit lazy val apiSectionReferenceFormat: Format[ApiSectionReference] = Json.format[ApiSectionReference]
   implicit lazy val apiOnwardFormat: Format[ApiOnward] = Json.format[ApiOnward]
   implicit lazy val apiMetadataFormat: Format[ApiMetadata] = Json.format[ApiMetadata]
   implicit lazy val apiAssetFormat: Format[ApiAsset] = Json.format[ApiAsset]
@@ -21,6 +22,7 @@ object ApiContentFormats {
 
 
 object ApiContentReads {
+  implicit lazy val apiSectionReferenceReads: Reads[ApiSectionReference] = Json.reads[ApiSectionReference]
   implicit lazy val apiOnwardReads: Reads[ApiOnward] = Json.reads[ApiOnward]
   implicit lazy val apiMetadataReads: Reads[ApiMetadata] = Json.reads[ApiMetadata]
   implicit lazy val apiSectionDataReads: Reads[ApiSectionData] = Json.reads[ApiSectionData]
@@ -33,6 +35,7 @@ object ApiContentReads {
 }
 
 object ApiContentWrites {
+  implicit lazy val apiSectionReferenceWrites: Writes[ApiSectionReference] = Json.writes[ApiSectionReference]
   implicit lazy val apiOnwardWrites: Writes[ApiOnward] = Json.writes[ApiOnward]
   implicit lazy val apiMetadataWrites: Writes[ApiMetadata] = Json.writes[ApiMetadata]
   implicit lazy val apiAssetWrites: Writes[ApiAsset] = Json.writes[ApiAsset]

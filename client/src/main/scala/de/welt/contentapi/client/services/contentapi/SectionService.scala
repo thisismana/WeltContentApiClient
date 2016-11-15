@@ -6,7 +6,7 @@ import de.welt.contentapi.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.client.services.s3.S3
 import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ChannelId}
 import de.welt.contentapi.core.models.content2.{ApiContent, EnrichedApiContent, SectionData}
-import de.welt.contentapi.core.models._
+import de.welt.contentapi.core.models.env.Env.{Env, Live}
 import de.welt.contentapi.core.traits.Loggable
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsError, JsSuccess, Json}

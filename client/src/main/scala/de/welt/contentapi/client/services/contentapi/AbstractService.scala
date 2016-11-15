@@ -4,7 +4,7 @@ import com.codahale.metrics.{MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
-import de.welt.contentapi.core.models.internal.http.RequestHeaders
+import de.welt.contentapi.client.services.http.RequestHeaders
 import de.welt.contentapi.core.traits.Loggable
 import play.api.http.Status
 import play.api.libs.json.{JsError, JsLookupResult, JsResult, JsSuccess}
@@ -42,7 +42,7 @@ trait AbstractService[T] extends Loggable with Status {
          (implicit requestHeaders: Option[RequestHeaders] = None, executionContext: ExecutionContext): Future[T] = {
 
     def parseJson(json: JsLookupResult): T = jsonValidate(json) match {
-      case JsSuccess(value, path) => value
+      case JsSuccess(value, _) => value
       case err@JsError(_) => throw new IllegalStateException(err.toString)
     }
 
@@ -58,7 +58,7 @@ trait AbstractService[T] extends Loggable with Status {
     log.debug(s"HTTP GET to ${getRequest.uri}")
 
     getRequest.get().map { response ⇒
-      
+
       context.stop()
 
       response.status match {
@@ -70,7 +70,7 @@ trait AbstractService[T] extends Loggable with Status {
   }
 
   /**
-    * headers to be forwared from client to server, e.g. the `X-Unique-Id`
+    * headers to be forwarded from client to server, e.g. the `X-Unique-Id`
     * @param maybeHeaders [[Headers]] from the incoming [[play.api.mvc.Request]]
     *
     * @return tuples of type String for headers to be forwarded
@@ -83,6 +83,9 @@ trait AbstractService[T] extends Loggable with Status {
       }
   }
 
+  /**
+    * Refactoring?: always funkotron prefix? This is wrong for: AMPotron
+    */
   protected def initializeMetricsContext(name: String): Timer.Context = {
     metrics.defaultRegistry.timer(MetricRegistry.name(s"funkotron.$name", "requestTimer")).time()
   }

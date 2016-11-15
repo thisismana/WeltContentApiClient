@@ -1,5 +1,7 @@
 package de.welt.contentapi.core.models.configuration
 
+import de.welt.contentapi.core.models.content.ApiSectionReference
+
 /**
   * Configuration for a content or section page. All configs are optional.
   * This means that they can be overwritten (by ConfigMcConfigFace) but not required. All clients must define some kind
@@ -64,14 +66,3 @@ case class ApiHeaderConfiguration(title: Option[String] = None,
   * @param name name of the theme. Need for mapping.
   */
 case class ApiThemeConfiguration(name: Option[String] = None)
-
-/**
-  * A reference <a/> to a section.
-  *
-  * Naming-Refactoring: Maybe is ApiReference better? Think of internal and external links. All internal links are
-  * relative and all external absolute. And what about links to content pages?
-  *
-  * @param label label of the <a/>
-  * @param path href of the <a/>
-  */
-case class ApiSectionReference(label: Option[String] = None, path: Option[String] = None)

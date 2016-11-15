@@ -2,10 +2,9 @@ package de.welt.contentapi.client.services.contentapi
 
 import javax.inject.{Inject, Singleton}
 
+import de.welt.contentapi.client.services.http.RequestHeaders
 import de.welt.contentapi.core.models.content2.EnrichedApiResponse
-import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import de.welt.contentapi.core.traits.Loggable
-import play.api.mvc.Request
 
 import scala.concurrent.{ExecutionContext, Future}
 

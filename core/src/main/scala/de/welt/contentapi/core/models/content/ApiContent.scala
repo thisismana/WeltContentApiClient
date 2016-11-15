@@ -124,3 +124,14 @@ case class ApiSectionData(home: Option[String], all: Option[List[String]] = None
   * @param value crap escenic format. don't use this.
   */
 case class ApiTag(id: Option[String], value: Option[String] = None)
+
+/**
+  * A reference <a/> to a section.
+  *
+  * Naming-Refactoring: Maybe is ApiReference better? Think of internal and external links. All internal links are
+  * relative and all external absolute. And what about links to content pages?
+  *
+  * @param label label of the <a/>
+  * @param path  href of the <a/>
+  */
+case class ApiSectionReference(label: Option[String] = None, path: Option[String] = None)

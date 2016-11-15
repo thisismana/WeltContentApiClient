@@ -10,7 +10,6 @@ import play.api.libs.json.{Format, Json, Reads, Writes}
   * see: http://stackoverflow.com/q/26086815/
   */
 object ApiConfigurationFormats {
-  implicit lazy val apiSectionReferenceFormat: Format[ApiSectionReference] = Json.format[ApiSectionReference]
   implicit lazy val apiThemeConfigurationFormat: Format[ApiThemeConfiguration] = Json.format[ApiThemeConfiguration]
   implicit lazy val apiHeaderConfigurationFormat: Format[ApiHeaderConfiguration] = Json.format[ApiHeaderConfiguration]
   implicit lazy val apiBrandingConfigurationFormat: Format[ApiBrandingConfiguration] = Json.format[ApiBrandingConfiguration]
@@ -20,7 +19,6 @@ object ApiConfigurationFormats {
 }
 
 object ApiConfigurationReads {
-  implicit lazy val apiSectionReferenceReads: Reads[ApiSectionReference] = Json.reads[ApiSectionReference]
   implicit lazy val apiThemeConfigurationReads: Reads[ApiThemeConfiguration] = Json.reads[ApiThemeConfiguration]
   implicit lazy val apiHeaderConfigurationReads: Reads[ApiHeaderConfiguration] = Json.reads[ApiHeaderConfiguration]
   implicit lazy val apiBrandingConfigurationReads: Reads[ApiBrandingConfiguration] = Json.reads[ApiBrandingConfiguration]
@@ -30,7 +28,6 @@ object ApiConfigurationReads {
 }
 
 object ApiConfigurationWrites {
-  implicit lazy val apiSectionReferenceWrites: Writes[ApiSectionReference] = Json.writes[ApiSectionReference]
   implicit lazy val apiThemeConfigurationWrites: Writes[ApiThemeConfiguration] = Json.writes[ApiThemeConfiguration]
   implicit lazy val apiHeaderConfigurationWrites: Writes[ApiHeaderConfiguration] = Json.writes[ApiHeaderConfiguration]
   implicit lazy val apiBrandingConfigurationWrites: Writes[ApiBrandingConfiguration] = Json.writes[ApiBrandingConfiguration]

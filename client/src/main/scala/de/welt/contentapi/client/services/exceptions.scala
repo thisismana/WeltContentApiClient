@@ -4,13 +4,13 @@ import play.api.PlayException
 
 object exceptions {
 
-  class BadConfigurationException(msg: String) extends RuntimeException(msg)
+  case class BadConfigurationException(msg: String) extends RuntimeException(msg)
 
   abstract class HttpStatusCodeException(statusCode: Int, statusPhrase: String, url: String)
     extends PlayException(s"HttpStatusCodeException[$statusCode]", statusPhrase) {
-    def getStatusCode = statusCode
-    def getStatusPhrase = statusPhrase
-    def getUrl = url
+    def getStatusCode: Int = statusCode
+    def getStatusPhrase: String = statusPhrase
+    def getUrl: String = url
 
     override def toString: String = super.toString
   }
