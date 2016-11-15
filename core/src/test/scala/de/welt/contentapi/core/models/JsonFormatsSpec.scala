@@ -285,7 +285,7 @@ class JsonFormatsSpec extends FlatSpec with Matchers {
   "JSON Formats for ApiSection" should "be equal when writing to Json and validating from Json to ApiSection" in {
     val expectedApiSection: ApiSection = getSampleApiSection
 
-    import de.welt.contentapi.core.models.section.SectionPageFormats._
+    import de.welt.contentapi.core.models.section.ApiSectionFormat._
     val apiSectionAsJsValue: JsValue = Json.toJson(expectedApiSection)
     val jsResultForJsValue: JsResult[ApiSection] = apiSectionAsJsValue.validate[ApiSection]
 
@@ -299,13 +299,13 @@ class JsonFormatsSpec extends FlatSpec with Matchers {
 
   def getSampleApiSection: ApiSection = {
     val apiContent: ApiContent = ApiContent(webUrl = "/foo", `type` = "news")
-    val teaser: Teaser = Teaser(
-      teaserConfig = TeaserConfig(
+    val teaser: ApiTeaser = ApiTeaser(
+      teaserConfig = ApiTeaserConfig(
         teaserProfile = "Hero",
         teaserType = "Default"),
       data = apiContent
     )
-    val stage: Stage = Stage(
+    val stage: ApiStage = ApiStage(
       stageLayoutId = "sectionHero",
       stageLabel = Some("Nice Section"),
       teasers = Seq(teaser)
