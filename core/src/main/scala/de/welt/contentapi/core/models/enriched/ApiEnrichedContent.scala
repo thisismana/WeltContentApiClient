@@ -13,4 +13,3 @@ case class ApiEnrichedContent(response: Option[ApiResponse] = None,
                               channel: Option[ApiChannel] = None,
                               configuration: Option[ApiConfiguration] = None)
 
-
