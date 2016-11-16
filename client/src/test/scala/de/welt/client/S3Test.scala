@@ -24,7 +24,7 @@ class S3Test extends PlaySpec {
     "return None if s3 is not enabled in config" in {
 
       val config = new FunkConfigTestImpl(s3Config ++ Configuration("funkotron.aws.s3.enabled" -> false))
-      val s3 = new S3Impl(funkConfig = config)
+      val s3 = new S3Impl(config = config)
 
       s3.client mustBe defined
     }
@@ -32,14 +32,14 @@ class S3Test extends PlaySpec {
     "return None if there is no s3 endpoint set" in {
 
       val config = new FunkConfigTestImpl(Configuration("funkotron.aws.s3.enabled" -> true))
-      val s3 = new S3Impl(funkConfig = config)
+      val s3 = new S3Impl(config = config)
 
       s3.client mustBe None
     }
 
     "create a s3 client in Prod mode when enabled and endpoint set" in {
       val config = new FunkConfigTestImpl(s3Config)
-      val s3 = new S3Impl(funkConfig = config)
+      val s3 = new S3Impl(config = config)
 
       s3.client mustBe defined
     }

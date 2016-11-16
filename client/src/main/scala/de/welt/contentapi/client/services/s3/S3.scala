@@ -13,15 +13,15 @@ import scala.io.{Codec, Source}
 
 sealed trait S3 extends Loggable {
 
-  val funkConfig: ContentClientConfig
+  val config: ContentClientConfig
   implicit val codec: Codec = Codec.UTF8
 
   lazy val client: Option[AmazonS3Client] = for {
-    endpoint <- funkConfig.aws.endpoint
+    endpoint <- config.aws.endpoint
   } yield {
     val s3Client = new AmazonS3Client()
     s3Client.setEndpoint(endpoint)
-    log.debug(s"s3 connected to ${funkConfig.aws.endpoint}")
+    log.debug(s"s3 connected to ${config.aws.endpoint}")
     s3Client
   }
 
@@ -79,4 +79,4 @@ sealed trait S3 extends Loggable {
 }
 
 @Singleton
-class S3Impl @Inject()(override val funkConfig: ContentClientConfig) extends S3 {}
+class S3Impl @Inject()(override val config: ContentClientConfig) extends S3 {}

@@ -4,7 +4,7 @@ import de.welt.contentapi.core.models.content._
 import de.welt.contentapi.core.models.section.ApiSection
 import de.welt.contentapi.core.models.section.stage._
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 
 
 class JsonFormatsSpec extends FlatSpec with Matchers {
@@ -289,12 +289,12 @@ class JsonFormatsSpec extends FlatSpec with Matchers {
     val apiSectionAsJsValue: JsValue = Json.toJson(expectedApiSection)
     val jsResultForJsValue: JsResult[ApiSection] = apiSectionAsJsValue.validate[ApiSection]
 
-    val maybeApiSectionFromJson: Option[ApiSection]= jsResultForJsValue match {
+    val maybeApiSectionFromJson: Option[ApiSection] = jsResultForJsValue match {
       case s: JsSuccess[String] => s.asOpt
       case e: JsError => Option.empty
     }
 
-     maybeApiSectionFromJson.get should be === expectedApiSection
+    maybeApiSectionFromJson.get should be === expectedApiSection
   }
 
   def getSampleApiSection: ApiSection = {

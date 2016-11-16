@@ -9,6 +9,6 @@ import de.welt.contentapi.core.models.configuration.ApiConfiguration
   * @param channel
   * @param configuration
   */
-case class PresentationChannel(channel: Option[ApiChannel] = None, configuration: Option[ApiConfiguration] = None)
+case class ApiPresentationChannel(channel: Option[ApiChannel] = None, configuration: Option[ApiConfiguration] = None)
 
 
