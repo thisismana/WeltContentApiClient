@@ -116,6 +116,13 @@ object MyBuild extends Build {
     .settings(codeStyleSettings: _*)
 
 
+  // only in "welt-content-api-client"
+  val utils = project("utils")
+    .settings(
+      name := "welt-content-api-utils"
+    )
+    .settings(coreDependencySettings: _*)
+
   val core = project("core")
     .settings(
       name := "welt-content-api-core"
@@ -155,6 +162,7 @@ object MyBuild extends Build {
       name := "welt-content-api-pressed-client"
     )
     .settings(clientDependencySettings: _*)
+    .dependsOn(withTests(utils)).aggregate(utils)
     .dependsOn(withTests(pressed)).aggregate(pressed)
 
   val legacy = project("legacy")
