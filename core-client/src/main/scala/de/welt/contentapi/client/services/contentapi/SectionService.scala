@@ -7,7 +7,6 @@ import de.welt.contentapi.client.services.s3.S3
 import de.welt.contentapi.core.models.channel.ApiChannel
 import de.welt.contentapi.core.models.configface.ApiConfigfaceChannel
 import de.welt.contentapi.core.models.content.{ApiContent, ApiSectionData}
-import de.welt.contentapi.core.models.enriched.ApiEnrichedContent
 import de.welt.contentapi.core.models.env.Env.{Env, Live}
 import de.welt.contentapi.core.traits.Loggable
 import play.api.cache.CacheApi
