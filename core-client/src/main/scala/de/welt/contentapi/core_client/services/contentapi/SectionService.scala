@@ -3,7 +3,7 @@ package de.welt.contentapi.core_client.services.contentapi
 import javax.inject.{Inject, Singleton}
 
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
-import de.welt.contentapi.core_client.services.s3.S3
+import de.welt.contentapi.core_client.services.s3.S3Client
 import de.welt.contentapi.core.models.channel.ApiChannel
 import de.welt.contentapi.core.models.configface.ApiConfigfaceChannel
 import de.welt.contentapi.core.models.content.{ApiContent, ApiSectionData}
@@ -26,7 +26,7 @@ trait SectionService {
 @Singleton
 class SectionServiceImpl @Inject()(config: ContentClientConfig,
                                    cache: CacheApi,
-                                   s3: S3,
+                                   s3: S3Client,
                                    environment: Environment)
   extends SectionService with Loggable {
 

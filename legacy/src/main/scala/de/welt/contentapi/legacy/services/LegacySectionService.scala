@@ -2,7 +2,7 @@ package de.welt.contentapi.legacy.services
 
 import com.google.inject.{Inject, Singleton}
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
-import de.welt.contentapi.core_client.services.s3.S3
+import de.welt.contentapi.core_client.services.s3.S3Client
 import de.welt.contentapi.legacy.models.{SdpSectionData, SdpSectionDataReads}
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsError, JsSuccess, Json}
@@ -16,7 +16,7 @@ trait LegacySectionService {
 }
 
 @Singleton
-class LegacySectionServiceImpl @Inject()(s3: S3, cache: CacheApi, funkConfig: ContentClientConfig)
+class LegacySectionServiceImpl @Inject()(s3: S3Client, cache: CacheApi, funkConfig: ContentClientConfig)
   extends LegacySectionService with Loggable {
 
   import SdpSectionDataReads._

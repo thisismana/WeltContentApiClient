@@ -2,7 +2,7 @@ package de.welt.contentapi.legacy.services
 
 import de.welt.contentapi.legacy.models.SdpSectionData
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfigImpl
-import de.welt.contentapi.core_client.services.s3.S3
+import de.welt.contentapi.core_client.services.s3.S3Client
 import de.welt.contentapi.core.models.{Live, Preview}
 import de.welt.meta.DisabledCache
 import org.mockito.Mockito._
@@ -26,7 +26,7 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
       "funkotron.aws.s3.janus.file" → file
     ))
 
-    val emptyS3ResponseMock = mock[S3]
+    val emptyS3ResponseMock = mock[S3Client]
     when(emptyS3ResponseMock.get(Matchers.eq(bucket), Matchers.anyString())) thenReturn None
 
     val legacyServiceMock = mock[LegacySectionService]

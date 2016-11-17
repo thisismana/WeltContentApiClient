@@ -3,11 +3,10 @@ package de.welt.contentapi.core_client.services.contentapi
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
+import de.welt.contentapi.core.models.ApiResponse
 import de.welt.contentapi.core_client.services.configuration.{ContentClientConfig, ServiceConfiguration}
-import de.welt.contentapi.core.models.internal.http._
-import de.welt.contentapi.core.models.ApiReads
-import de.welt.contentapi.core.models.content2.ApiResponse
-import de.welt.contentapi.core.traits.Loggable
+import de.welt.contentapi.core_client.services.http.RequestHeaders
+import de.welt.contentapi.utils.Loggable
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 
@@ -27,7 +26,7 @@ class ContentServiceImpl @Inject()(override val ws: WSClient,
                                    funkConfig: ContentClientConfig)
   extends AbstractService[ApiResponse] with ContentService with Loggable {
 
-  import de.welt.contentapi.core.models.content2.ApiReads._
+  import de.welt.contentapi.core.models.ApiContentReads._
 
   override def jsonValidate: JsLookupResult ⇒ JsResult[ApiResponse] = _.validate[ApiResponse]
 

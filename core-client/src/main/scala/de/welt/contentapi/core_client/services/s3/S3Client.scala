@@ -7,11 +7,11 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
 import com.amazonaws.util.StringInputStream
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
-import de.welt.contentapi.core.traits.Loggable
+import de.welt.contentapi.utils.Loggable
 
 import scala.io.{Codec, Source}
 
-sealed trait S3 extends Loggable {
+sealed trait S3Client extends Loggable {
 
   val config: ContentClientConfig
   implicit val codec: Codec = Codec.UTF8
@@ -79,4 +79,4 @@ sealed trait S3 extends Loggable {
 }
 
 @Singleton
-class S3Impl @Inject()(override val config: ContentClientConfig) extends S3 {}
+class S3ClientImpl @Inject()(override val config: ContentClientConfig) extends S3Client {}

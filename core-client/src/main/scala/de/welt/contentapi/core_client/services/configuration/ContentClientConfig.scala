@@ -21,27 +21,34 @@ sealed trait ContentClientConfig {
 
   def configuration: Configuration
 
-  def getServiceConfig(serviceName: String): ServiceConfiguration = configuration.getConfig(s"funkotron.api.$serviceName")
+  def getServiceConfig(serviceName: String): ServiceConfiguration = configuration.getConfig(s"welt.api.$serviceName")
     .flatMap(cfg => ServiceConfiguration.fromConfig(serviceName, cfg))
     .getOrElse(throw BadConfigurationException(s"Service at $serviceName was not properly configured"))
 
   object aws {
-    private lazy val s3Config = configuration.getConfig("funkotron.aws.s3")
+    private lazy val s3Config = configuration.getConfig("welt.aws.s3")
     lazy val endpoint: Option[String] = s3Config.flatMap(_.getString("endpoint"))
 
     object s3 {
 
       object janus {
         lazy val bucket: String = s3Config.flatMap(_.getString("janus.bucket"))
-          .getOrElse(throw BadConfigurationException("'funkotron.aws.s3.janus.bucket' not configured"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.bucket' not configured"))
         lazy val file: String = s3Config.flatMap(_.getString("janus.file"))
-          .getOrElse(throw BadConfigurationException("'funkotron.aws.s3.janus.file' not configured"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.file' not configured"))
 
       }
 
       object sectionMetadata {
         lazy val bucket: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.bucket"))
         lazy val file: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.file"))
+      }
+
+      object rawTree {
+        lazy val bucket: String = s3Config.flatMap(_.getString("rawTree.bucket"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.rawTree.file' not configured"))
+        lazy val file: String = s3Config.flatMap(_.getString("rawTree.file"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.rawTree.file' not configured"))
       }
     }
   }

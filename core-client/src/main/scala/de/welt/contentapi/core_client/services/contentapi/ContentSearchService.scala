@@ -14,9 +14,25 @@ import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait ContentSearchService {
   protected val serviceName = "search"
+  val defaultResultSize = 12
+  val maxResultSize = 30
 
   def search(query: ApiContentSearch)
             (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[ApiContent]]
+
+
+  /**
+    * filter invalid values (such as negative or too large)
+    *
+    * @param maybeLimit the requested limit
+    * @return sanitized limit:
+    *         the value, if within valid bounds
+    *         max allowed is `ContentSearchServiceImpl.maxResultSize`
+    *         `ContentSearchServiceImpl.defaultResultSize` if `None` was passed
+    */
+  def sanitizeLimit(maybeLimit: Option[Int]) :Int = {
+    maybeLimit.map(l => Math.abs(Math.min(l, maxResultSize))) getOrElse defaultResultSize
+  }
 }
 
 @Singleton
@@ -37,22 +53,4 @@ class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
     get(Nil, apiContentSearch.getAllParamsUnwrapped, Nil)
   }
 
-}
-
-object ContentSearchService {
-  val defaultResultSize = 12
-  val maxResultSize = 30
-
-  /**
-    * filter invalid values (such as negative or too large)
-    *
-    * @param maybeLimit the requested limit
-    * @return sanitized limit:
-    *         the value, if within valid bounds
-    *         max allowed is `ContentSearchServiceImpl.maxResultSize`
-    *         `ContentSearchServiceImpl.defaultResultSize` if `None` was passed
-    */
-  def sanitizeLimit(maybeLimit: Option[Int]) :Int = {
-    maybeLimit.map(l => Math.abs(Math.min(l, maxResultSize))) getOrElse defaultResultSize
-  }
 }

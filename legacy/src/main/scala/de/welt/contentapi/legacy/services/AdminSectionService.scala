@@ -6,12 +6,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.common.base.Stopwatch
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core_client.services.contentapi.{SectionService, SectionServiceImpl}
-import de.welt.contentapi.core_client.services.s3.S3
-import de.welt.contentapi.core.models._
-import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ApiChannelMetadataNew, ChannelUpdate}
-import de.welt.contentapi.core.models.configuration2.formats.writes.FullChannelWrites
-import de.welt.contentapi.core.models.section2.Stage
-import de.welt.contentapi.core.traits.Loggable
+import de.welt.contentapi.core_client.services.s3.S3Client
 import play.api.Environment
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsValue, Json}
@@ -29,7 +24,7 @@ trait AdminSectionService extends SectionService {
 
 @Singleton
 class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
-                                        s3: S3,
+                                        s3: S3Client,
                                         environment: Environment,
                                         legacySectionService: LegacySectionService,
                                         cache: CacheApi)
