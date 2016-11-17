@@ -21,10 +21,10 @@ case class ApiResponse(content: ApiContent,
   * @param fields generic map with 'data/content' based on the content type
   * @param authors authors of the content
   * @param elements all elements for the content. A element has a relation (teaser, opener, inline) and type (image, video)
-  * @param roles ???
+  * @param roles needed for related content (role playlist) (Frank)
   * @param sections ???
   * @param tags Tags of the content. Only the Escenic tags (manuel created).
-  * @param onward ???
+  * @param onward non resolved relations (related content) (GraphQl)
   */
 case class ApiContent(webUrl: String,
                       `type`: String,
@@ -43,7 +43,6 @@ case class ApiContent(webUrl: String,
   lazy val unwrappedElements: List[ApiElement] = elements.getOrElse(Nil)
   lazy val unwrappedRoles: List[String] = roles.getOrElse(Nil)
   lazy val unwrappedTags: List[ApiTag] = tags.getOrElse(Nil)
-  lazy val unwrappedOnward: List[ApiOnward] = onward.getOrElse(Nil)
 
   def fieldsContainEntry(entry: (String, String)): Boolean = unwrappedFields.exists(_ == entry)
 
@@ -52,14 +51,14 @@ case class ApiContent(webUrl: String,
 }
 
 /**
-  * Wer braucht das eigentlich?
+  * TODO MANA
   * @param id ???
   * @param roles ???
   */
 case class ApiOnward(id: String, roles: Seq[String])
 
 /**
-  * @param id ???
+  * @param id escenic id of author content page (author page)
   * @param name name of the author
   * @param position position of the author
   * @param url relative web url the author page
@@ -89,7 +88,7 @@ case class ApiElement(id: String,
 }
 
 /**
-  * WTF?
+  * WTF? Irgendwas mit VIDEO
   * @param validToDate ???
   */
 case class ApiMetadata(validToDate: String) {
@@ -113,7 +112,7 @@ case class ApiAsset(`type`: String,
 }
 
 /**
-  * Brauchen wir das überhaupt noch?
+  *
   * @param home ???
   * @param all ???
   */

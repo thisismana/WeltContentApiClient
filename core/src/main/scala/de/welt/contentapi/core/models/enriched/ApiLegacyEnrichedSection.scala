@@ -1,8 +1,7 @@
 package de.welt.contentapi.core.models.enriched
 
-import de.welt.contentapi.core.models.channel.ApiChannel
-import de.welt.contentapi.core.models.configuration.ApiConfiguration
 import de.welt.contentapi.core.models.legacy.ApiLegacySection
+import de.welt.contentapi.core.models.pressed.{ApiChannel, ApiConfiguration}
 
 /**
   * Legacy == papyrus -> da-hood version of sections

@@ -1,6 +1,6 @@
 package de.welt.contentapi.core.models.configface
 
-import de.welt.contentapi.core.models.configuration._
+import de.welt.contentapi.core.models.pressed._
 
 case class ApiConfigfaceChannel(meta: Option[ApiMetaConfiguration] = None,
                                 commercial: Option[ApiCommercialConfiguration] = None,

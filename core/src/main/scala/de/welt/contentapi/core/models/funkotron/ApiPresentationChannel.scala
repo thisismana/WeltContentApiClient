@@ -1,7 +1,6 @@
 package de.welt.contentapi.core.models.funkotron
 
-import de.welt.contentapi.core.models.channel.ApiChannel
-import de.welt.contentapi.core.models.configuration.ApiConfiguration
+import de.welt.contentapi.core.models.pressed.{ApiChannel, ApiConfiguration}
 
 
 /**

@@ -1,4 +1,4 @@
-package de.welt.contentapi.core.models.configuration
+package de.welt.contentapi.core.models.pressed
 
 import de.welt.contentapi.core.models.content.ApiSectionReference
 import play.api.libs.json.{Format, Json, Reads, Writes}

@@ -1,6 +1,7 @@
 package de.welt.contentapi.core.models
 
 import de.welt.contentapi.core.models.content._
+import de.welt.contentapi.core.models.pressed.{ApiStage, ApiTeaser, ApiTeaserConfig}
 import de.welt.contentapi.core.models.section.ApiSection
 import de.welt.contentapi.core.models.section.stage._
 import org.scalatest.{FlatSpec, Matchers}
@@ -285,7 +286,7 @@ class JsonFormatsSpec extends FlatSpec with Matchers {
   "JSON Formats for ApiSection" should "be equal when writing to Json and validating from Json to ApiSection" in {
     val expectedApiSection: ApiSection = getSampleApiSection
 
-    import de.welt.contentapi.core.models.section.ApiSectionFormat._
+    import de.welt.contentapi.core.models.pressed.ApiSectionFormat._
     val apiSectionAsJsValue: JsValue = Json.toJson(expectedApiSection)
     val jsResultForJsValue: JsResult[ApiSection] = apiSectionAsJsValue.validate[ApiSection]
 
@@ -301,13 +302,13 @@ class JsonFormatsSpec extends FlatSpec with Matchers {
     val apiContent: ApiContent = ApiContent(webUrl = "/foo", `type` = "news")
     val teaser: ApiTeaser = ApiTeaser(
       teaserConfig = ApiTeaserConfig(
-        teaserProfile = "Hero",
-        teaserType = "Default"),
+        profile = "Hero",
+        `type` = "Default"),
       data = apiContent
     )
     val stage: ApiStage = ApiStage(
-      stageLayoutId = "sectionHero",
-      stageLabel = Some("Nice Section"),
+      layout = "sectionHero",
+      label = Some("Nice Section"),
       teasers = Seq(teaser)
     )
     ApiSection(stages = Seq(stage))
