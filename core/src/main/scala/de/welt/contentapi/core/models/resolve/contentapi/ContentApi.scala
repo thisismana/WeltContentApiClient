@@ -7,46 +7,63 @@ case class ApiContentSearch(`type`: Option[MainTypeParam],
                             homeSection: Option[HomeSectionParam],
                             sectionExcludes: Option[SectionExcludes],
                             flags: Option[FlagParam],
-                            limit: Option[Int]
+                            limit: Option[LimitParam]
                            ) {
-  def getAllQuerieParameters: Seq[String] = ??? // `type`.map(_.getKeyValue) // TODO
+  def allParams: Seq[Option[SearchParam]
+    ] = Seq(`type`, subType, section, homeSection, sectionExcludes, flags, limit)
+
+  def getAllParamsUnwrapped: Seq[(String, String)] = {
+    allParams
+      .filter(_.isDefined)
+      .map(_.get)
+      .map(_.getKeyValue)
+  }
+
+
+
 }
 
-sealed trait SearchParams {
+sealed trait SearchParam {
   val queryParamName: String
   val queryValue: String
-  def getKeyValue = queryParamName + "=" + queryValue
+
+  def getKeyValue = (queryParamName, queryValue)
 }
 
 
 case class MainTypeParam(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "type"
 }
 
 case class SubTypeParam(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "subType"
 }
 
 case class SectionParam(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "sectionPath"
 }
 
 case class HomeSectionParam(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "sectionHome"
 }
 
 case class SectionExcludes(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "excludeSections"
 }
 
 case class FlagParam(queryValue: String)
-  extends SearchParams {
+  extends SearchParam {
   override val queryParamName: String = "flag"
+}
+
+case class LimitParam(queryValue: String)
+  extends SearchParam {
+  override val queryParamName: String = "pageSize"
 }
 
 
@@ -63,7 +80,9 @@ case class CuratedSource(override val maxSize: Option[Int],
 }
 
 case class SearchSource(override val maxSize: Option[Int],
-                        queries: Seq[SearchParams] = Seq()) extends Datasource {
+                        queries: Seq[SearchParam] = Seq()) extends Datasource {
   override val `type`: String = "search"
 }
+
+
 

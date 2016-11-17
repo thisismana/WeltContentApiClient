@@ -4,8 +4,10 @@ import javax.inject.{Inject, Singleton}
 
 import de.welt.contentapi.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.client.services.s3.S3
-import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelData, ChannelId}
-import de.welt.contentapi.core.models.content2.{ApiContent, EnrichedApiContent, SectionData}
+import de.welt.contentapi.core.models.channel.ApiChannel
+import de.welt.contentapi.core.models.configface.ApiConfigfaceChannel
+import de.welt.contentapi.core.models.content.{ApiContent, ApiSectionData}
+import de.welt.contentapi.core.models.enriched.ApiEnrichedContent
 import de.welt.contentapi.core.models.env.Env.{Env, Live}
 import de.welt.contentapi.core.traits.Loggable
 import play.api.cache.CacheApi
@@ -18,7 +20,7 @@ trait SectionService {
 
   def findChannel(path: String)(implicit env: Env): Option[ApiChannel]
 
-  def enrich(apiContent: ApiContent): EnrichedApiContent
+  def enrich(apiContent: ApiContent): ApiEnrichedContent
 
 }
 
@@ -29,20 +31,20 @@ class SectionServiceImpl @Inject()(config: ContentClientConfig,
                                    environment: Environment)
   extends SectionService with Loggable {
 
-  override def findChannel(path: String)(implicit env: Env): Option[ApiChannel] = root.flatMap(_.findByPath(path))
+  override def findChannel(path: String)(implicit env: Env): Option[ApiConfigfaceChannel] = root.flatMap(_.findByPath(path))
 
-  override def enrich(apiContent: ApiContent): EnrichedApiContent = {
+  override def enrich(apiContent: ApiContent): ApiEnrichedContent = {
 
-    val maybeSectionData: Option[SectionData] = apiContent.sections.flatMap {
+    val maybeApiSectionData: Option[ApiSectionData] = apiContent.sections.flatMap {
       _.home.flatMap { home ⇒ {
         val maybeHomeSection: Option[ApiChannel] = root(Live).flatMap(_.findByPath(home))
         maybeHomeSection.map { homeSection ⇒
-          SectionData.fromChannel(homeSection)
+          ApiConfigfaceChannel.fromChannel(homeSection)
         }
       }
       }
     }
-    EnrichedApiContent(apiContent, maybeSectionData)
+    ApiEnrichedContent(apiContent, maybeApiSectionData)
   }
 
   protected def breadcrumb(home: ApiChannel): Seq[ApiChannel] = {
@@ -57,8 +59,6 @@ class SectionServiceImpl @Inject()(config: ContentClientConfig,
 
 
   protected def root(implicit env: Env): Option[ApiChannel] = cache.getOrElse(env.toString, 10.minutes) {
-
-    import de.welt.contentapi.core.models.configuration2.formats.reads.FullChannelReads._
 
     s3.get(config.aws.s3.janus.bucket, objectKeyForEnv(env))
       .map { data ⇒ Json.parse(data).validate[ApiChannel] }

@@ -4,12 +4,12 @@ import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
-import de.welt.contentapi.core.models.content2.{ApiContent, ApiContentSearch, EnrichedApiContent}
+import de.welt.contentapi.core.models.content.ApiContent
+import de.welt.contentapi.core.models.enriched.ApiEnrichedContent
 import de.welt.contentapi.core.models.internal.http.RequestHeaders
-import de.welt.contentapi.core.models.ContentApiQuery
+import de.welt.contentapi.core.models.resolve.contentapi.ApiContentSearch
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
-import play.api.mvc.Request
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,7 +17,7 @@ sealed trait ContentSearchService {
   protected val serviceName = "search"
 
   def search(query: ApiContentSearch)
-            (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[EnrichedApiContent]]
+            (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[ApiEnrichedContent]]
 }
 
 @Singleton
@@ -27,27 +27,15 @@ class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
                                          sectionService: SectionService)
   extends AbstractService[Seq[ApiContent]] with ContentSearchService {
 
-  import de.welt.contentapi.core.models.content2.ApiReads._
-
   override def config: ServiceConfiguration = cfg.getServiceConfig(serviceName)
 
   override def jsonValidate: (JsLookupResult) => JsResult[Seq[ApiContent]] = json => json.validate[Seq[ApiContent]]
 
-  override def search(query: ApiContentSearch)
-                     (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[EnrichedApiContent]] = {
+  override def search(apiContentSearch: ApiContentSearch)
+                     (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[ApiEnrichedContent]] = {
 
 
-
-    val parameters = Seq("resultSize" -> ContentSearchService.sanitizeLimit(query.limit).toString) ++
-      query.path.map("sectionPath" → _) ++
-      query.excludePaths.map("excludeSections" → _) ++
-      query.typ.map("type" → _) ++
-      query.subType.map("subType" → _) ++
-      query.flags.map("flags" → _) ++
-      query.flag.map("flag" → _) ++
-      List("excludes" → query.subTypeExcludes.mkString(","))
-
-    get(Nil, parameters, Nil).map { responses ⇒
+    get(Nil, apiContentSearch.getAllParamsUnwrapped, Nil).map { responses ⇒
       responses.map { content ⇒
         sectionService.enrich(content)
       }
@@ -58,7 +46,7 @@ class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
 
 object ContentSearchService {
   val defaultResultSize = 12
-  val maxResultSize = 24
+  val maxResultSize = 30
 
   /**
     * filter invalid values (such as negative or too large)
@@ -69,7 +57,7 @@ object ContentSearchService {
     *         max allowed is `ContentSearchServiceImpl.maxResultSize`
     *         `ContentSearchServiceImpl.defaultResultSize` if `None` was passed
     */
-  def sanitizeLimit(maybeLimit: Option[Int]) = {
+  def sanitizeLimit(maybeLimit: Option[Int]) :Int = {
     maybeLimit.map(l => Math.abs(Math.min(l, maxResultSize))) getOrElse defaultResultSize
   }
 }
