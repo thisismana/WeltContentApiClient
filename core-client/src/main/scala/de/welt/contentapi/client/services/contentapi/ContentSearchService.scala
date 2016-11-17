@@ -3,10 +3,10 @@ package de.welt.contentapi.client.services.contentapi
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
+import de.welt.contentapi.client.models.ApiContentSearch
 import de.welt.contentapi.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
 import de.welt.contentapi.core.models.content.ApiContent
 import de.welt.contentapi.core.models.internal.http.RequestHeaders
-import de.welt.contentapi.core.models.resolve.contentapi.ApiContentSearch
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 
