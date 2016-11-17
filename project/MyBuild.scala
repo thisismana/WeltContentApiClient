@@ -122,19 +122,47 @@ object MyBuild extends Build {
     )
     .settings(coreDependencySettings: _*)
 
-  val client = project("client")
+  val raw = project("raw")
     .settings(
-      name := "welt-content-api-client"
+      name := "welt-content-api-raw"
+    )
+    .settings(coreDependencySettings: _*)
+
+  val pressed = project("pressed")
+    .settings(
+      name := "welt-content-api-pressed"
+    )
+    .settings(coreDependencySettings: _*)
+    .dependsOn(withTests(core)).aggregate(core)
+
+  val convert = project("convert")
+    .settings(
+      name := "welt-content-api-convert"
+    )
+    .settings(coreDependencySettings: _*)
+    .dependsOn(withTests(pressed)).aggregate(pressed)
+    .dependsOn(withTests(raw)).aggregate(raw)
+
+  val coreClient = project("core-client")
+    .settings(
+      name := "welt-content-api-core-client"
     )
     .settings(clientDependencySettings: _*)
     .dependsOn(withTests(core)).aggregate(core)
 
-  val admin = project("admin")
+  val pressedClient = project("pressed-client")
     .settings(
-      name := "welt-content-api-admin-client"
+      name := "welt-content-api-pressed-client"
     )
     .settings(clientDependencySettings: _*)
-    .dependsOn(withTests(client)).aggregate(client)
+    .dependsOn(withTests(pressed)).aggregate(pressed)
+
+  val legacy = project("legacy")
+    .settings(
+      name := "welt-content-api-legacy"
+    )
+    .settings(clientDependencySettings: _*)
+    .dependsOn(withTests(coreClient)).aggregate(coreClient)
 
   val main = Project("Root", base = file("."))
     .settings(
@@ -145,6 +173,6 @@ object MyBuild extends Build {
       publish := {},
       bintrayUnpublish := {}
     )
-    .aggregate(core, client, admin)
+    .aggregate(core, coreClient, legacy)
 
 }
