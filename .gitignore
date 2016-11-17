@@ -2,9 +2,7 @@
 /logs/
 /project/*-shim.sbt
 /project/project/
-/project/target/
-/target/
 /.idea/
-/core/target/
+**/target
 /client/target/
 /admin/target/
