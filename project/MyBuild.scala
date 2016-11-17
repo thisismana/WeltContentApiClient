@@ -155,6 +155,7 @@ object MyBuild extends Build {
       name := "welt-content-api-core-client"
     )
     .settings(clientDependencySettings: _*)
+    .dependsOn(withTests(utils)).aggregate(utils)
     .dependsOn(withTests(core)).aggregate(core)
 
   val pressedClient = project("pressed-client")
@@ -170,6 +171,7 @@ object MyBuild extends Build {
       name := "welt-content-api-legacy"
     )
     .settings(clientDependencySettings: _*)
+    .dependsOn(withTests(utils)).aggregate(utils)
     .dependsOn(withTests(coreClient)).aggregate(coreClient)
 
   val main = Project("Root", base = file("."))

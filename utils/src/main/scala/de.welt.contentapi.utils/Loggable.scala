@@ -1,3 +1,5 @@
+package de.welt.contentapi.utils
+
 import org.slf4j.LoggerFactory
 
 trait Loggable {

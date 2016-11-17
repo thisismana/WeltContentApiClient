@@ -1,3 +1,5 @@
+package de.welt.contentapi.utils
+
 object Env {
   sealed trait Env
 

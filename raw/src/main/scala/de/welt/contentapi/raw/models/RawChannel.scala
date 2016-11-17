@@ -45,7 +45,7 @@ case class RawChannelHeader(sponsoring: Option[String], // like 'tagheuer'
   * @param modified was this channel configured via ConfigMcConfigface or is it still like `default`
   * @param isRessort so far /icon, maybe blau and bilanz will be added (used for tree logic in angular app)
   */
-private[configface] case class Metadata(changedBy: String = "system",
+private[raw] case class Metadata(changedBy: String = "system",
                                         lastModifiedDate: Long = Instant.now.toEpochMilli,
                                         modified: Boolean = false,
                                         isRessort: Boolean = false)

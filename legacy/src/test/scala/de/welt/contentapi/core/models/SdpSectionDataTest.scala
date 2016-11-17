@@ -2,7 +2,7 @@ package de.welt.contentapi.core.models
 
 import java.time.Instant
 
-import de.welt.contentapi.admin.models.SdpSectionData
+import de.welt.contentapi.legacy.models.SdpSectionData
 import org.scalatestplus.play.PlaySpec
 
 class SdpSectionDataTest extends PlaySpec {
