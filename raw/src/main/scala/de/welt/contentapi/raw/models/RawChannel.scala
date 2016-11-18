@@ -2,6 +2,8 @@ package de.welt.contentapi.raw.models
 
 import java.time.Instant
 
+import play.api.libs.json.{JsValue, Json}
+
 /**
   * Tree structure of the escenic channel/section tree. Simple representation:
   * |-- '/' root (WON_frontpage)
@@ -151,6 +153,33 @@ case class RawMetadata(changedBy: String = "system",
                        modified: Boolean = false,
                        isRessort: Boolean = false)
 
+
+
+object RawChannelStage {
+  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageCommercialFormat
+  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageContentFormat
+  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageModuleFormat
+
+  /**
+    * http://stackoverflow.com/questions/17021847/noise-free-json-format-for-sealed-traits-with-play-2-2-library
+    */
+  def unapply(rawChannelStage: RawChannelStage ): Option[(String, JsValue)] = {
+    val (prod: Product, sub) = rawChannelStage match {
+      case content: RawChannelStageContent => (content, Json.toJson(content)(rawChannelStageContentFormat))
+      case module: RawChannelStageModule => (module, Json.toJson(module)(rawChannelStageModuleFormat))
+      case commercial: RawChannelStageCommercial => (commercial, Json.toJson(commercial)(rawChannelStageCommercialFormat))
+    }
+    Some(prod.productPrefix -> sub)
+  }
+
+  def apply(`class`: String, data: JsValue): RawChannelStage = {
+    (`class` match {
+      case "RawChannelStageContent" => Json.fromJson[RawChannelStageContent](data)(rawChannelStageContentFormat)
+      case "RawChannelStageModule" => Json.fromJson[RawChannelStageModule](data)(rawChannelStageModuleFormat)
+      case "RawChannelStageCommercial" => Json.fromJson[RawChannelStageCommercial](data)(rawChannelStageCommercialFormat)
+    }).get
+  }
+}
 
 trait RawChannelStage {
   val `type`: String
