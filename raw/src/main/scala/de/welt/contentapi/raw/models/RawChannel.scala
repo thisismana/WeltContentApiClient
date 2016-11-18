@@ -5,7 +5,9 @@ import java.time.Instant
 case class RawChannel(id: RawChannelId,
                       config: RawChannelConfiguration,
                       metadata: Option[Metadata] = None,
-                      stages: Option[Seq[RawChannelStage]] = None) {
+                      stages: Option[Seq[RawChannelStage]] = None,
+                      parent: Option[RawChannel] = None,
+                      children: Option[Seq[RawChannel]] = None) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
 }
 
