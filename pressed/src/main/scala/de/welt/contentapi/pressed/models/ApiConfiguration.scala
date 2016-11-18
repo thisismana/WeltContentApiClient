@@ -9,13 +9,13 @@ import de.welt.contentapi.core.models.ApiSectionReference
   *
   * @param meta configuration for <meta> tag overrides
   * @param commercial commercial configuration
-  * @param branding branding is part of the page header (page sponsoring). E.g. Formel1
+  * @param sponsoring branding is part of the page header (page sponsoring). E.g. Formel1
   * @param header (content) page header configuration. Not the real page header.
   * @param theme theme of the page
   */
 case class ApiConfiguration(meta: Option[ApiMetaConfiguration] = None,
                             commercial: Option[ApiCommercialConfiguration] = None,
-                            branding: Option[ApiBrandingConfiguration] = None,
+                            sponsoring: Option[ApiSponsoringConfiguration] = None,
                             header: Option[ApiHeaderConfiguration] = None,
                             theme: Option[ApiThemeConfiguration] = None)
 
@@ -46,7 +46,7 @@ case class ApiCommercialConfiguration(adTag: Option[String] = None, videoAdTag: 
   *
   * @param name name of the branding. Need for mapping.
   */
-case class ApiBrandingConfiguration(name: Option[String] = None)
+case class ApiSponsoringConfiguration(name: Option[String] = None)
 
 /**
   * Some configuration for the section or content page header. Not the real page header.
@@ -55,8 +55,8 @@ case class ApiBrandingConfiguration(name: Option[String] = None)
   * @param sectionReferences section refs for linking
   */
 case class ApiHeaderConfiguration(title: Option[String] = None,
-                                  sectionReferences: Option[List[ApiSectionReference]] = None) {
-  lazy val unwrappedSectionReferences: List[ApiSectionReference] = sectionReferences.getOrElse(Nil)
+                                  sectionReferences: Option[Seq[ApiSectionReference]] = None) {
+  lazy val unwrappedSectionReferences: Seq[ApiSectionReference] = sectionReferences.getOrElse(Nil)
 }
 
 /**
