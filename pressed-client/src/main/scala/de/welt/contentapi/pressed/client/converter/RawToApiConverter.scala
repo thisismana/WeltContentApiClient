@@ -8,7 +8,7 @@ class RawToApiConverter {
 
   /** Converter method that takes a rawChannel and returns an ApiChannel from its data
     *
-    * @param rawChannel the rawChannel produced by ConfigMcConfigface
+    * @param rawChannel the rawChannel produced by ConfigMcConfigFace
     * @return a new ApiChannel with the data from the rawChannel
     */
   def getApiChannelFromRawChannel(rawChannel: RawChannel): ApiChannel = {
@@ -41,7 +41,7 @@ class RawToApiConverter {
     * @param rawChannel the rawChannel produced by ConfigMcConfigface
     * @return a new ApiConfiguration Object with the data from the rawChannel
     */
-  def apiConfiguationFromRawChannelConfiguration(rawChannel: RawChannel) = ApiConfiguration(
+  def apiConfigurationFromRawChannelConfiguration(rawChannel: RawChannel) = ApiConfiguration(
     meta = apiMetaConfigurationFromRawChannel(rawChannel),
     commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
     sponsoring = Some(apiSponsoringConfigurationFromRawChannel(rawChannel)),
@@ -70,9 +70,11 @@ class RawToApiConverter {
   }
 
   private def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel) = {
-    rawChannel.config.flatMap(_.metaTags).map(metaTags => ApiMetaConfiguration(title = metaTags.title,
-      description = metaTags.title,
-      tags = metaTags.keywords))
+    rawChannel.config.flatMap(_.metadata).map(metadata => ApiMetaConfiguration(
+      title = metadata.title,
+      description = metadata.title,
+      tags = metadata.keywords)
+    )
   }
 
   private def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel) = {
@@ -89,12 +91,12 @@ class RawToApiConverter {
   }
 
   private def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
-    val apiSectionRefenreces = apiSectionReferencesFromRawSectionReferences(
-      rawChannel.config.flatMap(_.header).flatMap(_.sectionReference).map(_.toSeq).getOrElse(Nil)
+    val apiSectionReferences = apiSectionReferencesFromRawSectionReferences(
+      rawChannel.config.flatMap(_.header).map(_.unwrappedSectionReferences).getOrElse(Nil)
     )
     ApiHeaderConfiguration(
       title = rawChannel.config.flatMap(_.header).flatMap(_.label),
-      sectionReferences = Some(apiSectionRefenreces)
+      sectionReferences = Some(apiSectionReferences)
     )
   }
 

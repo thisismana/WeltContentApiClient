@@ -64,11 +64,11 @@ case class RawChannelId(path: String,
                         escenicId: Long = -1)
 
 /**
-  * @param metaTags   `<meta>` tag overrides of the channel.
+  * @param metadata   `<meta>` tag overrides of the channel.
   * @param header     content header (not the real page header) configuration.
   * @param commercial commercial configuration for the channel. Used some override logic.
   */
-case class RawChannelConfiguration(metaTags: Option[RawChannelMetaTags] = None,
+case class RawChannelConfiguration(metadata: Option[RawChannelMetadata] = None,
                                    header: Option[RawChannelHeader] = None,
                                    commercial: Option[RawChannelCommercial] = None)
 
@@ -93,9 +93,10 @@ case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
   * @param contentRobots override `<meta name="robots">` tag only for all content pages of the channel.
   * @param sectionRobots override `<meta name="robots">` tag only for the section page of the channel.
   */
-case class RawChannelMetaTags(title: Option[String] = None,
+case class RawChannelMetadata(title: Option[String] = None,
                               description: Option[String] = None,
                               keywords: Option[Seq[String]] = None,
+                              breadcrumbDisabled: Option[Boolean] = None,
                               contentRobots: Option[RawChannelMetaRobotsTag] = None,
                               sectionRobots: Option[RawChannelMetaRobotsTag] = None) {
   lazy val unwrappedKeywords: Seq[String] = keywords.getOrElse(Nil)
@@ -133,7 +134,9 @@ case class RawChannelHeader(sponsoring: Option[String] = None,
                             logo: Option[String] = None,
                             slogan: Option[String] = None,
                             label: Option[String] = None,
-                            sectionReferences: Option[Seq[RawSectionReference]] = None)
+                            sectionReferences: Option[Seq[RawSectionReference]] = None) {
+  lazy val unwrappedSectionReferences: Seq[RawSectionReference] = sectionReferences.getOrElse(Nil)
+}
 
 /**
   * @param changedBy        id of last sitebuilder

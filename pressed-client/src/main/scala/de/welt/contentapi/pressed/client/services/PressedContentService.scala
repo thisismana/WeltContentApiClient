@@ -45,7 +45,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
 
         val maybeRawChannel: Option[RawChannel] = responseContent.sections.flatMap(_.home).flatMap(rawTree.findByPath)
         val maybeApiChannel: Option[ApiChannel] = maybeRawChannel.map(rawChannel => converter.getApiChannelFromRawChannel(rawChannel))
-        val apiConfiguration: ApiConfiguration = converter.apiConfiguationFromRawChannelConfiguration(rawTree)
+        val apiConfiguration: ApiConfiguration = converter.apiConfigurationFromRawChannelConfiguration(rawTree)
 
         ApiPressedContent(
           content = Some(responseContent),

@@ -27,7 +27,7 @@ object ApiChannelToRawChannelConverter {
 
   private def config(apiChannelData: ApiChannelData): Option[RawChannelConfiguration] = {
     val config = RawChannelConfiguration(
-      metaTags = apiChannelData.fields.map(metaTags),
+      metadata = apiChannelData.fields.map(channelMetadata),
       header = header(apiChannelData),
       commercial = commercial(apiChannelData.adData)
     )
@@ -38,10 +38,15 @@ object ApiChannelToRawChannelConverter {
     }
   }
 
-  private def metaTags(fields: Map[String, String]): RawChannelMetaTags = RawChannelMetaTags(
+  private def channelMetadata(fields: Map[String, String]): RawChannelMetadata = RawChannelMetadata(
     title = fields.get("title"),
     description = fields.get("description"),
+    // Info:
+    // We clean the keywords from a string to Seq[String]
     keywords = fields.get("keywords").map(_.split(",")),
+    // Info:
+    // New field
+    breadcrumbDisabled = None,
     contentRobots = contentMetaRobotsContent(fields),
     sectionRobots = contentMetaRobotsSection(fields)
   )
@@ -104,7 +109,7 @@ object ApiChannelToRawChannelConverter {
 
   private def metadata(apiChannelMetadataNew: ApiChannelMetadataNew): Metadata = Metadata(
     changedBy = apiChannelMetadataNew.changedBy,
-    lastModifiedDate = apiChannelMetadataNew.lastModifiedDate,
+    lastModifiedDate = apiChannelMetadataNew.lastModifiedDate
     // Info:
     // modified & isRessort are new fields
   )
