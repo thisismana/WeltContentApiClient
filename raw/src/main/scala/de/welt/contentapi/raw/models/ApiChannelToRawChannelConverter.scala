@@ -104,7 +104,9 @@ object ApiChannelToRawChannelConverter {
 
   private def metadata(apiChannelMetadataNew: ApiChannelMetadataNew): Metadata = Metadata(
     changedBy = apiChannelMetadataNew.changedBy,
-    lastModifiedDate = apiChannelMetadataNew.lastModifiedDate
+    lastModifiedDate = apiChannelMetadataNew.lastModifiedDate,
+    // Info:
+    // modified & isRessort are new fields
   )
 
 }

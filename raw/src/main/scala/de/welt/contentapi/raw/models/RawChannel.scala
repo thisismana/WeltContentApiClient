@@ -50,6 +50,8 @@ case class RawChannel(id: RawChannelId,
     }
   }
 
+  // TODO: (mana) (re)-write or copy/paste the old update/merge logic here.
+
 }
 
 /**
@@ -76,7 +78,7 @@ case class RawChannelConfiguration(metaTags: Option[RawChannelMetaTags] = None,
   * We need this for some channel targeting. E.g. '/sport/formel1/' needs his own ad tag.
   *
   * @param definesAdTag      overrides the (ASMI) ad tag for the channel
-  * @param definesVideoAdTag ??? do we need this ???
+  * @param definesVideoAdTag overrides the (ASMI) video ad tag for the channel
   */
 case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
                                 definesVideoAdTag: Option[Boolean] = None) {
@@ -117,28 +119,26 @@ case class RawSectionReference(label: Option[String] = None, path: Option[String
 
 /**
   *
-  * @param sponsoring only a mapping string for the client. Used for a svg/image logo. E.g. 'tagheuer'
-  * @param logo       only a mapping string for the client. Used for a svg/image logo to replace the label.
-  *                   The logo could be a channel logo like '/icon' or a ressort logo like '/kmpk'.
-  *                   What's the different? Ask UI/UX!
-  *                   Display-Logic
-  *                   channelLogo.orElse(ressortLogo).getOrElse(label)
-  * @param slogan     slogan for the channel. E.g. /kmpkt: 'NEWS TO GO. EINZIGARTIG ANDERS.'
-  * @param label      display name of the channel. The fallback label is always the [[RawChannelId.label]]
-  * @param sectionReferences
+  * @param sponsoring        only a mapping string for the client. Used for a svg/image logo. E.g. 'tagheuer'
+  * @param logo              only a mapping string for the client. Used for a svg/image logo to replace the label.
+  *                          The logo could be a channel logo like '/icon' or a ressort logo like '/kmpk'.
+  *                          What's the different? Ask UI/UX!
+  *                          Display-Logic:
+  *                          channelLogo.orElse(ressortLogo).getOrElse(label)
+  * @param slogan            slogan for the channel. E.g. /kmpkt: 'NEWS TO GO. EINZIGARTIG ANDERS.'
+  * @param label             display name of the channel. The fallback label is always the [[RawChannelId.label]]
+  * @param sectionReferences some optional links inside the header. Example: Link to a sub-channel.
   */
 case class RawChannelHeader(sponsoring: Option[String] = None,
-                            logo: Option[String] = None, // could be Channel logo (e.g. /icon) or Ressort logo (e.g. /kmpkt)
-                            slogan: Option[String] = None, // belongs to the logo
+                            logo: Option[String] = None,
+                            slogan: Option[String] = None,
                             label: Option[String] = None,
                             sectionReferences: Option[Seq[RawSectionReference]] = None)
-// replaced by logo if set
-
 
 /**
   * @param changedBy        id of last sitebuilder
   * @param lastModifiedDate timestamp of last change
-  * @param modified         was this channel configured via ConfigMcConfigface or is it still like `default`
+  * @param modified         was this channel configured via ConfigMcConfigFace or is it still like `default`
   * @param isRessort        so far /icon, maybe blau and bilanz will be added (used for tree logic in angular app)
   */
 case class Metadata(changedBy: String = "system",
@@ -154,9 +154,20 @@ trait RawChannelStage {
   val references: Option[Seq[RawSectionReference]] = None
   val teaserLimit: Option[Int] = None
 
-  def unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
+  lazy val unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
 }
 
+/**
+  * @param index          index of the stage (ordering)
+  * @param label          display name of the stage
+  * @param references     optional section references. Example: Link to Mediathek A-Z.
+  * @param teaserLimit    todo harry
+  * @param sourceOverride the default source is always the current channel path. This is a override.
+  * @param desktopLayout  mapping string for a (desktop) layout name. The mapping is for Digger and Clients.
+  *                       Why desktop and not mobile?
+  *                       On a mobile device all teasers inside a stage are among each another. Only the desktop
+  *                       breakpoint need some 'hints' to structure the teasers. Example: 1/3 1/3 1/3 teaser row.
+  */
 case class RawChannelStageContent(index: Int,
                                   label: String,
                                   override val references: Option[Seq[RawSectionReference]] = None,
@@ -166,14 +177,29 @@ case class RawChannelStageContent(index: Int,
   override val `type`: String = "content"
 }
 
+/**
+  * todo harry: WTF is a module?
+  *
+  * @param index       index of the stage (ordering)
+  * @param label       display name of the stage
+  * @param references  optional section references. Example: Link to Mediathek A-Z.
+  * @param teaserLimit todo harry
+  * @param module      todo harry
+  */
 case class RawChannelStageModule(index: Int,
                                  label: String,
                                  override val references: Option[Seq[RawSectionReference]] = None,
                                  override val teaserLimit: Option[Int] = None,
-                                 module: String) extends RawChannelStage {
+                                 module: Option[String] = None) extends RawChannelStage {
   override val `type`: String = "module"
 }
 
+/**
+  * @param index      index of the stage (ordering)
+  * @param label      display name of the stage
+  * @param references optional section references. Example: Link to Mediathek A-Z.
+  * @param commercial mapping string with the name of the commercial. E.g. MediumRectangle
+  */
 case class RawChannelStageCommercial(index: Int,
                                      label: String,
                                      override val references: Option[Seq[RawSectionReference]] = None,
