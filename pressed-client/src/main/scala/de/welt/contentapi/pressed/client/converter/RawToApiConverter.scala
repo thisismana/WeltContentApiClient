@@ -49,19 +49,25 @@ class RawToApiConverter {
     theme = Some(apiThemeFromRawChannel(rawChannel))
   )
 
-  private[converter] def unwrappedDefinesAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
+  private[converter] def unwrappedDefinesAdTag(rawChannel: RawChannel): Boolean = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
 
   private[converter] def unwrappedDefinesVideoAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesVideoAdTag)
 
-  private[converter] def calculateAdTech(rawChannel: RawChannel): String = {
+  private[converter] def calculateAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
-    while (!unwrappedDefinesAdTag(currentChannel) && currentChannel.parent.isDefined && currentChannel.id.path != "/") {
+    while (!unwrappedDefinesAdTag(currentChannel) && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
-    currentChannel.id.path.replaceAll("/", "")
+    val adTag: String = currentChannel.id.path.replaceAll("/", "")
+    if (adTag.isEmpty) {
+      "sonstiges"
+    }
+    else {
+      adTag
+    }
   }
 
-  private[converter] def calculateVideoAdTech(rawChannel: RawChannel): String = {
+  private[converter] def calculateVideoAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
     while (!unwrappedDefinesVideoAdTag(currentChannel) && currentChannel.parent.isDefined && currentChannel.id.path != "/") {
       currentChannel = currentChannel.parent.get
@@ -79,8 +85,8 @@ class RawToApiConverter {
 
   private[converter] def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel) = {
     ApiCommercialConfiguration(
-      adTag = Some(calculateAdTech(rawChannel)),
-      videoAdTag = Some(calculateVideoAdTech(rawChannel))
+      adTag = Some(calculateAdTag(rawChannel)),
+      videoAdTag = Some(calculateVideoAdTag(rawChannel))
     )
   }
 

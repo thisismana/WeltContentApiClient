@@ -9,18 +9,24 @@ class RawToApiConverterTest extends FlatSpec with Matchers with TestScope with M
   val converter: RawToApiConverter = new RawToApiConverter()
 
   "Converter" should "calculate 'sport' as adTag" in {
-      converter.calculateAdTech(homeSportFussball) shouldBe homeSport.id.path.replaceAll("/", "")
+    converter.calculateAdTag(homeSportFussball) shouldBe homeSport.id.path.replaceAll("/", "")
   }
 
   it should "calculate 'sport' as videoAdTech" in {
-    converter.calculateVideoAdTech(homeSportFussball) shouldBe homeSport.id.path.replaceAll("/", "")
+    converter.calculateVideoAdTag(homeSportFussball) shouldBe homeSport.id.path.replaceAll("/", "")
   }
+
+  it should "get adTech 'sonstiges' if no `rootLevel` section has definesAdTech==true" in {
+    // create Channel
+  }
+
+
 
 }
 
 
 trait TestScope {
-  val rawChannelMetaTags: RawChannelMetaTags = RawChannelMetaTags(
+  val rawChannelMetaTags = RawChannelMetadata(
     title = Some("Meta Title"),
     description = Some("Meta Description"),
     keywords = Some(Seq("Keyword1", "Keyword2")),
@@ -28,7 +34,7 @@ trait TestScope {
     sectionRobots = Some(RawChannelMetaRobotsTag(noFollow = Some(true), noIndex = Some(true)))
   )
 
-  val fussballRawChannelHeader: RawChannelHeader = RawChannelHeader(
+  val fussballRawChannelHeader = RawChannelHeader(
     sponsoring = Some("tagHeuer"),
     logo = Some("fussball_logo"),
     slogan = Some("Make Fosbal great again"),
@@ -45,20 +51,14 @@ trait TestScope {
     definesVideoAdTag = Some(true)
   )
 
-  val homeSportFussball: RawChannel = RawChannel(
+  val home: RawChannel = RawChannel(
     RawChannelId(
-      path = "/sport/fussball/",
-      label = "Fussball"
+      path = "/",
+      label = "home"
     ),
-    parent = Some(homeSport),
-    children = Some(Seq.empty),
-    config = Some(
-      RawChannelConfiguration(
-        commercial = Some(falseRawChannelCommercial),
-        metaTags = Some(rawChannelMetaTags),
-        header = Some(fussballRawChannelHeader)
-      )
-    )
+    parent = None,
+    children = None,
+    config = Some(RawChannelConfiguration(commercial = Some(trueRawChannelCommercial)))
   )
   val homeSport: RawChannel = RawChannel(
     RawChannelId(
@@ -66,16 +66,22 @@ trait TestScope {
       label = "Sport"
     ),
     parent = Some(home),
-    children = Some(Seq(homeSportFussball)),
+    children = None,
     config = Some(RawChannelConfiguration(commercial = Some(trueRawChannelCommercial)))
   )
-  val home: RawChannel = RawChannel(
+  val homeSportFussball: RawChannel = RawChannel(
     RawChannelId(
-      path = "/",
-      label = "home"
+      path = "/sport/fussball/",
+      label = "Fussball"
     ),
-    parent = None,
-    children = Some(Seq(homeSport)),
-    config = Some(RawChannelConfiguration(commercial = Some(trueRawChannelCommercial)))
+    parent = Some(homeSport),
+    children = None,
+    config = Some(
+      RawChannelConfiguration(
+        commercial = Some(falseRawChannelCommercial),
+        metadata = Some(rawChannelMetaTags),
+        header = Some(fussballRawChannelHeader)
+      )
+    )
   )
 }
