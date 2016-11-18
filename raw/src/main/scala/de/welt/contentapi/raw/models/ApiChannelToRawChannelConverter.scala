@@ -44,8 +44,8 @@ object ApiChannelToRawChannelConverter {
 
   private def contentMetaRobotsSection(fields: Map[String, String]): Option[RawChannelMetaRobotsTag] = {
     val metaRobotsTag = RawChannelMetaRobotsTag(
-      noIndex = fields.get("metaNoIndex"),
-      noFollow = fields.get("metaNoFollow")
+      noIndex = fields.get("metaNoIndex").map(_.toBoolean),
+      noFollow = fields.get("metaNoFollow").map(_.toBoolean)
     )
     metaRobotsTag match {
       case RawChannelMetaRobotsTag(None, None) ⇒ None
@@ -55,8 +55,8 @@ object ApiChannelToRawChannelConverter {
 
   private def contentMetaRobotsContent(fields: Map[String, String]): Option[RawChannelMetaRobotsTag] = {
     val metaRobotsTag = RawChannelMetaRobotsTag(
-      noIndex = fields.get("metaArticleNoIndex"),
-      noFollow = fields.get("metaArticleNoFollow")
+      noIndex = fields.get("metaArticleNoIndex").map(_.toBoolean),
+      noFollow = fields.get("metaArticleNoFollow").map(_.toBoolean)
     )
     metaRobotsTag match {
       case RawChannelMetaRobotsTag(None, None) ⇒ None

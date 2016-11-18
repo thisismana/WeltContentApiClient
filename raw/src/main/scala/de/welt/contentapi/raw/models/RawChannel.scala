@@ -4,18 +4,19 @@ import java.time.Instant
 
 /**
   * Tree structure of the escenic channel/section tree. Simple representation:
-  * - '/' root (WON_frontpage)
-  * |-- '/sport/'
-  *    |-- '/sport/fussball/'
-  *    |-- '/sport/formel1/'
-  * |-- '/wirtschaft/'
-  * |-- '/politik/'
+  * |-- '/' root (WON_frontpage)
+  * |--|-- '/sport/'
+  * |--|--|-- '/sport/fussball/'
+  * |--|--|-- '/sport/formel1/'
+  * |--|--|-- '/sport/golf/'
+  * |--|-- '/wirtschaft/'
+  * |--|-- '/politik/'
   *
-  * @param id mandatory id with the channel path. E.g. /sport/fussball/
-  * @param config
-  * @param metadata
-  * @param stages
-  * @param parent the maybe parent of the current channel. Root channel has no parent. (no shit sherlock!)
+  * @param id       mandatory id with the channel path. E.g. /sport/fussball/
+  * @param config   channel configuration for the clients. Used by Funkotron.
+  * @param stages   stage configuration for the channel. Used by Digger.
+  * @param metadata meta data for CMCF and Janus. Needed for some merge/update logic.
+  * @param parent   the maybe parent of the current channel. Root channel has no parent. (no shit sherlock!)
   * @param children all children of the current channel
   */
 case class RawChannel(id: RawChannelId,
@@ -25,8 +26,12 @@ case class RawChannel(id: RawChannelId,
                       parent: Option[RawChannel] = None,
                       children: Option[Seq[RawChannel]] = None) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
+  lazy val unwrappedChildren: Seq[RawChannel] = children.getOrElse(Nil)
 
-
+  /**
+    * @param search channel path. E.g. '/sport/fussball/'
+    * @return maybe channel for the search string
+    */
   def findByPath(search: String): Option[RawChannel] = findByPath(
     search.split('/').filter(_.nonEmpty).toList match {
       case Nil ⇒ Nil
@@ -39,33 +44,53 @@ case class RawChannel(id: RawChannelId,
       case Nil ⇒
         Some(this)
       case head :: Nil ⇒
-        children.getOrElse(Nil).find(_.id.path == head)
+        unwrappedChildren.find(_.id.path == head)
       case head :: tail ⇒
-        children.getOrElse(Nil).find(_.id.path == head).flatMap(_.findByPath(tail))
+        unwrappedChildren.find(_.id.path == head).flatMap(_.findByPath(tail))
     }
   }
 
 }
 
 /**
-  * @param path unique path of the channel. Always with a trailing slash. E.g. /sport/fussball/
-  * @param label label of the channel. This is the display name from escenic. (provided by SDP)
-  * @param escenicId escenic id of the section. E.g. root channel ('/') with id 5
+  * @param path      unique path of the channel. Always with a trailing slash. E.g. '/sport/fussball/'
+  * @param label     label of the channel. This is the display name from escenic. (provided by SDP)
+  * @param escenicId escenic id of the section. E.g. root channel ('/') with id 5. Default value '-1' is a error state.
   */
 case class RawChannelId(path: String,
                         label: String,
                         escenicId: Long = -1)
 
+/**
+  * @param metaTags   `<meta>` tag overrides of the channel.
+  * @param header     content header (not the real page header) configuration.
+  * @param commercial commercial configuration for the channel. Used some override logic.
+  */
 case class RawChannelConfiguration(metaTags: Option[RawChannelMetaTags] = None,
                                    header: Option[RawChannelHeader] = None,
                                    commercial: Option[RawChannelCommercial] = None)
 
+/**
+  * The (ASMI) ad tag is a string with the root section and type of the page (section or content page).
+  * When a channel defines an ad tag we override the root section with its own section.
+  * We need this for some channel targeting. E.g. '/sport/formel1/' needs his own ad tag.
+  *
+  * @param definesAdTag      overrides the (ASMI) ad tag for the channel
+  * @param definesVideoAdTag ??? do we need this ???
+  */
 case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
                                 definesVideoAdTag: Option[Boolean] = None) {
   lazy val unwrappedDefinesAdTag: Boolean = definesAdTag.getOrElse(false)
   lazy val unwrappedDefinesVideoAdTag: Boolean = definesVideoAdTag.getOrElse(false)
 }
 
+/**
+  * @param title         override `<title>` tag.
+  * @param description   override `<meta name="description">` tag.
+  * @param keywords      override `<meta name="keywords">` tag.
+  * @param contentRobots override `<meta name="robots">` tag only for all content pages of the channel.
+  * @param sectionRobots override `<meta name="robots">` tag only for the section page of the channel.
+  */
 case class RawChannelMetaTags(title: Option[String] = None,
                               description: Option[String] = None,
                               keywords: Option[Seq[String]] = None,
@@ -74,7 +99,13 @@ case class RawChannelMetaTags(title: Option[String] = None,
   lazy val unwrappedKeywords: Seq[String] = keywords.getOrElse(Nil)
 }
 
-case class RawChannelMetaRobotsTag(noIndex: Option[String] = None, noFollow: Option[String] = None)
+/**
+  * <meta name="robots" content="index,follow,noodp">
+  *
+  * @param noIndex `true` == 'noIndex' & `false` == 'index'
+  * @param noFollow `true` == 'noFollow' & `false` == 'follow'
+  */
+case class RawChannelMetaRobotsTag(noIndex: Option[Boolean] = None, noFollow: Option[Boolean] = None)
 
 case class RawSectionReference(label: Option[String] = None, path: Option[String] = None)
 
@@ -82,7 +113,8 @@ case class RawSectionReference(label: Option[String] = None, path: Option[String
 case class RawChannelHeader(sponsoring: Option[String] = None, // like 'tagheuer'
                             logo: Option[String] = None, // could be Channel logo (e.g. /icon) or Ressort logo (e.g. /kmpkt)
                             slogan: Option[String] = None, // belongs to the logo
-                            label: Option[String] = None) // replaced by logo if set
+                            label: Option[String] = None)
+// replaced by logo if set
 
 
 /**
