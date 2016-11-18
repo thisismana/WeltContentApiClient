@@ -1,6 +1,5 @@
 package de.welt.contentapi.legacy
 
-import de.welt.contentapi.legacy.services.{AdminSectionService, AdminSectionServiceImpl, LegacySectionService, LegacySectionServiceImpl}
 import play.api.inject.Module
 import play.api.{Configuration, Environment}
 
@@ -12,8 +11,8 @@ class PlayModule extends Module {
 
     client.bindings(environment, configuration) ++ Seq(
       // admin services
-      bind(classOf[AdminSectionService]).to(classOf[AdminSectionServiceImpl]),
-      bind(classOf[LegacySectionService]).to(classOf[LegacySectionServiceImpl])
+      //      bind(classOf[AdminSectionService]).to(classOf[AdminSectionServiceImpl]),
+//      bind(classOf[LegacySectionService]).to(classOf[LegacySectionServiceImpl])
 
     )
   }
