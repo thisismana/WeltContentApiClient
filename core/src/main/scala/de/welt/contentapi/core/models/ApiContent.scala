@@ -14,17 +14,17 @@ case class ApiResponse(content: ApiContent,
 }
 
 /**
-  * @param webUrl relative url of the content
-  * @param `type` main content type (Escenic based) like: article, video, live
-  * @param id Escenic ID. This is needed for: tracking, commercials, videos
-  * @param subType e.g. satire, commentary
-  * @param fields generic map with 'data/content' based on the content type
-  * @param authors authors of the content
+  * @param webUrl   relative url of the content
+  * @param `type`   main content type (Escenic based) like: article, video, live
+  * @param id       Escenic ID. This is needed for: tracking, commercials, videos
+  * @param subType  e.g. satire, commentary
+  * @param fields   generic map with 'data/content' based on the content type
+  * @param authors  authors of the content
   * @param elements all elements for the content. A element has a relation (teaser, opener, inline) and type (image, video)
-  * @param roles needed for related content (role playlist) (Frank)
+  * @param roles    needed for related content (role playlist) (Frank)
   * @param sections ???
-  * @param tags Tags of the content. Only the Escenic tags (manuel created).
-  * @param onward non resolved relations (related content) (GraphQl)
+  * @param tags     Tags of the content. Only the Escenic tags (manuel created).
+  * @param onward   non resolved relations (related content) (GraphQl)
   */
 case class ApiContent(webUrl: String,
                       `type`: String,
@@ -52,16 +52,17 @@ case class ApiContent(webUrl: String,
 
 /**
   * TODO MANA
-  * @param id ???
+  *
+  * @param id    ???
   * @param roles ???
   */
 case class ApiOnward(id: String, roles: Seq[String])
 
 /**
-  * @param id escenic id of author content page (author page)
-  * @param name name of the author
+  * @param id       escenic id of author content page (author page)
+  * @param name     name of the author
   * @param position position of the author
-  * @param url relative web url the author page
+  * @param url      relative web url the author page
   * @param elements images of the author
   */
 case class ApiAuthor(id: Option[String] = None,
@@ -73,10 +74,10 @@ case class ApiAuthor(id: Option[String] = None,
 }
 
 /**
-  * @param id unique identifier from WeltN24/brian to find a single element inside the content body text
-  * @param `type` type of element like: image, video, oembed ...
+  * @param id        unique identifier from WeltN24/brian to find a single element inside the content body text
+  * @param `type`    type of element like: image, video, oembed ...
   * @param relations on witch relations is the element used: Teaser, Opener, Closer, Inline ...
-  * @param assets all assets of the element: image asset with url, video asset with url, poster, width, heidht
+  * @param assets    all assets of the element: image asset with url, video asset with url, poster, width, heidht
   */
 case class ApiElement(id: String,
                       `type`: String,
@@ -89,6 +90,7 @@ case class ApiElement(id: String,
 
 /**
   * WTF? Irgendwas mit VIDEO
+  *
   * @param validToDate ???
   */
 case class ApiMetadata(validToDate: String) {
@@ -98,10 +100,10 @@ case class ApiMetadata(validToDate: String) {
 }
 
 /**
-  * @param `type` type of the asset like: image, video
-  * @param fields generic 'data/content' based on the type of asset. E.g. source, width, height
+  * @param `type`   type of the asset like: image, video
+  * @param fields   generic 'data/content' based on the type of asset. E.g. source, width, height
   * @param metadata api processing meta data like: state, fetchErrors, transformationDate
-  * @param index the index for multiple assets like a gallery
+  * @param index    the index for multiple assets like a gallery
   */
 case class ApiAsset(`type`: String,
                     fields: Option[Map[String, String]] = None,
@@ -114,12 +116,12 @@ case class ApiAsset(`type`: String,
 /**
   *
   * @param home ???
-  * @param all ???
+  * @param all  ???
   */
 case class ApiSectionData(home: Option[String], all: Option[List[String]] = None)
 
 /**
-  * @param id the real value of the tag
+  * @param id    the real value of the tag
   * @param value crap escenic format. don't use this.
   */
 case class ApiTag(id: Option[String], value: Option[String] = None)

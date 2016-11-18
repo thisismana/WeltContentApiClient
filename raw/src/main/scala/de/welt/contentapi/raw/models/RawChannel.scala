@@ -102,18 +102,36 @@ case class RawChannelMetaTags(title: Option[String] = None,
 /**
   * <meta name="robots" content="index,follow,noodp">
   *
-  * @param noIndex `true` == 'noIndex' & `false` == 'index'
+  * @param noIndex  `true` == 'noIndex' & `false` == 'index'
   * @param noFollow `true` == 'noFollow' & `false` == 'follow'
   */
 case class RawChannelMetaRobotsTag(noIndex: Option[Boolean] = None, noFollow: Option[Boolean] = None)
 
+/**
+  * Render a simple `<a>`.
+  *
+  * @param label display name of the link.
+  * @param path  path (`href`) of the link.
+  */
 case class RawSectionReference(label: Option[String] = None, path: Option[String] = None)
 
-// Logo/Header Prio: Ressort Icon > Channel Icon > RawChannelId Label
+/**
+  *
+  * @param sponsoring only a mapping string for the client. Used for a svg/image logo. E.g. 'tagheuer'
+  * @param logo       only a mapping string for the client. Used for a svg/image logo to replace the label.
+  *                   The logo could be a channel logo like '/icon' or a ressort logo like '/kmpk'.
+  *                   What's the different? Ask UI/UX!
+  *                   Display-Logic
+  *                   channelLogo.orElse(ressortLogo).getOrElse(label)
+  * @param slogan     slogan for the channel. E.g. /kmpkt: 'NEWS TO GO. EINZIGARTIG ANDERS.'
+  * @param label      display name of the channel. The fallback label is always the [[RawChannelId.label]]
+  * @param sectionReference
+  */
 case class RawChannelHeader(sponsoring: Option[String] = None, // like 'tagheuer'
                             logo: Option[String] = None, // could be Channel logo (e.g. /icon) or Ressort logo (e.g. /kmpkt)
                             slogan: Option[String] = None, // belongs to the logo
-                            label: Option[String] = None)
+                            label: Option[String] = None,
+                            sectionReference: Option[Seq[RawSectionReference]] = None)
 // replaced by logo if set
 
 
