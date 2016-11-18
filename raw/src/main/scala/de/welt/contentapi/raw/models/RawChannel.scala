@@ -22,7 +22,7 @@ import java.time.Instant
 case class RawChannel(id: RawChannelId,
                       config: Option[RawChannelConfiguration] = None,
                       stages: Option[Seq[RawChannelStage]] = None,
-                      metadata: Option[Metadata] = None,
+                      metadata: Option[RawMetadata] = None,
                       parent: Option[RawChannel] = None,
                       children: Option[Seq[RawChannel]] = None) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
@@ -87,16 +87,17 @@ case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
 }
 
 /**
-  * @param title         override `<title>` tag.
-  * @param description   override `<meta name="description">` tag.
-  * @param keywords      override `<meta name="keywords">` tag.
-  * @param contentRobots override `<meta name="robots">` tag only for all content pages of the channel.
-  * @param sectionRobots override `<meta name="robots">` tag only for the section page of the channel.
+  * @param title                     override `<title>` tag.
+  * @param description               override `<meta name="description">` tag.
+  * @param keywords                  override `<meta name="keywords">` tag.
+  * @param sectionBreadcrumbDisabled `true` == no breadcrumb on the section page. The frontpage has no breadcrumb.
+  * @param contentRobots             override `<meta name="robots">` tag only for all content pages of the channel.
+  * @param sectionRobots             override `<meta name="robots">` tag only for the section page of the channel.
   */
 case class RawChannelMetadata(title: Option[String] = None,
                               description: Option[String] = None,
                               keywords: Option[Seq[String]] = None,
-                              breadcrumbDisabled: Option[Boolean] = None,
+                              sectionBreadcrumbDisabled: Option[Boolean] = None,
                               contentRobots: Option[RawChannelMetaRobotsTag] = None,
                               sectionRobots: Option[RawChannelMetaRobotsTag] = None) {
   lazy val unwrappedKeywords: Seq[String] = keywords.getOrElse(Nil)
@@ -139,15 +140,16 @@ case class RawChannelHeader(sponsoring: Option[String] = None,
 }
 
 /**
-  * @param changedBy        id of last sitebuilder
+  * Stored values for CMCF and Janus2. Should not be used by any clients.
+  * @param changedBy        github id of last sitebuilder
   * @param lastModifiedDate timestamp of last change
   * @param modified         was this channel configured via ConfigMcConfigFace or is it still like `default`
   * @param isRessort        so far /icon, maybe blau and bilanz will be added (used for tree logic in angular app)
   */
-case class Metadata(changedBy: String = "system",
-                    lastModifiedDate: Long = Instant.now.toEpochMilli,
-                    modified: Boolean = false,
-                    isRessort: Boolean = false)
+case class RawMetadata(changedBy: String = "system",
+                       lastModifiedDate: Long = Instant.now.toEpochMilli,
+                       modified: Boolean = false,
+                       isRessort: Boolean = false)
 
 
 trait RawChannelStage {

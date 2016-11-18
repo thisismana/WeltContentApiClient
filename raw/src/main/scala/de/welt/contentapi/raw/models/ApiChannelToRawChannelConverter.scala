@@ -46,7 +46,7 @@ object ApiChannelToRawChannelConverter {
     keywords = fields.get("keywords").map(_.split(",")),
     // Info:
     // New field
-    breadcrumbDisabled = None,
+    sectionBreadcrumbDisabled = None,
     contentRobots = contentMetaRobotsContent(fields),
     sectionRobots = contentMetaRobotsSection(fields)
   )
@@ -107,7 +107,7 @@ object ApiChannelToRawChannelConverter {
     }
   }
 
-  private def metadata(apiChannelMetadataNew: ApiChannelMetadataNew): Metadata = Metadata(
+  private def metadata(apiChannelMetadataNew: ApiChannelMetadataNew): RawMetadata = RawMetadata(
     changedBy = apiChannelMetadataNew.changedBy,
     lastModifiedDate = apiChannelMetadataNew.lastModifiedDate
     // Info:
