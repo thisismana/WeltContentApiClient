@@ -81,7 +81,7 @@ object ApiChannelToRawChannelConverter {
       slogan = None,
       // Info:
       // New field. This is part for some next steps.
-      sectionReference = None
+      sectionReferences = None
     )
 
     header match {

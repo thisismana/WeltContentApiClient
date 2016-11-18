@@ -125,13 +125,13 @@ case class RawSectionReference(label: Option[String] = None, path: Option[String
   *                   channelLogo.orElse(ressortLogo).getOrElse(label)
   * @param slogan     slogan for the channel. E.g. /kmpkt: 'NEWS TO GO. EINZIGARTIG ANDERS.'
   * @param label      display name of the channel. The fallback label is always the [[RawChannelId.label]]
-  * @param sectionReference
+  * @param sectionReferences
   */
-case class RawChannelHeader(sponsoring: Option[String] = None, // like 'tagheuer'
+case class RawChannelHeader(sponsoring: Option[String] = None,
                             logo: Option[String] = None, // could be Channel logo (e.g. /icon) or Ressort logo (e.g. /kmpkt)
                             slogan: Option[String] = None, // belongs to the logo
                             label: Option[String] = None,
-                            sectionReference: Option[Seq[RawSectionReference]] = None)
+                            sectionReferences: Option[Seq[RawSectionReference]] = None)
 // replaced by logo if set
 
 
