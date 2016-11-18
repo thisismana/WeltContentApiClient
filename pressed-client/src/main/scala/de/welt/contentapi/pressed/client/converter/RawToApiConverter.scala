@@ -1,8 +1,8 @@
 package de.welt.contentapi.pressed.client.converter
 
 import de.welt.contentapi.core.models.ApiSectionReference
-import de.welt.contentapi.pressed.models.{ApiBrandingConfiguration, ApiChannel, ApiCommercialConfiguration, ApiConfiguration, ApiMetaConfiguration}
-import de.welt.contentapi.raw.models.{RawChannel, RawChannelCommercial, RawChannelHeader, RawChannelMetaTags}
+import de.welt.contentapi.pressed.models.{ApiChannel, ApiCommercialConfiguration, ApiConfiguration, ApiHeaderConfiguration, ApiMetaConfiguration, ApiSponsoringConfiguration, ApiThemeConfiguration}
+import de.welt.contentapi.raw.models.{RawChannel, RawSectionReference}
 
 class RawToApiConverter {
 
@@ -41,23 +41,16 @@ class RawToApiConverter {
     * @param rawChannel the rawChannel produced by ConfigMcConfigface
     * @return a new ApiConfiguration Object with the data from the rawChannel
     */
-  def apiConfiguationFromRawChannelConfiguration(rawChannel: RawChannel): ApiConfiguration = {
-    val maybeHeader: Option[RawChannelHeader] = rawChannel.config.flatMap(_.header)
-
-    val breadcrumb: Seq[ApiSectionReference] = getBreadcrumb(rawChannel)
-
-
-
-    ApiConfiguration(
-      meta = apiMetaConfigurationFromRawChannel(rawChannel),
-      commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
-      branding = None,
-      header = None,
-      theme = None
-    )
-  }
+  def apiConfiguationFromRawChannelConfiguration(rawChannel: RawChannel) = ApiConfiguration(
+    meta = apiMetaConfigurationFromRawChannel(rawChannel),
+    commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
+    sponsoring = Some(apiSponsoringConfigurationFromRawChannel(rawChannel)),
+    header = Some(apiHeaderConfigurationFromRawChannel(rawChannel)),
+    theme = Some(apiThemeFromRawChannel(rawChannel))
+  )
 
   private def unwrappedDefinesAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
+
   private def unwrappedDefinesVideoAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesVideoAdTag)
 
   private def calculateAdTech(rawChannel: RawChannel): String = {
@@ -89,8 +82,34 @@ class RawToApiConverter {
     )
   }
 
-  private def apiBrandingConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel) = {
+    ApiSponsoringConfiguration(
+      rawChannel.config.flatMap(_.header.flatMap(_.sponsoring))
+    )
+  }
 
+  private def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
+    val apiSectionRefenreces = apiSectionReferencesFromRawSectionReferences(
+      rawChannel.config.flatMap(_.header).flatMap(_.references).map(_.toSeq).getOrElse(Nil)
+    )
+    ApiHeaderConfiguration(
+      title = rawChannel.config.flatMap(_.header).flatMap(_.label),
+      sectionReferences = Some(apiSectionRefenreces)
+    )
+  }
+
+
+  private def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]) = {
+    references.map(ref => ApiSectionReference(ref.label, ref.path))
+  }
+
+  // TODO: find right way to find theme
+  // e.g. one for
+  // - /mediathek/**
+  // - /icon/
+  // or persisted in rawChannel ?
+  private def apiThemeFromRawChannel(rawChannel: RawChannel) = {
+    ApiThemeConfiguration(name = Some("default"))
   }
 
 }
