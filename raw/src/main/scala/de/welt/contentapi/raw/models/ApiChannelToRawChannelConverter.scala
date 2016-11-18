@@ -8,9 +8,11 @@ object ApiChannelToRawChannelConverter {
       channelId = apiChannel.id,
       apiChannelData = apiChannel.data
     ),
-    config = null,
-    metadata = apiChannel.metadata.map(metadata),
-    stages = None
+    config = config(apiChannel.data),
+    // Info:
+    // All old stage configuration are ignored. Currently not used by any app.
+    stages = None,
+    metadata = apiChannel.metadata.map(metadata)
   )
 
   private def rawChannelId(channelId: ChannelId, apiChannelData: ApiChannelData): RawChannelId = RawChannelId(
@@ -19,14 +21,23 @@ object ApiChannelToRawChannelConverter {
     escenicId = channelId.ece
   )
 
-  private def config(apiChannelData: ApiChannelData): RawChannelConfiguration = RawChannelConfiguration(
-    metaTags = apiChannelData.fields.map(metaTags)
-  )
+  private def config(apiChannelData: ApiChannelData): Option[RawChannelConfiguration] = {
+    val config = RawChannelConfiguration(
+      metaTags = apiChannelData.fields.map(metaTags),
+      header = header(apiChannelData),
+      commercial = commercial(apiChannelData.adData)
+    )
+
+    config match {
+      case RawChannelConfiguration(None, None, None) ⇒ None
+      case valid@RawChannelConfiguration(_, _, _) ⇒ Some(valid)
+    }
+  }
 
   private def metaTags(fields: Map[String, String]): RawChannelMetaTags = RawChannelMetaTags(
     title = fields.get("title"),
     description = fields.get("description"),
-    keywords = fields.get("keywords"),
+    keywords = fields.get("keywords").map(_.split(",")),
     contentRobots = contentMetaRobotsContent(fields),
     sectionRobots = contentMetaRobotsSection(fields)
   )
@@ -50,6 +61,30 @@ object ApiChannelToRawChannelConverter {
     metaRobotsTag match {
       case RawChannelMetaRobotsTag(None, None) ⇒ None
       case valid@RawChannelMetaRobotsTag(_, _) ⇒ Some(valid)
+    }
+  }
+
+  private def header(apiChannelData: ApiChannelData): Option[RawChannelHeader] = {
+    val header = RawChannelHeader(
+      sponsoring = apiChannelData.siteBuilding.map(_.theme),
+      label = Some(apiChannelData.label)
+    )
+
+    header match {
+      case RawChannelHeader(None, None, None, None) ⇒ None
+      case valid@RawChannelHeader(_, _, _, _) ⇒ Some(valid)
+    }
+  }
+
+  private def commercial(apiChannelAdData: ApiChannelAdData): Option[RawChannelCommercial] = {
+    val commercial = RawChannelCommercial(
+      definesAdTag = if (apiChannelAdData.definesAdTag) Some(apiChannelAdData.definesAdTag) else None,
+      definesVideoAdTag = apiChannelAdData.definesVideoAdTag
+    )
+
+    commercial match {
+      case RawChannelCommercial(None, None) ⇒ None
+      case valid@RawChannelCommercial(_, _) ⇒ Some(valid)
     }
   }
 
