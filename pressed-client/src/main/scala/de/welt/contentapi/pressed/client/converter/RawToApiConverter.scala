@@ -90,7 +90,7 @@ class RawToApiConverter {
 
   private def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
     val apiSectionRefenreces = apiSectionReferencesFromRawSectionReferences(
-      rawChannel.config.flatMap(_.header).flatMap(_.references).map(_.toSeq).getOrElse(Nil)
+      rawChannel.config.flatMap(_.header).flatMap(_.sectionReference).map(_.toSeq).getOrElse(Nil)
     )
     ApiHeaderConfiguration(
       title = rawChannel.config.flatMap(_.header).flatMap(_.label),

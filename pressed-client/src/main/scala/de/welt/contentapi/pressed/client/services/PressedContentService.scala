@@ -8,7 +8,7 @@ import de.welt.contentapi.core_client.services.contentapi.ContentService
 import de.welt.contentapi.core_client.services.http.RequestHeaders
 import de.welt.contentapi.core_client.services.s3.S3Client
 import de.welt.contentapi.pressed.client.converter.RawToApiConverter
-import de.welt.contentapi.pressed.models.{ApiChannel, ApiPressedContent}
+import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration, ApiPressedContent}
 import de.welt.contentapi.raw.models.RawChannel
 import de.welt.contentapi.utils.Loggable
 import play.api.libs.json.{JsError, JsSuccess, Json}
@@ -43,18 +43,18 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
         }
       }.map { rawTree =>
 
-        val maybeRawChannel: Option[RawChannel] = responseContent.sections.flatMap(_.home).flatMap(x=>rawTree.findByPath(x))
-
+        val maybeRawChannel: Option[RawChannel] = responseContent.sections.flatMap(_.home).flatMap(rawTree.findByPath)
         val maybeApiChannel: Option[ApiChannel] = maybeRawChannel.map(rawChannel => converter.getApiChannelFromRawChannel(rawChannel))
+        val apiConfiguration: ApiConfiguration = converter.apiConfiguationFromRawChannelConfiguration(rawTree)
 
         ApiPressedContent(
           content = Some(responseContent),
           related = maybeResponseRelated,
-          channel = maybeApiChannel, // TODO: get data from tree
-          configuration = None // TODO: get data from tree
+          channel = maybeApiChannel,
+          configuration = Some(apiConfiguration)
         )
       }.getOrElse(
-        // Only fallback if s3 get or parse fails
+        // Fallback if S3.get or Json.parse fails
         ApiPressedContent(
           content = Some(responseContent),
           related = maybeResponseRelated)
