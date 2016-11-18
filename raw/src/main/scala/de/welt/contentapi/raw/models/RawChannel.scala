@@ -26,9 +26,8 @@ case class RawChannel(id: RawChannelId,
                       stages: Option[Seq[RawChannelStage]] = None,
                       metadata: Option[RawMetadata] = None,
                       parent: Option[RawChannel] = None,
-                      children: Option[Seq[RawChannel]] = None) {
+                      children: Seq[RawChannel] = Nil) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
-  lazy val unwrappedChildren: Seq[RawChannel] = children.getOrElse(Nil)
 
   /**
     * @param search channel path. E.g. '/sport/fussball/'
@@ -46,9 +45,9 @@ case class RawChannel(id: RawChannelId,
       case Nil ⇒
         Some(this)
       case head :: Nil ⇒
-        unwrappedChildren.find(_.id.path == head)
+        children.find(_.id.path == head)
       case head :: tail ⇒
-        unwrappedChildren.find(_.id.path == head).flatMap(_.findByPath(tail))
+        children.find(_.id.path == head).flatMap(_.findByPath(tail))
     }
   }
 

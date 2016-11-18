@@ -2,21 +2,27 @@ package de.welt.contentapi.raw.models
 
 import de.welt.contentapi.raw.models.legacy._
 
+/**
+  * This is the converter from the old welt-content-api-client-0.4 to welt-content-api-client-0.5 model.
+  * 1. shutdown CMCF
+  * 2. convert old-json to new-json (write a simple test)
+  * 3. upload new-json to s3
+  * 4. boot updated CMCF
+  */
 object ApiChannelToRawChannelConverter {
-  def apply(apiChannel: ApiChannel): RawChannel = RawChannel(
+  def apply(root: ApiChannel): RawChannel = RawChannel(
     id = rawChannelId(
-      channelId = apiChannel.id,
-      apiChannelData = apiChannel.data
+      channelId = root.id,
+      apiChannelData = root.data
     ),
-    config = config(apiChannel.data),
+    config = config(root.data),
     // Info:
     // All old stage configuration are ignored. Currently not used by any app.
     stages = None,
-    metadata = apiChannel.metadata.map(metadata),
-    // Todo
+    metadata = root.metadata.map(metadata),
+    // Todo (mana) how to update the parent here? Do we need this here
     parent = None,
-    // Todo
-    children = None
+    children = root.children.map(child ⇒ ApiChannelToRawChannelConverter(child))
   )
 
   private def rawChannelId(channelId: ChannelId, apiChannelData: ApiChannelData): RawChannelId = RawChannelId(
