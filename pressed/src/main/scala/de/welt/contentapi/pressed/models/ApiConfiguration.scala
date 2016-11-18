@@ -1,6 +1,6 @@
 package de.welt.contentapi.pressed.models
 
-import de.welt.contentapi.core.models.content.ApiSectionReference
+import de.welt.contentapi.core.models.ApiSectionReference
 
 /**
   * Configuration for a content or section page. All configs are optional.
@@ -28,8 +28,8 @@ case class ApiConfiguration(meta: Option[ApiMetaConfiguration] = None,
   */
 case class ApiMetaConfiguration(title: Option[String] = None,
                                 description: Option[String] = None,
-                                tags: Option[List[String]] = None) {
-  lazy val unwrappedTags: List[String] = tags.getOrElse(Nil)
+                                tags: Option[Seq[String]] = None) {
+  lazy val unwrappedTags: Seq[String] = tags.getOrElse(Nil)
 }
 
 /**
