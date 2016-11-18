@@ -1,5 +1,7 @@
 package de.welt.contentapi.pressed.models.legacy
 
+import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration}
+
 /**
   * Legacy == papyrus -> da-hood version of sections
   *

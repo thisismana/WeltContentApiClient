@@ -1,7 +1,7 @@
 package de.welt.contentapi.pressed.client.converter
 
-import de.welt.contentapi.core.models.ApiSectionReference
-import de.welt.contentapi.pressed.models.{ApiChannel, ApiCommercialConfiguration, ApiConfiguration, ApiHeaderConfiguration, ApiMetaConfiguration, ApiSponsoringConfiguration, ApiThemeConfiguration}
+import de.welt.contentapi.core.models.ApiReference
+import de.welt.contentapi.pressed.models._
 import de.welt.contentapi.raw.models.{RawChannel, RawSectionReference}
 
 class RawToApiConverter {
@@ -17,20 +17,20 @@ class RawToApiConverter {
       breadcrumb = Some(getBreadcrumb(rawChannel)))
   }
 
-  private def getApiSectionReferenceFromRawChannel(rawChannel: RawChannel): ApiSectionReference = {
-    ApiSectionReference(
+  private[converter] def getApiSectionReferenceFromRawChannel(rawChannel: RawChannel): ApiReference = {
+    ApiReference(
       label = Some(rawChannel.id.label),
-      path = Some(rawChannel.id.path)
+      href = Some(rawChannel.id.path)
     )
   }
 
-  private def getBreadcrumb(selfRawChannel: RawChannel): Seq[ApiSectionReference] = {
-    val breadcrumbFromRawChannel: Seq[ApiSectionReference] = Seq.empty
+  private[converter] def getBreadcrumb(selfRawChannel: RawChannel): Seq[ApiReference] = {
+    val breadcrumbFromRawChannel: Seq[ApiReference] = Seq.empty
     while (selfRawChannel.parent.isDefined) {
       val currentParent: RawChannel = selfRawChannel.parent.get
-      breadcrumbFromRawChannel :+ ApiSectionReference(
+      breadcrumbFromRawChannel :+ ApiReference(
         label = Some(currentParent.id.label),
-        path = Some(currentParent.id.path)
+        href = Some(currentParent.id.path)
       )
     }
     breadcrumbFromRawChannel
@@ -49,11 +49,11 @@ class RawToApiConverter {
     theme = Some(apiThemeFromRawChannel(rawChannel))
   )
 
-  private def unwrappedDefinesAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
+  private[converter] def unwrappedDefinesAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
 
-  private def unwrappedDefinesVideoAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesVideoAdTag)
+  private[converter] def unwrappedDefinesVideoAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesVideoAdTag)
 
-  private def calculateAdTech(rawChannel: RawChannel): String = {
+  private[converter] def calculateAdTech(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
     while (!unwrappedDefinesAdTag(currentChannel) && currentChannel.parent.isDefined && currentChannel.id.path != "/") {
       currentChannel = currentChannel.parent.get
@@ -61,7 +61,7 @@ class RawToApiConverter {
     currentChannel.id.path.replaceAll("/", "")
   }
 
-  private def calculateVideoAdTech(rawChannel: RawChannel): String = {
+  private[converter] def calculateVideoAdTech(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
     while (!unwrappedDefinesVideoAdTag(currentChannel) && currentChannel.parent.isDefined && currentChannel.id.path != "/") {
       currentChannel = currentChannel.parent.get
@@ -69,7 +69,7 @@ class RawToApiConverter {
     currentChannel.id.path.replaceAll("/", "")
   }
 
-  private def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel) = {
     rawChannel.config.flatMap(_.metadata).map(metadata => ApiMetaConfiguration(
       title = metadata.title,
       description = metadata.title,
@@ -77,20 +77,20 @@ class RawToApiConverter {
     )
   }
 
-  private def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel) = {
     ApiCommercialConfiguration(
       adTag = Some(calculateAdTech(rawChannel)),
       videoAdTag = Some(calculateVideoAdTech(rawChannel))
     )
   }
 
-  private def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel) = {
     ApiSponsoringConfiguration(
       rawChannel.config.flatMap(_.header.flatMap(_.sponsoring))
     )
   }
 
-  private def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
     val apiSectionReferences = apiSectionReferencesFromRawSectionReferences(
       rawChannel.config.flatMap(_.header).map(_.unwrappedSectionReferences).getOrElse(Nil)
     )
@@ -101,8 +101,8 @@ class RawToApiConverter {
   }
 
 
-  private def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]) = {
-    references.map(ref => ApiSectionReference(ref.label, ref.path))
+  private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]) = {
+    references.map(ref => ApiReference(ref.label, ref.path))
   }
 
   // TODO: find right way to find theme
@@ -110,7 +110,7 @@ class RawToApiConverter {
   // - /mediathek/**
   // - /icon/
   // or persisted in rawChannel ?
-  private def apiThemeFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiThemeFromRawChannel(rawChannel: RawChannel) = {
     ApiThemeConfiguration(name = Some("default"))
   }
 

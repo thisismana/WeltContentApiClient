@@ -26,7 +26,7 @@ class ContentServiceImpl @Inject()(override val ws: WSClient,
                                    funkConfig: ContentClientConfig)
   extends AbstractService[ApiResponse] with ContentService with Loggable {
 
-  import de.welt.contentapi.core.models.ApiContentReads._
+  import de.welt.contentapi.core.models.ApiReads._
 
   override def jsonValidate: JsLookupResult ⇒ JsResult[ApiResponse] = _.validate[ApiResponse]
 

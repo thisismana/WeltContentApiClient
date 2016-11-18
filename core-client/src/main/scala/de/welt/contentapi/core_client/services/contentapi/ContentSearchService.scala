@@ -38,9 +38,10 @@ sealed trait ContentSearchService {
 @Singleton
 class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
                                          override val metrics: Metrics,
-                                         cfg: ContentClientConfig,
-                                         sectionService: SectionService)
+                                         cfg: ContentClientConfig)
   extends AbstractService[Seq[ApiContent]] with ContentSearchService {
+
+  import de.welt.contentapi.core.models.ApiReads.apiContentReads
 
   override def config: ServiceConfiguration = cfg.getServiceConfig(serviceName)
 

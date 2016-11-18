@@ -1,6 +1,6 @@
 package de.welt.contentapi.pressed.models
 
-import de.welt.contentapi.core.models.ApiSectionReference
+import de.welt.contentapi.core.models.ApiReference
 
 
 case class ApiStage(teasers: Seq[ApiTeaser],
@@ -8,6 +8,6 @@ case class ApiStage(teasers: Seq[ApiTeaser],
 
 case class ApiStageConfiguration(layout: String,
                                  label: Option[String],
-                                 sectionReference: Option[Seq[ApiSectionReference]] = None)
+                                 sectionReference: Option[Seq[ApiReference]] = None)
 
 

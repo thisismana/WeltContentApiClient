@@ -35,10 +35,11 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
       val maybeResponseRelated: Option[Seq[ApiContent]] = response.related.map(_.toSeq)
       val responseContent: ApiContent = response.content
 
+      // ToDo: add S3 File Caching
       s3Client.get(bucket, file).flatMap { tree =>
         Json.parse(tree).validate[RawChannel] match {
           case s: JsSuccess[RawChannel] => s.asOpt
-          case e: JsError => log.error(s"JsError parsing S3 file: '%s/%s'." + JsError.toJson(e).toString(), bucket, file)
+          case e: JsError => log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
             Option.empty
         }
       }.map { rawTree =>

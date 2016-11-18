@@ -133,6 +133,6 @@ case class ApiTag(id: Option[String], value: Option[String] = None)
   * relative and all external absolute. And what about links to content pages?
   *
   * @param label label of the <a/>
-  * @param path  href of the <a/>
+  * @param href  href of the <a/>
   */
-case class ApiSectionReference(label: Option[String] = None, path: Option[String] = None)
+case class ApiReference(label: Option[String] = None, href: Option[String] = None)

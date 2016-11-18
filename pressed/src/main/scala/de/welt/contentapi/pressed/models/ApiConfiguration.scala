@@ -1,6 +1,6 @@
 package de.welt.contentapi.pressed.models
 
-import de.welt.contentapi.core.models.ApiSectionReference
+import de.welt.contentapi.core.models.ApiReference
 
 /**
   * Configuration for a content or section page. All configs are optional.
@@ -55,8 +55,8 @@ case class ApiSponsoringConfiguration(name: Option[String] = None)
   * @param sectionReferences section refs for linking
   */
 case class ApiHeaderConfiguration(title: Option[String] = None,
-                                  sectionReferences: Option[Seq[ApiSectionReference]] = None) {
-  lazy val unwrappedSectionReferences: Seq[ApiSectionReference] = sectionReferences.getOrElse(Nil)
+                                  sectionReferences: Option[Seq[ApiReference]] = None) {
+  lazy val unwrappedSectionReferences: Seq[ApiReference] = sectionReferences.getOrElse(Nil)
 }
 
 /**

@@ -5,21 +5,18 @@ import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.core_client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.core_client.services.contentapi.AbstractService
 import de.welt.contentapi.core_client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
-import de.welt.contentapi.core.models.internal.http.RequestHeaders
 import org.mockito.Matchers
 import org.mockito.Matchers.anyString
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsLookupResult, JsResult, JsString}
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.mvc.{Headers, Request}
-import play.api.test.FakeRequest
 
 class AbstractServiceTest extends PlaySpec
   with MockitoSugar with Status {
@@ -68,7 +65,7 @@ class AbstractServiceTest extends PlaySpec
     }
 
     "forward the X-Unique-Id header" in new TestScope {
-      val headers = Seq(("X-Unique-Id","0xdeadbeef"))
+      val headers = Seq(("X-Unique-Id", "0xdeadbeef"))
       new TestService().get(Seq("fake-id"), Seq.empty, Seq.empty)(Some(headers), defaultContext)
       verify(mockRequest).withHeaders(("X-Unique-Id", "0xdeadbeef"))
     }

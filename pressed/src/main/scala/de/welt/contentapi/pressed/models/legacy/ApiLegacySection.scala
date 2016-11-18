@@ -1,9 +1,9 @@
 package de.welt.contentapi.pressed.models.legacy
 
-import de.welt.contentapi.core.models.content.ApiContent
+import de.welt.contentapi.core.models.ApiContent
 
-/**
-  * Da-hood version of a section
+/** Da-hood version of a section
+  *
   * @param lists all stages with teasers of a section page
   */
 case class ApiLegacySection(lists: Option[List[ApiLegacyStage]] = None) {

@@ -16,7 +16,7 @@ class PlayModule extends Module {
 
       bind(classOf[S3Client]).to(classOf[S3ClientImpl]),
 
-      bind(classOf[SectionService]).to(classOf[SectionServiceImpl]),
+//      bind(classOf[SectionService]).to(classOf[SectionServiceImpl]),
       bind(classOf[ContentSearchService]).to(classOf[ContentSearchServiceImpl])
 
     )
