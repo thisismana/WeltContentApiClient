@@ -12,7 +12,11 @@ object ApiChannelToRawChannelConverter {
     // Info:
     // All old stage configuration are ignored. Currently not used by any app.
     stages = None,
-    metadata = apiChannel.metadata.map(metadata)
+    metadata = apiChannel.metadata.map(metadata),
+    // Todo
+    parent = None,
+    // Todo
+    children = None
   )
 
   private def rawChannelId(channelId: ChannelId, apiChannelData: ApiChannelData): RawChannelId = RawChannelId(
@@ -67,12 +71,22 @@ object ApiChannelToRawChannelConverter {
   private def header(apiChannelData: ApiChannelData): Option[RawChannelHeader] = {
     val header = RawChannelHeader(
       sponsoring = apiChannelData.siteBuilding.map(_.theme),
-      label = Some(apiChannelData.label)
+      label = Option(apiChannelData.label).filter(_.nonEmpty),
+      // Info:
+      // After the migration we split sponsoring and logo.
+      // For now: old data == sponsoring
+      logo = None,
+      // Info:
+      // New field. At the moment the slogan is part of the client (Funkotron)
+      slogan = None,
+      // Info:
+      // New field. This is part for some next steps.
+      sectionReference = None
     )
 
     header match {
-      case RawChannelHeader(None, None, None, None) ⇒ None
-      case valid@RawChannelHeader(_, _, _, _) ⇒ Some(valid)
+      case RawChannelHeader(None, None, None, None, None) ⇒ None
+      case valid@RawChannelHeader(_, _, _, _, _) ⇒ Some(valid)
     }
   }
 
