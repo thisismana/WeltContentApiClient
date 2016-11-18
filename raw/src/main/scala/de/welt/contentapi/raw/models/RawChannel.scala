@@ -9,6 +9,26 @@ case class RawChannel(id: RawChannelId,
                       parent: Option[RawChannel] = None,
                       children: Option[Seq[RawChannel]] = None) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
+
+
+  def findByPath(search: String): Option[RawChannel] = findByPath(
+    search.split('/').filter(_.nonEmpty).toList match {
+      case Nil ⇒ Nil
+      case head :: tail ⇒ tail.scanLeft(s"/$head/")((path, s) ⇒ path + s + "/")
+    }
+  )
+
+  private def findByPath(sectionPath: Seq[String]): Option[RawChannel] = {
+    sectionPath match {
+      case Nil ⇒
+        Some(this)
+      case head :: Nil ⇒
+        children.getOrElse(Nil).find(_.id.path == head)
+      case head :: tail ⇒
+        children.getOrElse(Nil).find(_.id.path == head).flatMap(_.findByPath(tail))
+    }
+  }
+
 }
 
 case class RawChannelId(path: String,
