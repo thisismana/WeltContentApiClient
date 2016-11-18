@@ -27,7 +27,6 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
 
   override def find(id: String, showRelated: Boolean = true)
                    (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedContent] =
-
     contentService.find(id, showRelated).map { response ⇒
       val bucket: String = config.aws.s3.rawTree.bucket
       val file: String = config.aws.s3.rawTree.file
@@ -37,6 +36,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
 
       // ToDo: add S3 File Caching
       s3Client.get(bucket, file).flatMap { tree =>
+        import de.welt.contentapi.raw.models.RawFormats._
         Json.parse(tree).validate[RawChannel] match {
           case s: JsSuccess[RawChannel] => s.asOpt
           case e: JsError => log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
