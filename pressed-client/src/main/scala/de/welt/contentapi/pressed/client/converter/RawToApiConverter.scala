@@ -69,10 +69,16 @@ class RawToApiConverter {
 
   private[converter] def calculateVideoAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
-    while (!unwrappedDefinesVideoAdTag(currentChannel) && currentChannel.parent.isDefined && currentChannel.id.path != "/") {
+    while (!unwrappedDefinesVideoAdTag(currentChannel) && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
-    currentChannel.id.path.replaceAll("/", "")
+    val adTag: String = currentChannel.id.path.replaceAll("/", "")
+    if (adTag.isEmpty) {
+      "sonstiges"
+    }
+    else {
+      adTag
+    }
   }
 
   private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel) = {
