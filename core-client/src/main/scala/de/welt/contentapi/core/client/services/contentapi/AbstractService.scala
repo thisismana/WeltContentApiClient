@@ -1,10 +1,10 @@
-package de.welt.contentapi.core_client.services.contentapi
+package de.welt.contentapi.core.client.services.contentapi
 
 import com.codahale.metrics.{MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
-import de.welt.contentapi.core_client.services.configuration.ServiceConfiguration
-import de.welt.contentapi.core_client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
-import de.welt.contentapi.core_client.services.http.RequestHeaders
+import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
+import de.welt.contentapi.core.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
+import de.welt.contentapi.core.client.services.http.RequestHeaders
 import de.welt.contentapi.utils.Loggable
 import play.api.http.Status
 import play.api.libs.json.{JsError, JsLookupResult, JsResult, JsSuccess}

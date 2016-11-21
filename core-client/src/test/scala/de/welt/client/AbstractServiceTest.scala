@@ -2,9 +2,9 @@ package de.welt.client
 
 import com.codahale.metrics.Timer.Context
 import com.kenshoo.play.metrics.Metrics
-import de.welt.contentapi.core_client.services.configuration.ServiceConfiguration
-import de.welt.contentapi.core_client.services.contentapi.AbstractService
-import de.welt.contentapi.core_client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
+import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
+import de.welt.contentapi.core.client.services.contentapi.AbstractService
+import de.welt.contentapi.core.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
 import org.mockito.Matchers
 import org.mockito.Matchers.anyString
 import org.mockito.Mockito.{verify, when}
