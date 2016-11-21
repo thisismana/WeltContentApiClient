@@ -1,4 +1,4 @@
-package de.welt.contentapi.legacy_client.models
+package de.welt.contentapi.raw_client.models
 
 import java.time.Instant
 

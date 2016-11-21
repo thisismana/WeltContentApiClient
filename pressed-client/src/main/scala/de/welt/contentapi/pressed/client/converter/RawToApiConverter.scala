@@ -46,7 +46,7 @@ class RawToApiConverter {
     commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
     sponsoring = Some(apiSponsoringConfigurationFromRawChannel(rawChannel)),
     header = Some(apiHeaderConfigurationFromRawChannel(rawChannel)),
-    theme = Some(apiThemeFromRawChannel(rawChannel))
+    theme = apiThemeFromRawChannel(rawChannel)
   )
 
   private[converter] def unwrappedDefinesAdTag(rawChannel: RawChannel): Boolean = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
@@ -112,18 +112,11 @@ class RawToApiConverter {
     )
   }
 
-
   private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]) = {
     references.map(ref => ApiReference(ref.label, ref.path))
   }
 
-  // TODO: find right way to find theme
-  // e.g. one for
-  // - /mediathek/**
-  // - /icon/
-  // or persisted in rawChannel ?
-  private[converter] def apiThemeFromRawChannel(rawChannel: RawChannel) = {
-    ApiThemeConfiguration(name = Some("default"))
-  }
+  private[converter] def apiThemeFromRawChannel(rawChannel: RawChannel): Option[ApiThemeConfiguration] =
+    rawChannel.config.flatMap(_.theme.map(t ⇒ ApiThemeConfiguration(t.name, t.fields)))
 
 }

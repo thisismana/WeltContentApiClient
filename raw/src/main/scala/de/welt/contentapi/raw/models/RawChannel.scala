@@ -67,10 +67,12 @@ case class RawChannelId(path: String,
 /**
   * @param metadata   `<meta>` tag overrides of the channel.
   * @param header     content header (not the real page header) configuration.
+  * @param theme      the optional theme for the channel. This is a developer configuration.
   * @param commercial commercial configuration for the channel. Used some override logic.
   */
 case class RawChannelConfiguration(metadata: Option[RawChannelMetadata] = None,
                                    header: Option[RawChannelHeader] = None,
+                                   theme: Option[RawChannelTheme] = None,
                                    commercial: Option[RawChannelCommercial] = None)
 
 /**
@@ -85,6 +87,22 @@ case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
                                 definesVideoAdTag: Option[Boolean] = None) {
   lazy val unwrappedDefinesAdTag: Boolean = definesAdTag.getOrElse(false)
   lazy val unwrappedDefinesVideoAdTag: Boolean = definesVideoAdTag.getOrElse(false)
+}
+
+/**
+  * What is a "Channel Theme"?
+  * Think of a unique channel with:
+  * - different background color
+  * - other teaser
+  * - new image crops
+  * Example Channels:
+  * - '/mediathek/'
+  * - '/icon/'
+  * @param name mapping string for the client. The impl. of the theme is part of the client (Funkotron)
+  * @param fields optional settings/hints/values for the theme.
+  */
+case class RawChannelTheme(name: Option[String] = None, fields: Option[Map[String, String]] = None) {
+  lazy val unwrappedFields: Map[String, String] = fields.getOrElse(Map.empty[String, String])
 }
 
 /**

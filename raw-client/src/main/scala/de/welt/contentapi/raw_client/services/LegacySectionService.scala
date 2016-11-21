@@ -1,9 +1,9 @@
-package de.welt.contentapi.legacy_client.services
+package de.welt.contentapi.raw_client.services
 
 import com.google.inject.{Inject, Singleton}
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core_client.services.s3.S3Client
-import de.welt.contentapi.legacy_client.models.{SdpSectionData, SdpSectionDataReads}
+import de.welt.contentapi.raw_client.models.{SdpSectionData, SdpSectionDataReads}
 import de.welt.contentapi.utils.Loggable
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsError, JsSuccess, Json}

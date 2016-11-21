@@ -1,4 +1,4 @@
-package de.welt.contentapi.legacy_client.services
+package de.welt.contentapi.raw_client.services
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
@@ -13,7 +13,7 @@ import play.api.Environment
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsValue, Json}
 
-trait AdminSectionService extends SectionService {
+trait AdminSectionService extends LegacySectionService {
 
   def updateChannel(channel: ApiChannel,
                     updatedChannelData: ApiChannelData,
@@ -30,7 +30,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
                                         environment: Environment,
                                         legacySectionService: LegacySectionService,
                                         cache: CacheApi)
-  extends SectionServiceImpl(config, cache, s3, environment) with AdminSectionService with Loggable {
+  extends LegacySectionServiceImpl(config, cache, s3, environment) with AdminSectionService with Loggable {
 
 
   override def updateChannel(channel: ApiChannel, updatedChannelData: ApiChannelData, user: String, updatedStages: Option[Seq[Stage]] = None)

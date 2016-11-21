@@ -19,6 +19,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait PressedContentService {
   def find(id: String, showRelated: Boolean = true)
           (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedContent]
+
+  def convert(apiContent: ApiContent): ApiPressedContent
 }
 
 @Singleton
@@ -35,12 +37,14 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
       val responseContent: ApiContent = response.content
 
       // ToDo: add S3 File Caching
-      s3Client.get(bucket, file).flatMap { tree =>
+      s3Client.get(bucket, file).flatMap { tree ⇒
         import de.welt.contentapi.raw.models.RawFormats._
         Json.parse(tree).validate[RawChannel] match {
-          case s: JsSuccess[RawChannel] => s.asOpt
-          case e: JsError => log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
-            Option.empty
+          case s: JsSuccess[RawChannel] ⇒
+            s.asOpt
+          case e: JsError ⇒
+            log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
+            None
         }
       }.map { rawTree =>
 
@@ -54,11 +58,12 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
           channel = maybeApiChannel,
           configuration = Some(apiConfiguration)
         )
-      }.getOrElse(
+      } getOrElse {
         // Fallback if S3.get or Json.parse fails
         ApiPressedContent(
           content = Some(responseContent),
           related = maybeResponseRelated)
-      )
+      }
     }
+  override def convert(apiContent: ApiContent): ApiPressedContent = ???
 }

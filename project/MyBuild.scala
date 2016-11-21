@@ -158,6 +158,14 @@ object MyBuild extends Build {
     .dependsOn(withTests(utils)).aggregate(utils)
     .dependsOn(withTests(core)).aggregate(core)
 
+  val rawClient = project("raw-client")
+    .settings(
+      name := "welt-content-api-raw-client"
+    )
+    .settings(coreDependencySettings: _*)
+    .dependsOn(withTests(utils)).aggregate(utils)
+    .dependsOn(withTests(raw)).aggregate(raw)
+
   val pressedClient = project("pressed-client")
     .settings(
       name := "welt-content-api-pressed-client"

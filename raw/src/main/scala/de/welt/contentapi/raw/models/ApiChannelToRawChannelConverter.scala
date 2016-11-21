@@ -35,12 +35,16 @@ object ApiChannelToRawChannelConverter {
     val config = RawChannelConfiguration(
       metadata = apiChannelData.fields.map(channelMetadata),
       header = header(apiChannelData),
+      // Info:
+      // We set the theme config with the ui.
+      // No migration from the old ChannelTheme needed.
+      theme = None,
       commercial = commercial(apiChannelData.adData)
     )
 
     config match {
-      case RawChannelConfiguration(None, None, None) ⇒ None
-      case valid@RawChannelConfiguration(_, _, _) ⇒ Some(valid)
+      case RawChannelConfiguration(None, None, None, None) ⇒ None
+      case valid@RawChannelConfiguration(_, _, _, _) ⇒ Some(valid)
     }
   }
 
