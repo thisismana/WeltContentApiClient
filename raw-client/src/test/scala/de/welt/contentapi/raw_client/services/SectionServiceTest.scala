@@ -1,7 +1,7 @@
 package de.welt.contentapi.raw_client.services
 
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfigImpl
-import de.welt.contentapi.core_client.services.s3.S3Client
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfigImpl
+import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw_client.models.SdpSectionData
 import de.welt.contentapi.utils.Env.{Live, Preview}
 import de.welt.testing.DisabledCache
