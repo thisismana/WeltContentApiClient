@@ -20,7 +20,7 @@ trait PressedContentService {
   def find(id: String, showRelated: Boolean = true)
           (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedContent]
 
-  def convert(apiContent: ApiContent): ApiPressedContent
+  def convert(apiContent: ApiContent, related: Option[Seq[ApiContent]]): ApiPressedContent
 }
 
 @Singleton
@@ -29,41 +29,47 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
 
   override def find(id: String, showRelated: Boolean = true)
                    (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedContent] =
-    contentService.find(id, showRelated).map { response ⇒
-      val bucket: String = config.aws.s3.rawTree.bucket
-      val file: String = config.aws.s3.rawTree.file
+    contentService
+      .find(id, showRelated)
+      .map(response ⇒ convert(response.content, response.related))
 
-      val maybeResponseRelated: Option[Seq[ApiContent]] = response.related.map(_.toSeq)
-      val responseContent: ApiContent = response.content
-
-      // ToDo: add S3 File Caching
-      s3Client.get(bucket, file).flatMap { tree ⇒
-        import de.welt.contentapi.raw.models.RawFormats._
-        Json.parse(tree).validate[RawChannel] match {
-          case s: JsSuccess[RawChannel] ⇒
-            s.asOpt
-          case e: JsError ⇒
-            log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
-            None
-        }
-      }.map { rawTree =>
-
-        val maybeRawChannel: Option[RawChannel] = responseContent.sections.flatMap(_.home).flatMap(rawTree.findByPath)
-        val maybeApiChannel: Option[ApiChannel] = maybeRawChannel.map(rawChannel => converter.getApiChannelFromRawChannel(rawChannel))
-        val apiConfiguration: ApiConfiguration = converter.apiConfigurationFromRawChannelConfiguration(rawTree)
-
-        ApiPressedContent(
-          content = responseContent,
-          related = maybeResponseRelated,
-          channel = maybeApiChannel,
-          configuration = Some(apiConfiguration)
-        )
-      } getOrElse {
-        // Fallback if S3.get or Json.parse fails
-        ApiPressedContent(
-          content = responseContent,
-          related = maybeResponseRelated)
+  override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]]): ApiPressedContent = {
+    val bucket: String = config.aws.s3.rawTree.bucket
+    val file: String = config.aws.s3.rawTree.file
+    // ToDo: add S3 File Caching
+    s3Client.get(bucket, file).flatMap { tree ⇒
+      import de.welt.contentapi.raw.models.RawFormats._
+      Json.parse(tree).validate[RawChannel] match {
+        case s: JsSuccess[RawChannel] ⇒
+          s.asOpt
+        case e: JsError ⇒
+          log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
+          None
       }
+    }.map { rawTree =>
+
+      val maybeRawChannel: Option[RawChannel] = apiContent
+        .sections
+        .flatMap(_.home)
+        .flatMap(rawTree.findByPath)
+
+      val maybeApiChannel: Option[ApiChannel] = maybeRawChannel
+        .map(converter.getApiChannelFromRawChannel)
+
+      val apiConfiguration: ApiConfiguration = converter
+        .apiConfigurationFromRawChannelConfiguration(rawTree)
+
+      ApiPressedContent(
+        content = apiContent,
+        related = maybeRelatedContent,
+        channel = maybeApiChannel,
+        configuration = Some(apiConfiguration)
+      )
+    } getOrElse {
+      // Fallback if S3.get or Json.parse fails
+      ApiPressedContent(
+        content = apiContent,
+        related = maybeRelatedContent)
     }
-  override def convert(apiContent: ApiContent): ApiPressedContent = ???
+  }
 }

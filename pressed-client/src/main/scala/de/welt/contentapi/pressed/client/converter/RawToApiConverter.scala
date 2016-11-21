@@ -24,10 +24,10 @@ class RawToApiConverter {
     )
   }
 
-  private[converter] def getBreadcrumb(selfRawChannel: RawChannel): Seq[ApiReference] = {
+  private[converter] def getBreadcrumb(self: RawChannel): Seq[ApiReference] = {
     val breadcrumbFromRawChannel: Seq[ApiReference] = Seq.empty
-    while (selfRawChannel.parent.isDefined) {
-      val currentParent: RawChannel = selfRawChannel.parent.get
+    while (self.parent.isDefined) {
+      val currentParent = self.parent.get
       breadcrumbFromRawChannel :+ ApiReference(
         label = Some(currentParent.id.label),
         href = Some(currentParent.id.path)
@@ -44,7 +44,7 @@ class RawToApiConverter {
   def apiConfigurationFromRawChannelConfiguration(rawChannel: RawChannel) = ApiConfiguration(
     meta = apiMetaConfigurationFromRawChannel(rawChannel),
     commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
-    sponsoring = Some(apiSponsoringConfigurationFromRawChannel(rawChannel)),
+    sponsoring = apiSponsoringConfigurationFromRawChannel(rawChannel),
     header = Some(apiHeaderConfigurationFromRawChannel(rawChannel)),
     theme = apiThemeFromRawChannel(rawChannel)
   )
@@ -81,7 +81,7 @@ class RawToApiConverter {
     }
   }
 
-  private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiMetaConfiguration] = {
     rawChannel.config.flatMap(_.metadata).map(metadata => ApiMetaConfiguration(
       title = metadata.title,
       description = metadata.title,
@@ -89,21 +89,29 @@ class RawToApiConverter {
     )
   }
 
-  private[converter] def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel) = {
+  /** Always calculates adTags, in doubt 'sonstiges' -> not optional
+    *
+    * @param rawChannel source Channel to take the data from
+    * @return a resolved 'ApiCommercialConfiguration' containing a videoAdTag and an adTag
+    */
+  private[converter] def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel): ApiCommercialConfiguration = {
     ApiCommercialConfiguration(
       adTag = Some(calculateAdTag(rawChannel)),
       videoAdTag = Some(calculateVideoAdTag(rawChannel))
     )
   }
 
-  private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel) = {
-    ApiSponsoringConfiguration(
-      rawChannel.config.flatMap(_.header.flatMap(_.sponsoring))
-    )
+  private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiSponsoringConfiguration] = {
+    rawChannel
+      .config
+      .flatMap(_.header)
+      .map {
+        header => ApiSponsoringConfiguration(header.sponsoring)
+      }
   }
 
   private[converter] def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
-    val apiSectionReferences = apiSectionReferencesFromRawSectionReferences(
+    val apiSectionReferences: Seq[ApiReference] = apiSectionReferencesFromRawSectionReferences(
       rawChannel.config.flatMap(_.header).map(_.unwrappedSectionReferences).getOrElse(Nil)
     )
     ApiHeaderConfiguration(
@@ -112,7 +120,7 @@ class RawToApiConverter {
     )
   }
 
-  private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]) = {
+  private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]): Seq[ApiReference] = {
     references.map(ref => ApiReference(ref.label, ref.path))
   }
 
