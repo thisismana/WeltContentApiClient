@@ -1,6 +1,6 @@
 package de.welt.contentapi.pressed.models
 
-import play.api.libs.json.{Format, Json, Reads, Writes}
+import play.api.libs.json._
 
 object PressedFormats {
 
@@ -17,38 +17,44 @@ object PressedFormats {
   implicit val apiBrandingConfigurationFormat: Format[ApiSponsoringConfiguration] = Json.format[ApiSponsoringConfiguration]
   implicit val apiMetaConfigurationFormat: Format[ApiMetaConfiguration] = Json.format[ApiMetaConfiguration]
   implicit val apiConfigurationFormat: Format[ApiConfiguration] = Json.format[ApiConfiguration]
+  implicit val apiPressedContentFormat: Format[ApiPressedContent] = Json.format[ApiPressedContent]
+  implicit val apiPressedSectionFormat: Format[ApiPressedSection] = Json.format[ApiPressedSection]
 }
 
 object PressedReads {
 
   import de.welt.contentapi.core.models.ApiReads._
 
-  implicit val apiTeaserConfigReads = Json.reads[ApiTeaserConfig]
-  implicit val apiTeaserReads = Json.reads[ApiTeaser]
+  implicit val apiTeaserConfigReads: Reads[ApiTeaserConfig] = Json.reads[ApiTeaserConfig]
+  implicit val apiTeaserReads: Reads[ApiTeaser] = Json.reads[ApiTeaser]
   implicit val apiChannelReads: Reads[ApiChannel] = Json.reads[ApiChannel]
-  implicit val apiStageConfigurationReads = Json.reads[ApiStageConfiguration]
-  implicit val apiStageReads = Json.reads[ApiStage]
+  implicit val apiStageConfigurationReads: Reads[ApiStageConfiguration] = Json.reads[ApiStageConfiguration]
+  implicit val apiStageReads: Reads[ApiStage] = Json.reads[ApiStage]
   implicit val apiCommercialConfigurationReads: Reads[ApiCommercialConfiguration] = Json.reads[ApiCommercialConfiguration]
   implicit val apiThemeConfigurationReads: Reads[ApiThemeConfiguration] = Json.reads[ApiThemeConfiguration]
   implicit val apiHeaderConfigurationReads: Reads[ApiHeaderConfiguration] = Json.reads[ApiHeaderConfiguration]
   implicit val apiBrandingConfigurationReads: Reads[ApiSponsoringConfiguration] = Json.reads[ApiSponsoringConfiguration]
   implicit val apiMetaConfigurationReads: Reads[ApiMetaConfiguration] = Json.reads[ApiMetaConfiguration]
   implicit val apiConfigurationReads: Reads[ApiConfiguration] = Json.reads[ApiConfiguration]
+  implicit val apiPressedContentReads: Reads[ApiPressedContent] = Json.reads[ApiPressedContent]
+  implicit val apiPressedSectionReads: Reads[ApiPressedSection] = Json.reads[ApiPressedSection]
 }
 
 object PressedWrites {
 
   import de.welt.contentapi.core.models.ApiWrites._
 
-  implicit val apiTeaserConfigWrites = Json.writes[ApiTeaserConfig]
-  implicit val apiTeaserWrites = Json.writes[ApiTeaser]
+  implicit val apiTeaserConfigWrites: Writes[ApiTeaserConfig] = Json.writes[ApiTeaserConfig]
+  implicit val apiTeaserWrites: Writes[ApiTeaser] = Json.writes[ApiTeaser]
   implicit val apiChannelWrites: Writes[ApiChannel] = Json.writes[ApiChannel]
-  implicit val apiStageConfigurationWrites = Json.writes[ApiStageConfiguration]
-  implicit val apiStageWrites = Json.writes[ApiStage]
+  implicit val apiStageConfigurationWrites: Writes[ApiStageConfiguration] = Json.writes[ApiStageConfiguration]
+  implicit val apiStageWrites: Writes[ApiStage] = Json.writes[ApiStage]
   implicit val apiCommercialConfigurationWrites: Writes[ApiCommercialConfiguration] = Json.writes[ApiCommercialConfiguration]
   implicit val apiThemeConfigurationWrites: Writes[ApiThemeConfiguration] = Json.writes[ApiThemeConfiguration]
   implicit val apiHeaderConfigurationWrites: Writes[ApiHeaderConfiguration] = Json.writes[ApiHeaderConfiguration]
   implicit val apiBrandingConfigurationWrites: Writes[ApiSponsoringConfiguration] = Json.writes[ApiSponsoringConfiguration]
   implicit val apiMetaConfigurationWrites: Writes[ApiMetaConfiguration] = Json.writes[ApiMetaConfiguration]
   implicit val apiConfigurationWrites: Writes[ApiConfiguration] = Json.writes[ApiConfiguration]
+  implicit val apiPressedContentWrites: Writes[ApiPressedContent] = Json.writes[ApiPressedContent]
+  implicit val apiPressedSectionWrites: Writes[ApiPressedSection] = Json.writes[ApiPressedSection]
 }

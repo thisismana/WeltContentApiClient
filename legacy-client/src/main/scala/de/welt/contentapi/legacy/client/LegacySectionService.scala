@@ -11,10 +11,11 @@ import de.welt.contentapi.pressed.client.services.PressedContentService
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait LegacySectionService {
-  def getByPath(path: String)(implicit requestHeaders: Option[RequestHeaders] = None): Future[Seq[ApiLegacyPressedSection]]
+  def getByPath(path: String)(implicit requestHeaders: Option[RequestHeaders] = None,
+                              executionContext: ExecutionContext): Future[Seq[ApiLegacyPressedSection]]
 }
 
 @Singleton
@@ -23,8 +24,12 @@ class LegacySectionServiceImpl @Inject()(pressedContentService: PressedContentSe
                                          override val metrics: Metrics)
   extends AbstractService[ApiLegacyLists] with LegacySectionService {
 
+  import de.welt.contentapi.legacy.models.LegacyFormats._
+
   override def getByPath(path: String)
-                        (implicit requestHeaders: Option[RequestHeaders] = None): Future[Seq[ApiLegacyPressedSection]] = {
+                        (implicit requestHeaders: Option[RequestHeaders] = None,
+                         executionContext: ExecutionContext): Future[Seq[ApiLegacyPressedSection]] = {
+
     super.get(ids = Seq(path)).map { _.unwrappedLists.map {convert} }
   }
 
