@@ -9,7 +9,7 @@ import de.welt.contentapi.core_client.services.s3.S3Client
 import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelConfiguration, RawChannelStage}
 import de.welt.contentapi.utils.Env.{Env, Live, Preview}
 import de.welt.contentapi.utils.Loggable
-import play.api.Environment
+import play.api.{Environment, Mode}
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsValue, Json}
 
@@ -37,17 +37,16 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
                             (implicit env: Env): Option[RawChannel] = {
 
     // update channel (lastModified), currently adData, fields, stages and siteBuilding allowed only
-    channel.config = channel.config.map(_.copy(
+    channel.config = channel.config.copy(
       commercial = updatedChannelData.commercial,
       header = updatedChannelData.header,
       theme = updatedChannelData.theme
-    ))
-    channel.metadata = channel.metadata.map(_.copy(
+    )
+    channel.metadata = channel.metadata.copy(
       lastModifiedDate = Instant.now.toEpochMilli,
       changedBy = user
-      //      , modified = todo (pada) → we would need to check agains the default config to calculate this information? is it important right now?
       //      , isRessort = todo (pada) → is this important here?
-    ))
+    )
     channel.stages = updatedStages
 
     log.info(s"$channel changed by $user")
@@ -80,21 +79,23 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
     log.info(s"[Sync] took ${stopwatch.stop.toString}")
   }
 
-
-  override protected[services] def root(implicit env: Env): Option[RawChannel] = super.root.orElse {
+  // todo (mana): extend correct service to fix this
+  /*override*/ protected[services] def root(implicit env: Env): Option[RawChannel] = ??? /*super.root.orElse {
     log.warn("No data found in s3 bucket, creating new data set from scratch.")
     val root = legacySectionService.getSectionData.toChannel
 
     saveChannel(root)(Preview)
     saveChannel(root)(Live)
     Some(root)
+  }*/
+
+  protected def objectKeyForEnv(env: Env) = environment.mode match {
+    case Mode.Prod ⇒ s"${config.aws.s3.janus.file}/prod/${env.toString}/config.json"
+    case _ ⇒ s"${config.aws.s3.janus.file}/dev/${env.toString}/config.json"
   }
 
   private def saveChannel(ch: RawChannel)(implicit env: Env) = {
-    import FullChannelWrites._
-
-
-    ch.applyChannelUpdates()
+    import de.welt.contentapi.raw.models.FullRawChannelWrites._
 
     val json: JsValue = Json.toJson(ch)(channelWrites)
     val serializedChannelData = json.toString

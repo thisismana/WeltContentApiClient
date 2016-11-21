@@ -193,6 +193,6 @@ object MyBuild extends Build {
       publish := {},
       bintrayUnpublish := {}
     )
-    .aggregate(core, coreClient, raw, pressed, pressedClient, legacyClient)
+    .aggregate(core, coreClient, raw, rawClient, pressed, pressedClient, legacyClient)
 
 }

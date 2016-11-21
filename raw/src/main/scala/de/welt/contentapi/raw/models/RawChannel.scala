@@ -2,6 +2,7 @@ package de.welt.contentapi.raw.models
 
 import java.time.Instant
 
+import de.welt.contentapi.raw.models.legacy.ApiChannel
 import play.api.libs.json.{JsValue, Json}
 
 import scala.annotation.tailrec
@@ -30,8 +31,11 @@ case class RawChannel(id: RawChannelId,
                       var config: RawChannelConfiguration = RawChannelConfiguration(),
                       var stages: Option[Seq[RawChannelStage]] = None,
                       var metadata: RawMetadata = RawMetadata(),
-                      parent: Option[RawChannel] = None,
-                      var children: Seq[RawChannel] = Nil) {
+                      var parent: Option[RawChannel] = None,
+                      var children: Seq[RawChannel] = Nil,
+                      var hasChildren: Boolean = false
+                     ) {
+  hasChildren = children.nonEmpty
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
 
   /**
@@ -69,6 +73,12 @@ case class RawChannel(id: RawChannelId,
     case Some(p) ⇒ p.root
     case None ⇒ this
   }
+
+  final def updateParentRelations(newParent: Option[RawChannel] = None): Unit = {
+    this.parent = newParent
+    children.foreach(_.updateParentRelations(Some(this)))
+  }
+
 
   /**
     * apply updates to the [[RawChannelConfiguration]] and [[RawChannelId]] from another [[RawChannel]]
@@ -169,7 +179,7 @@ case class RawChannel(id: RawChannelId,
 
   /** equals solely on the ```ChannelId``` */
   override def equals(obj: Any): Boolean = obj match {
-    case RawChannel(otherId, _, _, _, _, _) ⇒ this.hashCode == otherId.hashCode
+    case RawChannel(otherId, _, _, _, _, _, _) ⇒ this.hashCode == otherId.hashCode
     case _ ⇒ false
   }
 

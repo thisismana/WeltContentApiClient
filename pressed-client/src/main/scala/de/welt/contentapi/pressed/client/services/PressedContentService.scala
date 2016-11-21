@@ -11,6 +11,7 @@ import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration, ApiPressedContent}
 import de.welt.contentapi.raw.models.RawChannel
 import de.welt.contentapi.utils.Loggable
+import play.api.Configuration
 import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import scala.collection.immutable.Seq
@@ -24,7 +25,7 @@ trait PressedContentService {
 }
 
 @Singleton
-class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Client: S3Client, config: ContentClientConfig, converter: RawToApiConverter)
+class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Client: S3Client, config: Configuration, converter: RawToApiConverter)
   extends PressedContentService with Loggable {
 
   override def find(id: String, showRelated: Boolean = true)
@@ -34,11 +35,15 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
       .map(response ⇒ convert(response.content, response.related))
 
   override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]]): ApiPressedContent = {
-    val bucket: String = config.aws.s3.rawTree.bucket
-    val file: String = config.aws.s3.rawTree.file
-    // ToDo: add S3 File Caching
+
+    // todo (mana): extract s3 and caching as own service
+    val bucket: String = config.getString("welt.aws.s3.rawTree.bucket")
+      .getOrElse(throw config.reportError("welt.aws.s3.rawTree.bucket", "rawTree bucket not configured"))
+    val file: String = config.getString("welt.aws.s3.rawTree.file")
+      .getOrElse(throw config.reportError("welt.aws.s3.rawTree.file", "rawTree file not configured"))
+
     s3Client.get(bucket, file).flatMap { tree ⇒
-      import de.welt.contentapi.raw.models.RawFormats._
+      import de.welt.contentapi.raw.models.RawReads._
       Json.parse(tree).validate[RawChannel] match {
         case s: JsSuccess[RawChannel] ⇒
           s.asOpt

@@ -42,15 +42,15 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
       val channel = service.root(Preview).get
 
       channel.id.path must be("/")
-      channel.data.label must be("root")
+      channel.id.label must be("root")
     }
 
     "have ad tags defined for depth 0~1" in new Fixture {
 
       val channel = service.root(Preview).get
 
-      channel.data.adData.definesAdTag must be(true)
-      channel.children.map(_.data.adData.definesAdTag) must contain(true)
+      channel.config.commercial.definesAdTag must be(true)
+      channel.children.map(_.config.commercial.definesAdTag) must contain(true)
     }
 
     "have not ad-tags for depth 2" in new Fixture {
@@ -58,7 +58,7 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
       val channel = service.root(Preview).get
 
       val secondChild = channel.children.flatMap(_.children)
-      secondChild.map(_.data.adData.definesAdTag) must contain(false)
+      secondChild.map(_.config.commercial.definesAdTag) must contain(false)
     }
 
     "store the data for both live and preview" in new Fixture {

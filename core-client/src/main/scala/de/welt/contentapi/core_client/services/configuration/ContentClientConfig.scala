@@ -44,12 +44,6 @@ sealed trait ContentClientConfig {
         lazy val file: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.file"))
       }
 
-      object rawTree {
-        lazy val bucket: String = s3Config.flatMap(_.getString("rawTree.bucket"))
-          .getOrElse(throw BadConfigurationException("'welt.aws.s3.rawTree.file' not configured"))
-        lazy val file: String = s3Config.flatMap(_.getString("rawTree.file"))
-          .getOrElse(throw BadConfigurationException("'welt.aws.s3.rawTree.file' not configured"))
-      }
     }
   }
 
