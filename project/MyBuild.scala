@@ -175,7 +175,7 @@ object MyBuild extends Build {
     .settings(clientDependencySettings: _*)
     .dependsOn(withTests(coreClient)).aggregate(coreClient)
     .dependsOn(withTests(pressed)).aggregate(pressed)
-    .dependsOn(withTests(raw)).aggregate(raw)
+    .dependsOn(withTests(rawClient)).aggregate(rawClient)
 
   val legacyClient = project("legacy-client")
     .settings(
