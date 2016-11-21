@@ -40,6 +40,6 @@ class LegacySectionServiceImpl @Inject()(pressedContentService: PressedContentSe
   private def convert(apiLegacySection: ApiLegacySection): ApiLegacyPressedSection = ApiLegacyPressedSection(
     id = apiLegacySection.id,
     label = apiLegacySection.label,
-    content = Option(apiLegacySection.unwrappedContent.map(apiContent ⇒ pressedContentService.convert(apiContent, None)))
+    content = Option(apiLegacySection.unwrappedContent.map(c ⇒ pressedContentService.convert(c, related = None)))
   )
 }

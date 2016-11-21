@@ -2,7 +2,7 @@ package de.welt.contentapi.pressed.client.converter
 
 import de.welt.contentapi.core.models.ApiReference
 import de.welt.contentapi.pressed.models._
-import de.welt.contentapi.raw.models.{RawChannel, RawSectionReference}
+import de.welt.contentapi.raw.models.{RawChannel, RawChannelMetaRobotsTag, RawSectionReference}
 
 class RawToApiConverter {
 
@@ -81,9 +81,15 @@ class RawToApiConverter {
     rawChannel.config.metadata.map(metadata => ApiMetaConfiguration(
       title = metadata.title,
       description = metadata.title,
-      tags = metadata.keywords)
+      tags = metadata.keywords,
+      contentMetaRobots = metadata.contentRobots.map(apiMetaRobotsFromRawChannelMetaRobotsTag),
+      sectionMetaRobots = metadata.sectionRobots.map(apiMetaRobotsFromRawChannelMetaRobotsTag)
+    )
     )
   }
+
+  private[converter] def apiMetaRobotsFromRawChannelMetaRobotsTag(rawChannelMetaRobotsTag: RawChannelMetaRobotsTag): ApiMetaRobots =
+    ApiMetaRobots(noIndex = rawChannelMetaRobotsTag.noIndex, noFollow = rawChannelMetaRobotsTag.noFollow)
 
   /** Always calculates adTags, in doubt 'sonstiges' -> not optional
     *
