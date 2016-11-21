@@ -22,15 +22,27 @@ case class ApiConfiguration(meta: Option[ApiMetaConfiguration] = None,
 /**
   * <meta> configuration for content or section pages
   *
-  * @param title       <title> override
-  * @param description <meta> description override
-  * @param tags        <meta> keyword override
+  * @param title             <title> override
+  * @param description       <meta> description override
+  * @param tags              <meta> keyword override
+  * @param contentMetaRobots override `<meta name="robots">` tag only for all content pages of the channel.
+  * @param sectionMetaRobots override `<meta name="robots">` tag only for the section page of the channel.
   */
 case class ApiMetaConfiguration(title: Option[String] = None,
                                 description: Option[String] = None,
-                                tags: Option[Seq[String]] = None) {
+                                tags: Option[Seq[String]] = None,
+                                contentMetaRobots: Option[ApiMetaRobots] = None,
+                                sectionMetaRobots: Option[ApiMetaRobots] = None) {
   lazy val unwrappedTags: Seq[String] = tags.getOrElse(Nil)
 }
+
+/**
+  * <meta name="robots" content="index,follow,noodp">
+  *
+  * @param noIndex  `true` == 'noIndex' & `false` == 'index'
+  * @param noFollow `true` == 'noFollow' & `false` == 'follow'
+  */
+case class ApiMetaRobots(noIndex: Option[Boolean] = None, noFollow: Option[Boolean] = None)
 
 /**
   * Some overrides for commercial settings (ASMI). Per default all commercial configuration based on the section path.
@@ -66,4 +78,6 @@ case class ApiHeaderConfiguration(title: Option[String] = None,
   * @param name   name of the theme. Need for mapping.
   * @param fields optional settings/hints/configuration of the theme
   */
-case class ApiThemeConfiguration(name: Option[String] = None, fields: Option[Map[String, String]] = None)
+case class ApiThemeConfiguration(name: Option[String] = None, fields: Option[Map[String, String]] = None) {
+  lazy val unwrappedFields: Map[String, String] = fields.getOrElse(Map.empty[String, String])
+}
