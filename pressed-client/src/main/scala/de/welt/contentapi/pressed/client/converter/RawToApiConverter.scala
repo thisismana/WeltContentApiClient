@@ -25,15 +25,21 @@ class RawToApiConverter {
   }
 
   private[converter] def getBreadcrumb(self: RawChannel): Seq[ApiReference] = {
-    val breadcrumbFromRawChannel: Seq[ApiReference] = Seq.empty
-    while (self.parent.isDefined) {
-      val currentParent = self.parent.get
-      breadcrumbFromRawChannel :+ ApiReference(
-        label = Some(currentParent.id.label),
-        href = Some(currentParent.id.path)
+    var current = self
+    var breadcrumbFromRawChannel: Seq[ApiReference] = Seq(ApiReference(
+      label = Some(current.id.label),
+      href = Some(current.id.path)
+    ))
+    while (current.parent.isDefined) {
+      current = current.parent.get
+      breadcrumbFromRawChannel = breadcrumbFromRawChannel :+ ApiReference(
+          label = Some(current.id.label),
+          href = Some(current.id.path)
       )
     }
-    breadcrumbFromRawChannel
+    // breadcrumb should start from root channel -> must be reversed
+    // / -> /sport/ -> /sport/fussball/
+    breadcrumbFromRawChannel.reverse
   }
 
   /** Converter method that takes a rawChannel and returns an ApiConfiguration from its data
@@ -41,7 +47,7 @@ class RawToApiConverter {
     * @param rawChannel the rawChannel produced by ConfigMcConfigface
     * @return a new ApiConfiguration Object with the data from the rawChannel
     */
-  def apiConfigurationFromRawChannelConfiguration(rawChannel: RawChannel) = ApiConfiguration(
+  def apiConfigurationFromRawChannel(rawChannel: RawChannel) = ApiConfiguration(
     meta = apiMetaConfigurationFromRawChannel(rawChannel),
     commercial = Some(apiCommercialConfigurationFromRawChannel(rawChannel)),
     sponsoring = apiSponsoringConfigurationFromRawChannel(rawChannel),
@@ -80,7 +86,7 @@ class RawToApiConverter {
   private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiMetaConfiguration] = {
     rawChannel.config.metadata.map(metadata => ApiMetaConfiguration(
       title = metadata.title,
-      description = metadata.title,
+      description = metadata.description,
       tags = metadata.keywords,
       contentMetaRobots = metadata.contentRobots.map(apiMetaRobotsFromRawChannelMetaRobotsTag),
       sectionMetaRobots = metadata.sectionRobots.map(apiMetaRobotsFromRawChannelMetaRobotsTag)
