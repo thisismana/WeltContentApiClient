@@ -4,8 +4,8 @@ import java.time.Instant
 import javax.inject.{Inject, Singleton}
 
 import com.google.common.base.Stopwatch
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
-import de.welt.contentapi.core_client.services.s3.S3Client
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
+import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelConfiguration, RawChannelStage}
 import de.welt.contentapi.utils.Env.{Env, Live, Preview}
 import de.welt.contentapi.utils.Loggable
