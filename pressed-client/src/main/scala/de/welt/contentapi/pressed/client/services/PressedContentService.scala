@@ -53,7 +53,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
         val apiConfiguration: ApiConfiguration = converter.apiConfigurationFromRawChannelConfiguration(rawTree)
 
         ApiPressedContent(
-          content = Some(responseContent),
+          content = responseContent,
           related = maybeResponseRelated,
           channel = maybeApiChannel,
           configuration = Some(apiConfiguration)
@@ -61,7 +61,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, s3Clie
       } getOrElse {
         // Fallback if S3.get or Json.parse fails
         ApiPressedContent(
-          content = Some(responseContent),
+          content = responseContent,
           related = maybeResponseRelated)
       }
     }
