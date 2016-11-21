@@ -3,9 +3,9 @@ package de.welt.contentapi.legacy.client
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
-import de.welt.contentapi.core_client.services.configuration.ServiceConfiguration
-import de.welt.contentapi.core_client.services.contentapi.AbstractService
-import de.welt.contentapi.core_client.services.http.RequestHeaders
+import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
+import de.welt.contentapi.core.client.services.contentapi.AbstractService
+import de.welt.contentapi.core.client.services.http.RequestHeaders
 import de.welt.contentapi.legacy.models.{ApiLegacyLists, ApiLegacyPressedSection, ApiLegacySection}
 import de.welt.contentapi.pressed.client.services.PressedContentService
 import play.api.libs.json.{JsLookupResult, JsResult}

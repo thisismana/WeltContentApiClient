@@ -3,10 +3,10 @@ package de.welt.contentapi.pressed.client.services
 import javax.inject.{Inject, Singleton}
 
 import de.welt.contentapi.core.models.ApiContent
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
-import de.welt.contentapi.core_client.services.contentapi.ContentService
-import de.welt.contentapi.core_client.services.http.RequestHeaders
-import de.welt.contentapi.core_client.services.s3.S3Client
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
+import de.welt.contentapi.core.client.services.contentapi.ContentService
+import de.welt.contentapi.core.client.services.http.RequestHeaders
+import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration, ApiPressedContent}
 import de.welt.contentapi.raw.models.RawChannel

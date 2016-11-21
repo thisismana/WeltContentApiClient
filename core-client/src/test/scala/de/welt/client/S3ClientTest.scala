@@ -2,8 +2,8 @@ package de.welt.client
 
 import java.io.File
 
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfigImpl
-import de.welt.contentapi.core_client.services.s3.S3ClientImpl
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfigImpl
+import de.welt.contentapi.core.client.services.s3.S3ClientImpl
 import org.scalatestplus.play.PlaySpec
 import play.api.{Configuration, Environment, Mode}
 

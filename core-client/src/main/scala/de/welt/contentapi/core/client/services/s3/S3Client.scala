@@ -1,4 +1,4 @@
-package de.welt.contentapi.core_client.services.s3
+package de.welt.contentapi.core.client.services.s3
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
@@ -6,7 +6,7 @@ import javax.inject.{Inject, Singleton}
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
 import com.amazonaws.util.StringInputStream
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.utils.Loggable
 
 import scala.io.{Codec, Source}

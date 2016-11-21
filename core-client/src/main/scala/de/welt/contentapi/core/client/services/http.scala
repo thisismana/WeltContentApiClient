@@ -1,4 +1,4 @@
-package de.welt.contentapi.core_client.services
+package de.welt.contentapi.core.client.services
 
 object http {
 

@@ -1,12 +1,12 @@
-package de.welt.contentapi.core_client.services.contentapi
+package de.welt.contentapi.core.client.services.contentapi
 
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
+import de.welt.contentapi.core.client.models.ApiContentSearch
 import de.welt.contentapi.core.models.ApiContent
-import de.welt.contentapi.core_client.models.ApiContentSearch
-import de.welt.contentapi.core_client.services.configuration.{ContentClientConfig, ServiceConfiguration}
-import de.welt.contentapi.core_client.services.http.RequestHeaders
+import de.welt.contentapi.core.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
+import de.welt.contentapi.core.client.services.http.RequestHeaders
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 

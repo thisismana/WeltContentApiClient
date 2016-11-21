@@ -1,8 +1,8 @@
-package de.welt.contentapi.core_client.services.configuration
+package de.welt.contentapi.core.client.services.configuration
 
 import javax.inject.{Inject, Singleton}
 
-import de.welt.contentapi.core_client.services.exceptions.BadConfigurationException
+import de.welt.contentapi.core.client.services.exceptions.BadConfigurationException
 import play.api.Configuration
 
 case class ServiceConfiguration(serviceName: String, host: String, endpoint: String, username: String, password: String)

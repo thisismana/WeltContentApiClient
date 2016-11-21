@@ -1,4 +1,4 @@
-package de.welt.contentapi.core_client.models
+package de.welt.contentapi.core.client.models
 
 case class ApiContentSearch(`type`: Option[MainTypeParam],
                             subType: Option[SubTypeParam],
