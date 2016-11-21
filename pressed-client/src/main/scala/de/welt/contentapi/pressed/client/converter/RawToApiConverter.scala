@@ -49,13 +49,9 @@ class RawToApiConverter {
     theme = apiThemeFromRawChannel(rawChannel)
   )
 
-  private[converter] def unwrappedDefinesAdTag(rawChannel: RawChannel): Boolean = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesAdTag)
-
-  private[converter] def unwrappedDefinesVideoAdTag(rawChannel: RawChannel) = rawChannel.config.flatMap(_.commercial).exists(_.unwrappedDefinesVideoAdTag)
-
   private[converter] def calculateAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
-    while (!unwrappedDefinesAdTag(currentChannel) && currentChannel.parent.isDefined) {
+    while (!currentChannel.config.commercial.definesAdTag && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
     val adTag: String = currentChannel.id.path.replaceAll("/", "")
@@ -69,7 +65,7 @@ class RawToApiConverter {
 
   private[converter] def calculateVideoAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
-    while (!unwrappedDefinesVideoAdTag(currentChannel) && currentChannel.parent.isDefined) {
+    while (!currentChannel.config.commercial.definesVideoAdTag && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
     val adTag: String = currentChannel.id.path.replaceAll("/", "")
@@ -82,7 +78,7 @@ class RawToApiConverter {
   }
 
   private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiMetaConfiguration] = {
-    rawChannel.config.flatMap(_.metadata).map(metadata => ApiMetaConfiguration(
+    rawChannel.config.metadata.map(metadata => ApiMetaConfiguration(
       title = metadata.title,
       description = metadata.title,
       tags = metadata.keywords)
@@ -102,20 +98,17 @@ class RawToApiConverter {
   }
 
   private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiSponsoringConfiguration] = {
-    rawChannel
-      .config
-      .flatMap(_.header)
-      .map {
+    rawChannel.config.header.map {
         header => ApiSponsoringConfiguration(header.sponsoring)
       }
   }
 
   private[converter] def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
     val apiSectionReferences: Seq[ApiReference] = apiSectionReferencesFromRawSectionReferences(
-      rawChannel.config.flatMap(_.header).map(_.unwrappedSectionReferences).getOrElse(Nil)
+      rawChannel.config.header.map(_.unwrappedSectionReferences).getOrElse(Nil)
     )
     ApiHeaderConfiguration(
-      title = rawChannel.config.flatMap(_.header).flatMap(_.label),
+      title = rawChannel.config.header.flatMap(_.label),
       sectionReferences = Some(apiSectionReferences)
     )
   }
@@ -125,6 +118,6 @@ class RawToApiConverter {
   }
 
   private[converter] def apiThemeFromRawChannel(rawChannel: RawChannel): Option[ApiThemeConfiguration] =
-    rawChannel.config.flatMap(_.theme.map(t ⇒ ApiThemeConfiguration(t.name, t.fields)))
+    rawChannel.config.theme.map(t ⇒ ApiThemeConfiguration(t.name, t.fields))
 
 }

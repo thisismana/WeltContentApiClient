@@ -34,7 +34,7 @@ object MyBuild extends Build {
 
   val frontendDependencyManagementSettings = Seq(
     resolvers := Seq(
-      Resolver.typesafeRepo("releases"),
+//      Resolver.typesafeRepo("releases"),
       Resolver.jcenterRepo
     ),
     // https://www.typesafe.com/blog/improved-dependency-management-with-sbt-0137
@@ -130,10 +130,12 @@ object MyBuild extends Build {
     .settings(coreDependencySettings: _*)
 
   val raw = project("raw")
+    .settings(clientDependencySettings: _*)
     .settings(
       name := "welt-content-api-raw"
     )
-    .settings(coreDependencySettings: _*)
+    .dependsOn(withTests(utils)).aggregate(utils)
+    .dependsOn(withTests(core)).aggregate(core)
 
   val pressed = project("pressed")
     .settings(
@@ -162,8 +164,8 @@ object MyBuild extends Build {
     .settings(
       name := "welt-content-api-raw-client"
     )
-    .settings(coreDependencySettings: _*)
-    .dependsOn(withTests(utils)).aggregate(utils)
+    .settings(clientDependencySettings: _*)
+    .dependsOn(withTests(coreClient)).aggregate(coreClient)
     .dependsOn(withTests(raw)).aggregate(raw)
 
   val pressedClient = project("pressed-client")

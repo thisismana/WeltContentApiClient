@@ -4,29 +4,34 @@ import java.time.Instant
 
 import play.api.libs.json.{JsValue, Json}
 
+import scala.annotation.tailrec
+
 /**
   * Tree structure of the escenic channel/section tree. Simple representation:
-  * |-- '/' root (WON_frontpage)
-  * |--|-- '/sport/'
-  * |--|--|-- '/sport/fussball/'
-  * |--|--|-- '/sport/formel1/'
-  * |--|--|-- '/sport/golf/'
-  * |--|-- '/wirtschaft/'
-  * |--|-- '/politik/'
+  * {{{
+  * ┗━┓ '/' root (WON_frontpage)
+  *   ┣━━━┓ '/sport/'
+  *   ┃   ┣━━━━ '/sport/fussball/'
+  *   ┃   ┣━━━━ '/sport/formel1/'
+  *   ┃   ┗━━━━ '/sport/golf/'
+  *   ┣━━━ '/wirtschaft/'
+  *   ┗━━━ '/politik/'
+  *
+  * }}}
   *
   * @param id       mandatory id with the channel path. E.g. /sport/fussball/
   * @param config   channel configuration for the clients. Used by Funkotron.
   * @param stages   stage configuration for the channel. Used by Digger.
-  * @param metadata meta data for CMCF and Janus. Needed for some merge/update logic.
+  * @param metadata meta data for CMCF and Janus. Needed for some merge/update/locking logic.
   * @param parent   the maybe parent of the current channel. Root channel has no parent. (no shit sherlock!)
   * @param children all children of the current channel
   */
 case class RawChannel(id: RawChannelId,
-                      config: Option[RawChannelConfiguration] = None,
-                      stages: Option[Seq[RawChannelStage]] = None,
-                      metadata: Option[RawMetadata] = None,
+                      var config: RawChannelConfiguration = RawChannelConfiguration(),
+                      var stages: Option[Seq[RawChannelStage]] = None,
+                      var metadata: RawMetadata = RawMetadata(),
                       parent: Option[RawChannel] = None,
-                      children: Seq[RawChannel] = Nil) {
+                      var children: Seq[RawChannel] = Nil) {
   lazy val unwrappedStages: Seq[RawChannelStage] = stages.getOrElse(Nil)
 
   /**
@@ -51,8 +56,124 @@ case class RawChannel(id: RawChannelId,
     }
   }
 
-  // TODO: (mana) (re)-write or copy/paste the old update/merge logic here.
+  final def findByEce(escenicId: Long): Option[RawChannel] = {
+    if (id.escenicId == escenicId) {
+      Some(this)
+    } else {
+      children.flatMap { ch ⇒ ch.findByEce(escenicId) }.headOption
+    }
+  }
 
+  @tailrec
+  final def root: RawChannel = parent match {
+    case Some(p) ⇒ p.root
+    case None ⇒ this
+  }
+
+  /**
+    * apply updates to the [[RawChannelConfiguration]] and [[RawChannelId]] from another [[RawChannel]]
+    *
+    * @param other the source for the changes
+    */
+  def updateMasterData(other: RawChannel) = {
+    id.path = other.id.path
+    id.label = other.id.label
+    metadata = metadata.copy(lastModifiedDate = Instant.now.toEpochMilli)
+  }
+
+
+  def diff(other: RawChannel): ChannelUpdate = {
+
+    if (this != other) {
+      log.debug(s"Cannot diff($this, $other, because they are not .equal()")
+      ChannelUpdate(Seq.empty, Seq.empty, Seq.empty)
+    } else {
+
+      val bothPresentIds = this.children.map(_.id).intersect(other.children.map(_.id))
+      val updatesFromChildren = bothPresentIds.flatMap { id ⇒
+        val tupleOfMatchingChannels = this.children.find(_.id == id).zip(other.children.find(_.id == id))
+
+        tupleOfMatchingChannels.map { tuple ⇒
+          tuple._1.diff(tuple._2)
+        }
+      }
+      // elements that are no longer in `other.children`
+      val deletedByOther = this.children.diff(other.children)
+      // additional elements from `other.children`
+      val addedByOther = other.children.diff(this.children)
+
+      log.debug(s"[$this] added locally: $addedByOther")
+      log.debug(s"[$this] deleted locally: $deletedByOther")
+
+      val moved = {
+        lazy val thisRoot = this.root
+
+        // if we can find it in our tree, it hasn't been added but only moved
+        val notAddedButMoved = addedByOther.filter { elem ⇒ thisRoot.findByEce(elem.id.escenicId).isDefined }
+        log.debug(s"[$this] not added but moved: $notAddedButMoved")
+
+        lazy val otherRoot = other.root
+        // if we can find the deleted elem, it has been moved
+        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEce(elem.id.escenicId).isDefined }
+        log.debug(s"[$this] not deleted but moved: $notDeletedButMoved")
+
+        notAddedButMoved ++ notDeletedButMoved
+      }
+      log.debug(s"[$this] moved: $moved")
+
+      val deleted = deletedByOther.diff(moved)
+      val added = addedByOther.diff(moved)
+
+      log.debug(s"[$this] deleted globally: $deleted")
+      log.debug(s"[$this] added globally: $added")
+
+      val u = ChannelUpdate(added, deleted, moved).merge(updatesFromChildren)
+      log.debug(s"[$this] Changes: $u\n\n")
+      u
+    }
+  }
+
+  def merge(other: RawChannel): ChannelUpdate = {
+
+    val channelUpdate = diff(other)
+
+    channelUpdate.deleted.foreach { deletion ⇒
+      deletion.parent.foreach { parent ⇒
+        parent.children = parent.children.diff(Seq(deletion))
+      }
+    }
+
+    channelUpdate.added.foreach { addition ⇒
+      this.children = this.children :+ addition
+    }
+
+    channelUpdate.moved.foreach { moved ⇒
+      // remove from current parent
+      moved.parent.foreach { parent ⇒
+        parent.children = parent.children.diff(Seq(moved))
+      }
+      // add to new parent
+      val newParentId = other.findByEce(moved.id.escenicId)
+        .flatMap(_.parent)
+        .map(_.id.escenicId)
+
+      newParentId.foreach { parentId ⇒
+        root.findByEce(parentId).foreach { newParent ⇒
+          newParent.children = newParent.children :+ moved
+        }
+      }
+    }
+    // for logging
+    channelUpdate
+  }
+
+  /** equals solely on the ```ChannelId``` */
+  override def equals(obj: Any): Boolean = obj match {
+    case RawChannel(otherId, _, _, _, _, _) ⇒ this.hashCode == otherId.hashCode
+    case _ ⇒ false
+  }
+
+  override def hashCode: Int = this.id.hashCode
 }
 
 /**
@@ -60,9 +181,17 @@ case class RawChannel(id: RawChannelId,
   * @param label     label of the channel. This is the display name from escenic. (provided by SDP)
   * @param escenicId escenic id of the section. E.g. root channel ('/') with id 5. Default value '-1' is a error state.
   */
-case class RawChannelId(path: String,
-                        label: String,
-                        escenicId: Long = -1)
+case class RawChannelId(var path: String,
+                        var label: String,
+                        escenicId: Long = -1) {
+
+  override def equals(obj: Any): Boolean = obj match {
+    case RawChannelId(_, _, otherEce) ⇒ this.escenicId.hashCode == otherEce.hashCode
+    case _ ⇒ false
+  }
+
+  override def hashCode: Int = escenicId.hashCode
+}
 
 /**
   * @param metadata   `<meta>` tag overrides of the channel.
@@ -73,7 +202,7 @@ case class RawChannelId(path: String,
 case class RawChannelConfiguration(metadata: Option[RawChannelMetadata] = None,
                                    header: Option[RawChannelHeader] = None,
                                    theme: Option[RawChannelTheme] = None,
-                                   commercial: Option[RawChannelCommercial] = None)
+                                   commercial: RawChannelCommercial = RawChannelCommercial())
 
 /**
   * The (ASMI) ad tag is a string with the root section and type of the page (section or content page).
@@ -83,11 +212,8 @@ case class RawChannelConfiguration(metadata: Option[RawChannelMetadata] = None,
   * @param definesAdTag      overrides the (ASMI) ad tag for the channel
   * @param definesVideoAdTag overrides the (ASMI) video ad tag for the channel
   */
-case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
-                                definesVideoAdTag: Option[Boolean] = None) {
-  lazy val unwrappedDefinesAdTag: Boolean = definesAdTag.getOrElse(false)
-  lazy val unwrappedDefinesVideoAdTag: Boolean = definesVideoAdTag.getOrElse(false)
-}
+case class RawChannelCommercial(definesAdTag: Boolean = false,
+                                definesVideoAdTag: Boolean = false)
 
 /**
   * What is a "Channel Theme"?
@@ -98,7 +224,8 @@ case class RawChannelCommercial(definesAdTag: Option[Boolean] = None,
   * Example Channels:
   * - '/mediathek/'
   * - '/icon/'
-  * @param name mapping string for the client. The impl. of the theme is part of the client (Funkotron)
+  *
+  * @param name   mapping string for the client. The impl. of the theme is part of the client (Funkotron)
   * @param fields optional settings/hints/values for the theme.
   */
 case class RawChannelTheme(name: Option[String] = None, fields: Option[Map[String, String]] = None) {
@@ -160,6 +287,7 @@ case class RawChannelHeader(sponsoring: Option[String] = None,
 
 /**
   * Stored values for CMCF and Janus2. Should not be used by any clients.
+  *
   * @param changedBy        github id of last sitebuilder
   * @param lastModifiedDate timestamp of last change
   * @param modified         was this channel configured via ConfigMcConfigFace or is it still like `default`
@@ -170,9 +298,8 @@ case class RawMetadata(changedBy: String = "system",
                        modified: Boolean = false,
                        isRessort: Boolean = false)
 
-
-
 object RawChannelStage {
+
   import de.welt.contentapi.raw.models.RawFormats.rawChannelStageCommercialFormat
   import de.welt.contentapi.raw.models.RawFormats.rawChannelStageContentFormat
   import de.welt.contentapi.raw.models.RawFormats.rawChannelStageModuleFormat
@@ -180,7 +307,7 @@ object RawChannelStage {
   /**
     * http://stackoverflow.com/questions/17021847/noise-free-json-format-for-sealed-traits-with-play-2-2-library
     */
-  def unapply(rawChannelStage: RawChannelStage ): Option[(String, JsValue)] = {
+  def unapply(rawChannelStage: RawChannelStage): Option[(String, JsValue)] = {
     val (prod: Product, sub) = rawChannelStage match {
       case content: RawChannelStageContent => (content, Json.toJson(content)(rawChannelStageContentFormat))
       case module: RawChannelStageModule => (module, Json.toJson(module)(rawChannelStageModuleFormat))

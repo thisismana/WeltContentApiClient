@@ -19,9 +19,8 @@ object ApiChannelToRawChannelConverter {
     // Info:
     // All old stage configuration are ignored. Currently not used by any app.
     stages = None,
-    metadata = root.metadata.map(metadata),
-    // Todo (mana) how to update the parent here? Do we need this here
-    parent = None,
+    metadata = root.metadata.map(metadata).getOrElse(RawMetadata()),
+    parent = None, // do not write parent to prevent loops while serializing JSON
     children = root.children.map(child ⇒ ApiChannelToRawChannelConverter(child))
   )
 
@@ -31,8 +30,8 @@ object ApiChannelToRawChannelConverter {
     escenicId = channelId.ece
   )
 
-  private def config(apiChannelData: ApiChannelData): Option[RawChannelConfiguration] = {
-    val config = RawChannelConfiguration(
+  private def config(apiChannelData: ApiChannelData): RawChannelConfiguration = {
+    RawChannelConfiguration(
       metadata = apiChannelData.fields.map(channelMetadata),
       header = header(apiChannelData),
       // Info:
@@ -41,11 +40,6 @@ object ApiChannelToRawChannelConverter {
       theme = None,
       commercial = commercial(apiChannelData.adData)
     )
-
-    config match {
-      case RawChannelConfiguration(None, None, None, None) ⇒ None
-      case valid@RawChannelConfiguration(_, _, _, _) ⇒ Some(valid)
-    }
   }
 
   private def channelMetadata(fields: Map[String, String]): RawChannelMetadata = RawChannelMetadata(
@@ -105,16 +99,11 @@ object ApiChannelToRawChannelConverter {
     }
   }
 
-  private def commercial(apiChannelAdData: ApiChannelAdData): Option[RawChannelCommercial] = {
-    val commercial = RawChannelCommercial(
-      definesAdTag = if (apiChannelAdData.definesAdTag) Some(apiChannelAdData.definesAdTag) else None,
-      definesVideoAdTag = apiChannelAdData.definesVideoAdTag
+  private def commercial(apiChannelAdData: ApiChannelAdData): RawChannelCommercial = {
+    RawChannelCommercial(
+      definesAdTag = apiChannelAdData.definesAdTag,
+      definesVideoAdTag = apiChannelAdData.definesVideoAdTag.getOrElse(false)
     )
-
-    commercial match {
-      case RawChannelCommercial(None, None) ⇒ None
-      case valid@RawChannelCommercial(_, _) ⇒ Some(valid)
-    }
   }
 
   private def metadata(apiChannelMetadataNew: ApiChannelMetadataNew): RawMetadata = RawMetadata(

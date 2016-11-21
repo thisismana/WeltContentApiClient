@@ -6,7 +6,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.common.base.Stopwatch
 import de.welt.contentapi.core_client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core_client.services.s3.S3Client
-import de.welt.contentapi.raw.models.legacy._
+import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelConfiguration, RawChannelStage}
 import de.welt.contentapi.utils.Env.{Env, Live, Preview}
 import de.welt.contentapi.utils.Loggable
 import play.api.Environment
@@ -15,10 +15,10 @@ import play.api.libs.json.{JsValue, Json}
 
 trait AdminSectionService extends LegacySectionService {
 
-  def updateChannel(channel: ApiChannel,
-                    updatedChannelData: ApiChannelData,
+  def updateChannel(channel: RawChannel,
+                    updatedChannelData: RawChannelConfiguration,
                     user: String,
-                    updatedStages: Option[Seq[Stage]])(implicit env: Env): Option[ApiChannel]
+                    updatedStages: Option[Seq[RawChannelStage]])(implicit env: Env): Option[RawChannel]
 
   def syncWithLegacy(): Unit
 
@@ -30,20 +30,24 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
                                         environment: Environment,
                                         legacySectionService: LegacySectionService,
                                         cache: CacheApi)
-  extends LegacySectionServiceImpl(config, cache, s3, environment) with AdminSectionService with Loggable {
+  extends LegacySectionServiceImpl(s3, cache, config) with AdminSectionService with Loggable {
 
 
-  override def updateChannel(channel: ApiChannel, updatedChannelData: ApiChannelData, user: String, updatedStages: Option[Seq[Stage]] = None)
-                            (implicit env: Env): Option[ApiChannel] = {
+  override def updateChannel(channel: RawChannel, updatedChannelData: RawChannelConfiguration, user: String, updatedStages: Option[Seq[RawChannelStage]] = None)
+                            (implicit env: Env): Option[RawChannel] = {
 
     // update channel (lastModified), currently adData, fields, stages and siteBuilding allowed only
-    channel.data = channel.data.copy(
-      adData = updatedChannelData.adData,
-      fields = updatedChannelData.fields,
-      siteBuilding = updatedChannelData.siteBuilding
-    )
-    channel.lastModifiedDate = Instant.now.toEpochMilli
-    channel.metadata = Some(ApiChannelMetadataNew(user, Instant.now.toEpochMilli))
+    channel.config = channel.config.map(_.copy(
+      commercial = updatedChannelData.commercial,
+      header = updatedChannelData.header,
+      theme = updatedChannelData.theme
+    ))
+    channel.metadata = channel.metadata.map(_.copy(
+      lastModifiedDate = Instant.now.toEpochMilli,
+      changedBy = user
+      //      , modified = todo (pada) → we would need to check agains the default config to calculate this information? is it important right now?
+      //      , isRessort = todo (pada) → is this important here?
+    ))
     channel.stages = updatedStages
 
     log.info(s"$channel changed by $user")
@@ -59,7 +63,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
   }
 
   override def syncWithLegacy(): Unit = {
-    def mergeAndSave(updates: ApiChannel, env: Env): Option[ChannelUpdate] = {
+    def mergeAndSave(updates: RawChannel, env: Env): Option[ChannelUpdate] = {
       val maybeRoot = root(env)
       val mergeResult = maybeRoot.map(root => ChannelTools.merge(root, updates))
       maybeRoot.foreach(root ⇒ saveChannel(root)(env))
@@ -77,7 +81,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
   }
 
 
-  override protected[services] def root(implicit env: Env): Option[ApiChannel] = super.root.orElse {
+  override protected[services] def root(implicit env: Env): Option[RawChannel] = super.root.orElse {
     log.warn("No data found in s3 bucket, creating new data set from scratch.")
     val root = legacySectionService.getSectionData.toChannel
 
@@ -86,7 +90,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
     Some(root)
   }
 
-  private def saveChannel(ch: ApiChannel)(implicit env: Env) = {
+  private def saveChannel(ch: RawChannel)(implicit env: Env) = {
     import FullChannelWrites._
 
 
@@ -110,7 +114,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
 
 object ChannelTools extends Loggable {
 
-  def diff(current: ApiChannel, update: ApiChannel): ChannelUpdate = {
+  def diff(current: RawChannel, update: RawChannel): ChannelUpdate = {
 
     if (current != update) {
       log.debug(s"Cannot diff($current, $update, because they are not .equal()")
@@ -134,11 +138,11 @@ object ChannelTools extends Loggable {
         lazy val currentRoot = current.root
 
         // if we can find it in our tree, it hasn't been added but only moved
-        val notAddedButMoved = addedByOther.filter { elem ⇒ currentRoot.findByEce(elem.id.ece).isDefined }
+        val notAddedButMoved = addedByOther.filter { elem ⇒ currentRoot.findByEce(elem.id.escenicId).isDefined }
 
         lazy val otherRoot = update.root
         // if we can find the deleted elem, it has been moved
-        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEce(elem.id.ece).isDefined }
+        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEce(elem.id.escenicId).isDefined }
 
         notAddedButMoved ++ notDeletedButMoved
       }
@@ -154,7 +158,7 @@ object ChannelTools extends Loggable {
     }
   }
 
-  def merge(current: ApiChannel, other: ApiChannel): ChannelUpdate = {
+  def merge(current: RawChannel, other: RawChannel): ChannelUpdate = {
 
     val channelUpdate = diff(current, other)
 
@@ -174,9 +178,9 @@ object ChannelTools extends Loggable {
         parent.children = parent.children.filterNot(_ == moved)
       }
       // add to new parent
-      val newParentId = other.findByEce(moved.id.ece)
+      val newParentId = other.findByEce(moved.id.escenicId)
         .flatMap(_.parent)
-        .map(_.id.ece)
+        .map(_.id.escenicId)
 
       newParentId.foreach { parentId ⇒
         current.root.findByEce(parentId).foreach { newParent ⇒
@@ -197,8 +201,8 @@ object ChannelTools extends Loggable {
     * @param current the destination where to write updates to
     * @param legacyRoot the source object where to read updates from
     */
-  def updateData(current: ApiChannel, legacyRoot: ApiChannel): Unit = {
-    legacyRoot.findByEce(current.id.ece).foreach(other ⇒ current.updateMasterData(other))
+  def updateData(current: RawChannel, legacyRoot: RawChannel): Unit = {
+    legacyRoot.findByEce(current.id.escenicId).foreach(other ⇒ current.updateMasterData(other))
     current.children.foreach(child ⇒ updateData(child, legacyRoot))
   }
 

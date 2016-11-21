@@ -2,7 +2,7 @@ package de.welt.contentapi.raw_client.models
 
 import java.time.Instant
 
-import de.welt.contentapi.raw.models.legacy.{ApiChannel, ApiChannelData, ChannelId}
+import de.welt.contentapi.raw.models.{RawChannel, RawChannelConfiguration, RawChannelId, RawMetadata}
 
 case class SdpSectionData(url: String,
                           displayName: String,
@@ -10,28 +10,26 @@ case class SdpSectionData(url: String,
                           children: Seq[SdpSectionData],
                           id: Long) {
 
-  private def defineAdTag(data: ApiChannelData) = data.copy(adData = data.adData.copy(definesAdTag = true))
+  private def defineAdTags(data: RawChannelConfiguration) = data.copy(commercial = data.commercial.copy(definesAdTag = true, definesVideoAdTag = true))
 
-  def toChannel: ApiChannel = {
+  def toChannel: RawChannel = {
     val root = transform
     // initially set hasAdTag to true for level 0 & 1 of the section tree
-    root.data = defineAdTag(root.data)
-    root.children.foreach { child ⇒ child.data = defineAdTag(child.data) }
+    root.config = defineAdTags(root.config)
+    root.children.foreach { child ⇒ child.config = defineAdTags(child.config) }
 
     // set the parent-relation for all elements
     root.updateParentRelations()
     root
   }
 
-  private def transform: ApiChannel = ApiChannel(
-    id = ChannelId(path = url, ece = id),
-    data = ApiChannelData(displayName),
+  private def transform: RawChannel = RawChannel(
+    id = RawChannelId(path = url, escenicId = id, label = displayName),
     children = children.map(_.transform),
-    lastModifiedDate = lastModifiedDate match {
-      case Some("") ⇒ Instant.now.toEpochMilli
-      case Some(s) ⇒ s.toLong
+    metadata = RawMetadata(lastModifiedDate = lastModifiedDate match {
+      case Some(s) if s.nonEmpty ⇒ s.toLong
       case _ ⇒ Instant.now.toEpochMilli
-    }
+    })
   )
 }
 

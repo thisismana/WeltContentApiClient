@@ -1,4 +1,4 @@
-package de.welt.meta
+package de.welt.testing
 
 import play.api.cache.CacheApi
 
@@ -11,9 +11,7 @@ object DisabledCache extends CacheApi {
 
   override def get[T: ClassTag](key: String): Option[T] = ???
 
-  override def getOrElse[A: ClassTag](key: String, expiration: Duration = Duration.Inf)(orElse: ⇒ A): A = {
-    orElse
-  }
+  override def getOrElse[A: ClassTag](key: String, expiration: Duration = Duration.Inf)(orElse: ⇒ A): A = orElse
 
   override def remove(key: String): Unit = {}
 }
