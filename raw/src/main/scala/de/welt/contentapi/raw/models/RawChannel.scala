@@ -177,6 +177,8 @@ case class RawChannel(id: RawChannelId,
     channelUpdate
   }
 
+  override def toString: String = Json.toJson(this)(PartialRawChannelWrites.noChildrenWrites).toString()
+
   /** equals solely on the ```ChannelId``` */
   override def equals(obj: Any): Boolean = obj match {
     case RawChannel(otherId, _, _, _, _, _, _) ⇒ this.hashCode == otherId.hashCode
