@@ -6,6 +6,7 @@ import de.welt.contentapi.raw.models.legacy.ApiChannel
 import play.api.libs.json.{JsValue, Json}
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 /**
   * Tree structure of the escenic channel/section tree. Simple representation:
@@ -60,11 +61,11 @@ case class RawChannel(id: RawChannelId,
     }
   }
 
-  final def findByEce(escenicId: Long): Option[RawChannel] = {
+  final def findByEscenicId(escenicId: Long): Option[RawChannel] = {
     if (id.escenicId == escenicId) {
       Some(this)
     } else {
-      children.flatMap { ch ⇒ ch.findByEce(escenicId) }.headOption
+      children.flatMap { ch ⇒ ch.findByEscenicId(escenicId) }.headOption
     }
   }
 
@@ -79,16 +80,26 @@ case class RawChannel(id: RawChannelId,
     children.foreach(_.updateParentRelations(Some(this)))
   }
 
+  def getBreadcrumb(): Seq[RawChannel] = {
+    parent match {
+      case None ⇒ this.copy(id = root.id.copy(label = "Home")) :: Nil
+      case Some(p) ⇒ p.getBreadcrumb() :+ this
+    }
+  }
+
+  override def toString: String = s"Channel(id='${id.path}', ece=${id.escenicId}'')"
 
   /**
-    * apply updates to the [[RawChannelConfiguration]] and [[RawChannelId]] from another [[RawChannel]]
+    * apply updates to this [[RawChannel]] from another [[RawChannel]] by overriding
+    * the `path` and the `label` usually from ece sync
     *
     * @param other the source for the changes
     */
-  def updateMasterData(other: RawChannel) = {
+  def updateMasterData(other: RawChannel): Unit = {
+    val needsUpdate = (id.path != other.id.path) || (id.label != other.id.label)
     id.path = other.id.path
     id.label = other.id.label
-    metadata = metadata.copy(lastModifiedDate = Instant.now.toEpochMilli)
+    if (needsUpdate) metadata = metadata.copy(lastModifiedDate = Instant.now.toEpochMilli)
   }
 
 
@@ -119,12 +130,12 @@ case class RawChannel(id: RawChannelId,
         lazy val thisRoot = this.root
 
         // if we can find it in our tree, it hasn't been added but only moved
-        val notAddedButMoved = addedByOther.filter { elem ⇒ thisRoot.findByEce(elem.id.escenicId).isDefined }
+        val notAddedButMoved = addedByOther.filter { elem ⇒ thisRoot.findByEscenicId(elem.id.escenicId).isDefined }
         log.debug(s"[$this] not added but moved: $notAddedButMoved")
 
         lazy val otherRoot = other.root
         // if we can find the deleted elem, it has been moved
-        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEce(elem.id.escenicId).isDefined }
+        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEscenicId(elem.id.escenicId).isDefined }
         log.debug(s"[$this] not deleted but moved: $notDeletedButMoved")
 
         notAddedButMoved ++ notDeletedButMoved
@@ -163,12 +174,12 @@ case class RawChannel(id: RawChannelId,
         parent.children = parent.children.diff(Seq(moved))
       }
       // add to new parent
-      val newParentId = other.findByEce(moved.id.escenicId)
+      val newParentId = other.findByEscenicId(moved.id.escenicId)
         .flatMap(_.parent)
         .map(_.id.escenicId)
 
       newParentId.foreach { parentId ⇒
-        root.findByEce(parentId).foreach { newParent ⇒
+        root.findByEscenicId(parentId).foreach { newParent ⇒
           newParent.children = newParent.children :+ moved
         }
       }

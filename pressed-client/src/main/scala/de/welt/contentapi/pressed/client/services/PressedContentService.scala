@@ -9,6 +9,7 @@ import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration, ApiPressedContent}
 import de.welt.contentapi.raw.models.RawChannel
 import de.welt.contentapi.raw_client.services.RawTreeService
+import de.welt.contentapi.utils.Env.Live
 import de.welt.contentapi.utils.Loggable
 
 import scala.collection.immutable.Seq
@@ -32,8 +33,8 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
       .map(response ⇒ convert(response.content, response.related))
 
   override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]] = None): ApiPressedContent = {
-    rawTreeService.get.map { rawTree =>
-
+    // todo (harry): check env-awareness?
+    rawTreeService.root(Live).map { rawTree =>
       val maybeRawChannel: Option[RawChannel] = apiContent
         .sections
         .flatMap(_.home)

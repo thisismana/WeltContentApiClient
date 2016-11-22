@@ -1,10 +1,10 @@
 package de.welt.contentapi.raw_client
 
-import de.welt.contentapi.raw_client.services.{AdminSectionService, AdminSectionServiceImpl, LegacySectionService, LegacySectionServiceImpl}
+import de.welt.contentapi.raw_client.services.{AdminSectionService, AdminSectionServiceImpl, SdpSectionDataService, SdpSectionDataServiceImpl}
 import play.api.inject.Module
 import play.api.{Configuration, Environment}
 
-class PlayModule extends Module {
+class RawClientModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration) = {
     //    val client = new de.welt.contentapi.core_client.PlayModule()
