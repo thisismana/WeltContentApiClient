@@ -85,7 +85,7 @@ object PartialRawChannelWrites {
 
   import RawWrites._
 
-  implicit lazy val noChildrenWrites: Writes[RawChannel]  = new Writes[RawChannel] {
+  implicit lazy val noChildrenWrites: Writes[RawChannel] = new Writes[RawChannel] {
     override def writes(o: RawChannel): JsValue = {
 
       JsObject(Map(
@@ -110,5 +110,30 @@ object PartialRawChannelWrites {
 
   implicit lazy val writeChannelAsNull: Writes[RawChannel] = new Writes[RawChannel] {
     override def writes(o: RawChannel): JsValue = JsNull
+  }
+}
+
+object PartialRawChannelReads {
+
+  import RawReads._
+
+  implicit lazy val noChildrenReads: Reads[RawChannel] = new Reads[RawChannel] {
+    override def reads(json: JsValue): JsResult[RawChannel] = json match {
+      case JsObject(underlying) ⇒ (for {
+        id ← underlying.get("id").map(_.as[RawChannelId])
+        config ← underlying.get("config").map(_.as[RawChannelConfiguration])
+        metadata ← underlying.get("metadata").map(_.as[RawMetadata])
+      } yield JsSuccess(
+        RawChannel(
+          id = id,
+          config = config,
+          metadata = metadata,
+          stages = underlying.get("stages").flatMap(_.asOpt[Seq[RawChannelStage]]),
+          children = Seq.empty
+        )))
+        .getOrElse(JsError("Could not validate json [something is missing]. " + Json.prettyPrint(json)))
+
+      case err@_ ⇒ JsError(s"expected js-object, but was $err")
+    }
   }
 }

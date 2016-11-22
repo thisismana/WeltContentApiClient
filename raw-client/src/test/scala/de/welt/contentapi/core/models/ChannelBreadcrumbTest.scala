@@ -28,28 +28,28 @@ class ChannelBreadcrumbTest extends PlaySpec {
 
     "generate correct breadcrumb for depth 1" in new Fixture {
 
-      val breadcrumb = root.getBreadcrumb()
+      val breadcrumb = root.getBreadcrumb
 
       breadcrumb mustBe Seq(root)
     }
 
     "generate correct breadcrumb for depth 2" in new Fixture {
 
-      val breadcrumb = node1.getBreadcrumb()
+      val breadcrumb = node1.getBreadcrumb
 
       breadcrumb mustBe Seq(root, node1)
     }
 
     "generate correct breadcrumb for depth 3" in new Fixture {
 
-      val breadcrumb = node2.getBreadcrumb()
+      val breadcrumb = node2.getBreadcrumb
 
       breadcrumb mustBe Seq(root, node1, node2)
     }
 
     "rewrites the label of the root to Home" in new Fixture {
 
-      val breadcrumb = node2.getBreadcrumb()
+      val breadcrumb = node2.getBreadcrumb
 
       breadcrumb.head.id.label must be("Home")
     }

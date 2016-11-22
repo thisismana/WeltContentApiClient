@@ -1,4 +1,4 @@
-package de.welt.contentapi.raw_client.services
+package de.welt.contentapi.raw.client.services
 
 import javax.inject.Inject
 

@@ -8,7 +8,7 @@ import de.welt.contentapi.core.models.{ApiContent, ApiResponse, ApiSectionData}
 import de.welt.contentapi.pressed.client.TestTraits.{TestScopeSimple, TestScopeWithParents}
 import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.ApiPressedContent
-import de.welt.contentapi.raw_client.services.RawTreeService
+import de.welt.contentapi.raw.client.services.RawTreeService
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.words.MustVerb
 import org.scalatest.{FlatSpec, Matchers}

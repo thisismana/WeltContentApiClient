@@ -1,7 +1,7 @@
 package de.welt.contentapi.core.models
 
 import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelCommercial}
-import de.welt.contentapi.raw_client.services.ChannelTools
+import de.welt.contentapi.raw.client.services.ChannelTools
 import de.welt.testing.testHelper
 import org.scalatestplus.play.PlaySpec
 

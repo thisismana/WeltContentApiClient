@@ -1,4 +1,4 @@
-package de.welt.contentapi.raw_client.services
+package de.welt.contentapi.raw.client.services
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
