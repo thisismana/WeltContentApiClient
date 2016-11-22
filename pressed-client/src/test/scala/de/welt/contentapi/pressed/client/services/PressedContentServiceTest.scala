@@ -13,6 +13,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.words.MustVerb
 import org.scalatest.{FlatSpec, Matchers}
 import org.mockito.Mockito._
+import org.mockito.Matchers.any
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -57,7 +58,7 @@ class PressedContentServiceTest extends FlatSpec
     when(contentService
       .find("1234567890", showRelated = true)(None, executionContext))
       .thenReturn(eventualApiResponse)
-    when(rawTreeService.get).thenReturn(Some(home))
+    when(rawTreeService.root(any())).thenReturn(Some(home))
 
     // When
     val eventualPressedContent: Future[ApiPressedContent] = pressedContentService.find("1234567890", showRelated = true)(None, executionContext)
