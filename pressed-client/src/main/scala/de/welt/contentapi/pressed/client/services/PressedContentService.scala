@@ -45,7 +45,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
         .map(converter.getApiChannelFromRawChannel)
 
       val apiConfiguration: ApiConfiguration = converter
-        .apiConfigurationFromRawChannelConfiguration(rawTree)
+        .apiConfigurationFromRawChannel(rawTree)
 
       ApiPressedContent(
         content = apiContent,
