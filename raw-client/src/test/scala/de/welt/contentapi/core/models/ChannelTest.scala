@@ -1,264 +1,288 @@
-//package de.welt.contentapi.core.models
-//
-//import de.welt.contentapi.legacy.services.ChannelTools
-//import de.welt.contentapi.core.models.configuration2.{ApiChannel, ApiChannelAdData, ApiChannelData, ChannelUpdate}
-//import de.welt.meta.ChannelHelper
-//import org.scalatestplus.play.PlaySpec
-//
-//class ChannelTest extends PlaySpec {
-//
-//  trait Fixture {
-//
-//    /** CHILD 1 */
-//    val child1Data = ApiChannelData(label = "child1", adData = ApiChannelAdData(true))
-//    val child1 = ChannelHelper.emptyWithIdAndData(1, child1Data)
-//
-//    /** CHILD 2 */
-//    val child2Data = ApiChannelData(label = "child2", adData = ApiChannelAdData(true))
-//    val child2 = ChannelHelper.emptyWithIdAndData(2, child2Data)
-//
-//    /** CHILD 2 */
-//    val child3Data = ApiChannelData(label = "child3", adData = ApiChannelAdData(true))
-//    val child3 = ChannelHelper.emptyWithIdAndData(3, child3Data)
-//
-//    object twoChildren {
-//
-//      /**
-//        *    (0)
-//        *   /  \
-//        * (1) (2)
-//        *
-//        */
-//      val root = ChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, child2))
-//      root.updateParentRelations()
-//
-//      // data node for root
-//      val rootData = ApiChannelData(label = "label", adData = ApiChannelAdData(true))
-//      root.data = rootData
-//    }
-//
-//    object twoChildrenMasterDataDiffers {
-//      /**
-//        *    (0)
-//        *   /  \
-//        * (1) (2)
-//        *
-//        */
-//      /** CHILD 1 */
-//      val modifiedChild1Data = ApiChannelData(label = "child1", adData = ApiChannelAdData(true))
-//      val modifiedChild1 = ChannelHelper.emptyWithIdAndData(1, child1Data)
-//
-//      /** CHILD 2 */
-//      val modifiedChild2Data = ApiChannelData(label = "child2", adData = ApiChannelAdData(false))
-//      val modifiedChild2 = ChannelHelper.emptyWithIdAndData(2, child2Data)
-//      val root = ChannelHelper.emptyWithIdAndChildren(0, children = Seq(modifiedChild1, modifiedChild2))
-//      root.updateParentRelations()
-//
-//      // data node for root
-//      val rootData = ApiChannelData(label = "modified-label", adData = ApiChannelAdData(false))
-//      root.data = rootData
-//    }
-//
-//    object threeChildren {
-//
-//      /**
-//        *       (0)
-//        *    /   |   \
-//        * (1)   (2)   (3)*
-//        *
-//        */
-//      val root = ChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, child2, child3))
-//      root.updateParentRelations()
-//
-//      // data node for root
-//      val rootData = ApiChannelData(label = "label", adData = ApiChannelAdData(true))
-//      root.data = rootData
-//    }
-//
-//    object movedChild {
-//
-//      val dataForCopyOf3 = child3.data.copy(label = "copyOf3-label")
-//      val copyOf3 = child3.copy(data = dataForCopyOf3)
-//      val copyOf2 = child2.copy(children = Seq(copyOf3))
-//
-//      /**
-//        *    (0)
-//        *   /  \
-//        * (1)  (2)
-//        *       |
-//        *      (3)*
-//        */
-//      val root = ChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, copyOf2))
-//      root.updateParentRelations()
-//
-//      // data node for root
-//      val rootData = ApiChannelData(label = "label", adData = ApiChannelAdData(true))
-//      root.data = rootData
-//    }
-//
-//  }
-//
-//  "Channel Model" must {
-//    "generate correct breadcrumb" in new Fixture {
-//      private val ece = movedChild.root.findByEce(3)
-//      val breadcrumb = ece.get.getBreadcrumb()
-//
-//      breadcrumb mustBe Seq(child2, child3)
-//    }
-//  }
-//
-//  "ChannelTools" must {
-//
-//    "support additions" must {
-//
-//      "detect addition of new channels" in new Fixture {
-//        val update = ChannelTools.diff(twoChildren.root, threeChildren.root)
-//        update must be(ChannelUpdate(
-//          added = Seq(child3),
-//          deleted = Seq.empty,
-//          moved = Seq.empty))
-//      }
-//
-//      "apply additions to channel tree" in new Fixture {
-//        val root = twoChildren.root
-//        ChannelTools.merge(root, threeChildren.root)
-//
-//        root.children must have size 3
-//      }
-//
-//      "maintain the data for all the nodes" in new Fixture {
-//
-//        val root = twoChildren.root
-//        ChannelTools.merge(root, threeChildren.root)
-//
-//        root.data must be(twoChildren.rootData)
-//        root.findByEce(1).map(_.data) must ===(Some(child1Data))
-//        root.findByEce(2).map(_.data) must ===(Some(child2Data))
-//        root.findByEce(3).map(_.data) must ===(Some(child3Data))
-//      }
-//    }
-//
-//    "support deletions" should {
-//      "detect deletion of channels" in new Fixture {
-//        private val update = ChannelTools.diff(threeChildren.root, twoChildren.root)
-//
-//        update must be(ChannelUpdate(
-//          added = Seq.empty,
-//          deleted = Seq(child3),
-//          moved = Seq.empty))
-//      }
-//
-//      "apply deletions to the tree" in new Fixture {
-//        val root = threeChildren.root
-//        ChannelTools.merge(root, twoChildren.root)
-//
-//        root.children must have size 2
-//        root.findByEce(3) must === (None)
-//      }
-//
-//      "maintain the data for all the nodes" in new Fixture {
-//        val root = threeChildren.root
-//        ChannelTools.merge(root, twoChildren.root)
-//
-//        root.data must be(threeChildren.rootData)
-//        root.findByEce(1).map(_.data) must ===(Some(child1Data))
-//        root.findByEce(2).map(_.data) must ===(Some(child2Data))
-//      }
-//    }
-//    "support moving of channels" should {
-//      "detect moved channels" in new Fixture {
-//        private val update = ChannelTools.diff(threeChildren.root, movedChild.root)
-//
-//        update must be(ChannelUpdate(
-//          added = Seq.empty,
-//          deleted = Seq.empty,
-//          moved = Seq(movedChild.copyOf3)
-//        ))
-//      }
-//
-//      "apply movings to the tree" in new Fixture {
-//        val root = threeChildren.root
-//        ChannelTools.merge(root, movedChild.root)
-//
-//        root.children must have size 2
-//        root.children must not contain child3
-//        root.findByEce(2).map(_.children).getOrElse(Nil) must contain (movedChild.copyOf3)
-//        root.findByEce(3) must === (Some(child3))
-//      }
-//
-//      "maintain the data for all the nodes" in new Fixture {
-//
-//        val root = threeChildren.root
-//        ChannelTools.merge(root, movedChild.root)
-//
-//        root.data must be(threeChildren.rootData)
-//        root.findByEce(1).map(_.data) must ===(Some(child1Data))
-//        root.findByEce(2).map(_.data) must ===(Some(child2Data))
-//        // the data from the other tree (movedChild.root) must be copied!
-//        root.findByEce(3).map(_.data) must ===(Some(child3Data.copy(label = movedChild.dataForCopyOf3.label)))
-//      }
-//    }
-//
-//    "produce no changes" must {
-//      "for twoChildren example" in new Fixture {
-//
-//        private val root = twoChildren.root
-//        ChannelTools.merge(root, root)
-//        root must be (new Fixture {}.twoChildren.root )
-//      }
-//      "for threeChildren example" in new Fixture {
-//
-//        private val root = threeChildren.root
-//        ChannelTools.merge(root, root)
-//        root must be (new Fixture {}.threeChildren.root )
-//      }
-//      "for movedChild example" in new Fixture {
-//
-//        private val root = movedChild.root
-//        ChannelTools.merge(root, root)
-//        root must be (new Fixture {}.movedChild.root )
-//      }
-//    }
-//
-//    "support updates within the channels itself" must {
-//      "update the label" in new Fixture {
-//
-//        private val root = twoChildren.root
-//        private val other: ApiChannel = twoChildrenMasterDataDiffers.root
-//        ChannelTools.merge(root, other)
-//
-//        root.id must be (other.id)
-//        root.data.label must be (other.data.label)
-//
-//        root.findByEce(1).map(_.data.label) must ===(Some(twoChildrenMasterDataDiffers.modifiedChild1.data.label))
-//        root.findByEce(2).map(_.data.label) must ===(Some(twoChildrenMasterDataDiffers.modifiedChild2.data.label))
-//      }
-//
-//      "update the path" in new Fixture {
-//
-//        private val root = twoChildren.root
-//        private val other: ApiChannel = twoChildrenMasterDataDiffers.root
-//        ChannelTools.merge(root, other)
-//
-//        root.id must be (other.id)
-//        root.id.path must be (other.id.path)
-//
-//        root.findByEce(1).map(_.id.path) must ===(Some(twoChildrenMasterDataDiffers.modifiedChild1.id.path))
-//        root.findByEce(2).map(_.id.path) must ===(Some(twoChildrenMasterDataDiffers.modifiedChild2.id.path))
-//      }
-//
-//      "not update the ad data" in new Fixture {
-//
-//        private val root = twoChildren.root
-//        private val other: ApiChannel = twoChildrenMasterDataDiffers.root
-//        ChannelTools.merge(root, other)
-//
-//        root.id must be (other.id)
-//        root.data.adData.definesAdTag must be (true)
-//
-//        root.findByEce(1).map(_.data.adData.definesAdTag) must ===(Some(true))
-//        root.findByEce(2).map(_.data.adData.definesAdTag) must ===(Some(true))
-//      }
-//    }
-//  }
-//}
+package de.welt.contentapi.core.models
+
+import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelCommercial, RawChannelConfiguration}
+import de.welt.contentapi.raw_client.services.ChannelTools
+import de.welt.testing.{RawChannelConfigurationHelper, RawChannelHelper}
+import org.scalatestplus.play.PlaySpec
+
+//noinspection TypeAnnotation
+class ChannelTest extends PlaySpec {
+
+  import testImplicits._
+
+  trait Fixture {
+
+    /** CHILD 1 */
+    val child1Config = RawChannelConfigurationHelper.withTitleAndAds("child1", adsEnabled = true)
+    val child1 = RawChannelHelper.emptyWithIdAndConfig(1, child1Config)
+
+    /** CHILD 2 */
+    val child2Config = RawChannelConfigurationHelper.withTitleAndAds("child2", adsEnabled = true)
+    val child2 = RawChannelHelper.emptyWithIdAndConfig(2, child2Config)
+
+    /** CHILD 2 */
+    val child3Config = RawChannelConfigurationHelper.withTitleAndAds("child3", adsEnabled = true)
+    val child3 = RawChannelHelper.emptyWithIdAndConfig(3, child3Config)
+
+    object twoChildren {
+
+      /**
+        * (0)
+        * /  \
+        * (1) (2)
+        *
+        */
+      val root = RawChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, child2))
+      root.updateParentRelations()
+
+      // data node for root
+      val rootData = RawChannelConfigurationHelper.withTitleAndAds("root", adsEnabled = true)
+      root.config = rootData
+    }
+
+    object twoChildrenMasterDataDiffers {
+      /**
+        * (0)
+        * /  \
+        * (1) (2)
+        *
+        */
+      /** CHILD 1 */
+      val child1Config = RawChannelConfigurationHelper.withTitleAndAds("child1", adsEnabled = true)
+      val modifiedChild1 = RawChannelHelper.emptyWithIdAndConfig(1, child1Config)
+
+      /** CHILD 2 */
+      val child2Config = RawChannelConfigurationHelper.withTitleAndAds("child2", adsEnabled = false)
+      val modifiedChild2 = RawChannelHelper.emptyWithIdAndConfig(2, child2Config)
+
+      val root = RawChannelHelper.emptyWithIdAndChildren(0, children = Seq(modifiedChild1, modifiedChild2))
+      root.updateParentRelations()
+
+      // data node for root
+      val rootConfig = RawChannelConfigurationHelper.withTitleAndAds("root", adsEnabled = false)
+      root.config = rootConfig
+    }
+
+    object threeChildren {
+
+      /**
+        * .  (0)
+        * /   |   \
+        * (1)   (2)   (3)*
+        *
+        */
+      val root = RawChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, child2, child3))
+      root.updateParentRelations()
+
+      // data node for root
+      val rootData = RawChannelConfigurationHelper.withTitleAndAds("root", adsEnabled = true)
+      root.config = rootData
+    }
+
+    object movedChild {
+
+      val copyOf3 = child3.copyWithLabelAndPath("copyOf3-label", "/the-new-path")
+      val copyOf2 = child2.copy(children = Seq(copyOf3))
+
+      /**
+        * (0)
+        * /  \
+        * (1)  (2)
+        * |
+        * (3)*
+        */
+      val root = RawChannelHelper.emptyWithIdAndChildren(0, children = Seq(child1, copyOf2))
+      root.updateParentRelations()
+
+      // data node for root
+      val rootConfig = RawChannelConfigurationHelper.withTitleAndAds("root", adsEnabled = true)
+      root.config = rootConfig
+    }
+
+  }
+
+  "Channel Model" must {
+    "generate correct breadcrumb" in new Fixture {
+
+      val node3 = movedChild.root.findByEscenicId(3).get
+      val breadcrumb = node3.getBreadcrumb()
+
+      breadcrumb mustBe Seq(movedChild.root, child2, child3)
+    }
+
+    "rewrites the label of the root to Home" in new Fixture {
+
+      val node3 = movedChild.root.findByEscenicId(3).get
+      val breadcrumb = node3.getBreadcrumb()
+
+      breadcrumb.head.id.label must be("Home")
+    }
+  }
+
+  "ChannelTools" must {
+
+    "support additions" must {
+
+      "detect addition of new channels" in new Fixture {
+        val update = ChannelTools.diff(twoChildren.root, threeChildren.root)
+        update must be(ChannelUpdate(
+          added = Seq(child3),
+          deleted = Seq.empty,
+          moved = Seq.empty
+        ))
+      }
+
+      "apply additions to channel tree" in new Fixture {
+        val root = twoChildren.root
+        ChannelTools.merge(root, threeChildren.root)
+
+        root.children must have size 3
+      }
+
+      "maintain the data for all the nodes" in new Fixture {
+
+        val root = twoChildren.root
+        ChannelTools.merge(root, threeChildren.root)
+
+        root.config must be(twoChildren.rootData)
+        root.findByEscenicId(1).map(_.config) must ===(Some(child1Config))
+        root.findByEscenicId(2).map(_.config) must ===(Some(child2Config))
+        root.findByEscenicId(3).map(_.config) must ===(Some(child3Config))
+      }
+    }
+
+    "support deletions" should {
+      "detect deletion of channels" in new Fixture {
+        private val update = ChannelTools.diff(threeChildren.root, twoChildren.root)
+
+        update must be(ChannelUpdate(
+          added = Seq.empty,
+          deleted = Seq(child3),
+          moved = Seq.empty
+        ))
+      }
+
+      "apply deletions to the tree" in new Fixture {
+        val root = threeChildren.root
+        ChannelTools.merge(root, twoChildren.root)
+
+        root.children must have size 2
+        root.findByEscenicId(3) must ===(None)
+      }
+
+      "maintain the data for all the nodes" in new Fixture {
+        val root = threeChildren.root
+        ChannelTools.merge(root, twoChildren.root)
+
+        root.config must be(threeChildren.rootData)
+        root.findByEscenicId(1).map(_.config) must ===(Some(child1Config))
+        root.findByEscenicId(2).map(_.config) must ===(Some(child2Config))
+      }
+    }
+    "support moving of channels" should {
+      "detect moved channels" in new Fixture {
+        private val update = ChannelTools.diff(threeChildren.root, movedChild.root)
+
+        update must be(ChannelUpdate(
+          added = Seq.empty,
+          deleted = Seq.empty,
+          moved = Seq(movedChild.copyOf3)
+        ))
+      }
+
+      "apply moved items to the tree" in new Fixture {
+        val root = threeChildren.root
+        ChannelTools.merge(root, movedChild.root)
+
+        root.children must have size 2
+        root.children must not contain child3
+        root.findByEscenicId(2).map(_.children).getOrElse(Nil) must contain(movedChild.copyOf3)
+        root.findByEscenicId(3) must ===(Some(child3))
+      }
+
+      "maintain the data for all the nodes" in new Fixture {
+
+        val root = threeChildren.root
+        ChannelTools.merge(root, movedChild.root)
+
+        root.config must be(threeChildren.rootData)
+        root.findByEscenicId(1).map(_.config) must ===(Some(child1Config))
+        root.findByEscenicId(2).map(_.config) must ===(Some(child2Config))
+        // the master data [path, label] from the other tree (movedChild.root) must be copied!
+        root.findByEscenicId(3).map(_.id.label) must ===(Some(movedChild.copyOf3.id.label))
+        root.findByEscenicId(3).map(_.id.path) must ===(Some(movedChild.copyOf3.id.path))
+      }
+    }
+
+    "produce no changes" must {
+      "for twoChildren example" in new Fixture {
+
+        private val root = twoChildren.root
+        ChannelTools.merge(root, root)
+        root must be(new Fixture {}.twoChildren.root)
+      }
+      "for threeChildren example" in new Fixture {
+
+        private val root = threeChildren.root
+        ChannelTools.merge(root, root)
+        root must be(new Fixture {}.threeChildren.root)
+      }
+      "for movedChild example" in new Fixture {
+
+        private val root = movedChild.root
+        ChannelTools.merge(root, root)
+        root must be(new Fixture {}.movedChild.root)
+      }
+    }
+
+    "support updates within the channels itself" must {
+      "update the label" in new Fixture {
+
+        private val root = twoChildren.root
+        private val other = twoChildrenMasterDataDiffers.root
+        ChannelTools.merge(root, other)
+
+        root.id must be(other.id)
+        root.id.label must be(other.id.label)
+
+        root.findByEscenicId(1).map(_.id.label) must be(Some(twoChildrenMasterDataDiffers.modifiedChild1.id.label))
+        root.findByEscenicId(2).map(_.id.label) must be(Some(twoChildrenMasterDataDiffers.modifiedChild2.id.label))
+      }
+
+      "update the path" in new Fixture {
+
+        private val root = twoChildren.root
+        private val other: RawChannel = twoChildrenMasterDataDiffers.root
+        ChannelTools.merge(root, other)
+
+        root.id must be(other.id)
+        root.id.path must be(other.id.path)
+
+        root.findByEscenicId(1).map(_.id.path) must be(Some(twoChildrenMasterDataDiffers.modifiedChild1.id.path))
+        root.findByEscenicId(2).map(_.id.path) must be(Some(twoChildrenMasterDataDiffers.modifiedChild2.id.path))
+      }
+
+      "not update the ad data" in new Fixture {
+
+        private val root = twoChildren.root
+        private val other = twoChildrenMasterDataDiffers.root
+        ChannelTools.merge(root, other)
+
+        root.id must be(other.id)
+        root.config.commercial must be(RawChannelCommercial(definesAdTag = true, definesVideoAdTag = true))
+
+        root.findByEscenicId(1).map(_.config.commercial) must ===(Some(RawChannelCommercial(definesAdTag = true, definesVideoAdTag = true)))
+        root.findByEscenicId(2).map(_.config.commercial) must ===(Some(RawChannelCommercial(definesAdTag = true, definesVideoAdTag = true)))
+      }
+    }
+  }
+}
+
+object testImplicits {
+
+  implicit class RawChannelUtils(r: RawChannel) {
+
+    def copyWithLabelAndPath(newLabel: String, newPath: String) = r.copy(id = r.id.copy(label = newLabel, path = newPath))
+  }
+
+}

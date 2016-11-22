@@ -9,11 +9,11 @@ import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelConfiguration, RawChannelStage}
 import de.welt.contentapi.utils.Env.{Env, Live, Preview}
 import de.welt.contentapi.utils.Loggable
-import play.api.{Environment, Mode}
+import play.api.{Configuration, Environment, Mode}
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsValue, Json}
 
-trait AdminSectionService extends LegacySectionService {
+trait AdminSectionService extends RawTreeService {
 
   def updateChannel(channel: RawChannel,
                     updatedChannelData: RawChannelConfiguration,
@@ -25,13 +25,12 @@ trait AdminSectionService extends LegacySectionService {
 }
 
 @Singleton
-class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
+class AdminSectionServiceImpl @Inject()(config: Configuration,
                                         s3: S3Client,
                                         environment: Environment,
-                                        legacySectionService: LegacySectionService,
+                                        legacySectionService: SdpSectionDataService,
                                         cache: CacheApi)
-  extends LegacySectionServiceImpl(s3, cache, config) with AdminSectionService with Loggable {
-
+  extends RawTreeServiceImpl(s3, config, environment, cache) with AdminSectionService with Loggable {
 
   override def updateChannel(channel: RawChannel, updatedChannelData: RawChannelConfiguration, user: String, updatedStages: Option[Seq[RawChannelStage]] = None)
                             (implicit env: Env): Option[RawChannel] = {
@@ -79,19 +78,13 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
     log.info(s"[Sync] took ${stopwatch.stop.toString}")
   }
 
-  // todo (mana): extend correct service to fix this
-  /*override*/ protected[services] def root(implicit env: Env): Option[RawChannel] = ??? /*super.root.orElse {
+  override def root(implicit env: Env): Option[RawChannel] = super.root.orElse {
     log.warn("No data found in s3 bucket, creating new data set from scratch.")
     val root = legacySectionService.getSectionData.toChannel
 
     saveChannel(root)(Preview)
     saveChannel(root)(Live)
     Some(root)
-  }*/
-
-  protected def objectKeyForEnv(env: Env) = environment.mode match {
-    case Mode.Prod ⇒ s"${config.aws.s3.janus.file}/prod/${env.toString}/config.json"
-    case _ ⇒ s"${config.aws.s3.janus.file}/dev/${env.toString}/config.json"
   }
 
   private def saveChannel(ch: RawChannel)(implicit env: Env) = {
@@ -102,7 +95,7 @@ class AdminSectionServiceImpl @Inject()(config: ContentClientConfig,
 
     log.info(s"saving channel tree to s3 -> ${objectKeyForEnv(env)}")
 
-    s3.putPrivate(config.aws.s3.janus.bucket, objectKeyForEnv(env), serializedChannelData, "application/json")
+    s3.putPrivate(bucket, objectKeyForEnv(env), serializedChannelData, "application/json")
 
     log.debug("Invalidating cache.")
     cache.remove(env.toString)
@@ -139,11 +132,11 @@ object ChannelTools extends Loggable {
         lazy val currentRoot = current.root
 
         // if we can find it in our tree, it hasn't been added but only moved
-        val notAddedButMoved = addedByOther.filter { elem ⇒ currentRoot.findByEce(elem.id.escenicId).isDefined }
+        val notAddedButMoved = addedByOther.filter { elem ⇒ currentRoot.findByEscenicId(elem.id.escenicId).isDefined }
 
         lazy val otherRoot = update.root
         // if we can find the deleted elem, it has been moved
-        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEce(elem.id.escenicId).isDefined }
+        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEscenicId(elem.id.escenicId).isDefined }
 
         notAddedButMoved ++ notDeletedButMoved
       }
@@ -179,12 +172,12 @@ object ChannelTools extends Loggable {
         parent.children = parent.children.filterNot(_ == moved)
       }
       // add to new parent
-      val newParentId = other.findByEce(moved.id.escenicId)
+      val newParentId = other.findByEscenicId(moved.id.escenicId)
         .flatMap(_.parent)
         .map(_.id.escenicId)
 
       newParentId.foreach { parentId ⇒
-        current.root.findByEce(parentId).foreach { newParent ⇒
+        current.root.findByEscenicId(parentId).foreach { newParent ⇒
           newParent.children = newParent.children :+ moved
         }
       }
@@ -203,7 +196,7 @@ object ChannelTools extends Loggable {
     * @param legacyRoot the source object where to read updates from
     */
   def updateData(current: RawChannel, legacyRoot: RawChannel): Unit = {
-    legacyRoot.findByEce(current.id.escenicId).foreach(other ⇒ current.updateMasterData(other))
+    legacyRoot.findByEscenicId(current.id.escenicId).foreach(other ⇒ current.updateMasterData(other))
     current.children.foreach(child ⇒ updateData(child, legacyRoot))
   }
 

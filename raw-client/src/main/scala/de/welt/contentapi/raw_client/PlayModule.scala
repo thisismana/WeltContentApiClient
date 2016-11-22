@@ -1,6 +1,6 @@
 package de.welt.contentapi.raw_client
 
-import de.welt.contentapi.raw_client.services.{AdminSectionService, AdminSectionServiceImpl, LegacySectionService, LegacySectionServiceImpl}
+import de.welt.contentapi.raw_client.services.{AdminSectionService, AdminSectionServiceImpl, SdpSectionDataService, SdpSectionDataServiceImpl}
 import play.api.inject.Module
 import play.api.{Configuration, Environment}
 

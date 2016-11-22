@@ -1,7 +1,7 @@
 package de.welt.contentapi.raw_client.services
 
-import de.welt.contentapi.core_client.services.configuration.ContentClientConfigImpl
-import de.welt.contentapi.core_client.services.s3.S3Client
+import de.welt.contentapi.core.client.services.configuration.ContentClientConfigImpl
+import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw_client.models.SdpSectionData
 import de.welt.contentapi.utils.Env.{Live, Preview}
 import de.welt.testing.DisabledCache
@@ -21,15 +21,15 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
 
     val bucket = "le-bucket"
     val file = "le-file"
-    val config = new ContentClientConfigImpl(Configuration(
-      "funkotron.aws.s3.janus.bucket" → bucket,
-      "funkotron.aws.s3.janus.file" → file
-    ))
+    val config = Configuration(
+      "welt.aws.s3.rawTree.bucket" → bucket,
+      "welt.aws.s3.rawTree.file" → file
+    )
 
     val emptyS3ResponseMock = mock[S3Client]
     when(emptyS3ResponseMock.get(Matchers.eq(bucket), Matchers.anyString())) thenReturn None
 
-    val legacyServiceMock = mock[LegacySectionService]
+    val legacyServiceMock = mock[SdpSectionDataService]
     when(legacyServiceMock.getSectionData) thenReturn root
 
     val service = new AdminSectionServiceImpl(config, emptyS3ResponseMock, Environment.simple(), legacyServiceMock, DisabledCache)

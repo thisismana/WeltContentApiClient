@@ -10,15 +10,15 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import scala.concurrent.duration._
 
-trait LegacySectionService {
+trait SdpSectionDataService {
 
   def getSectionData: SdpSectionData
 
 }
 
 @Singleton
-class LegacySectionServiceImpl @Inject()(s3: S3Client, cache: CacheApi, funkConfig: ContentClientConfig)
-  extends LegacySectionService with Loggable {
+class SdpSectionDataServiceImpl @Inject()(s3: S3Client, cache: CacheApi, funkConfig: ContentClientConfig)
+  extends SdpSectionDataService with Loggable {
 
   import SdpSectionDataReads._
 
