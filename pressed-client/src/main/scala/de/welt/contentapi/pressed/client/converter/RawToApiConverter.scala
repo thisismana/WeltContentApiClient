@@ -55,31 +55,33 @@ class RawToApiConverter {
     theme = apiThemeFromRawChannel(rawChannel)
   )
 
-  private[converter] def calculateAdTag(rawChannel: RawChannel): String = {
+  private[converter] def calculatePathForAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
     while (!currentChannel.config.commercial.definesAdTag && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
-    val adTag: String = currentChannel.id.path.replaceAll("/", "")
-    if (adTag.isEmpty) {
-      "sonstiges"
+    val currentPath: String = currentChannel.id.path
+    val lastOption: Option[String] = currentPath.substring(0,currentPath.length).split("/").lastOption
+    if (lastOption.isDefined) {
+      lastOption.get
     }
     else {
-      adTag
+      "sonstiges"
     }
   }
 
-  private[converter] def calculateVideoAdTag(rawChannel: RawChannel): String = {
+  private[converter] def calculatePathForVideoAdTag(rawChannel: RawChannel): String = {
     var currentChannel = rawChannel
     while (!currentChannel.config.commercial.definesVideoAdTag && currentChannel.parent.isDefined) {
       currentChannel = currentChannel.parent.get
     }
-    val adTag: String = currentChannel.id.path.replaceAll("/", "")
-    if (adTag.isEmpty) {
-      "sonstiges"
+    val currentPath: String = currentChannel.id.path
+    val lastOption: Option[String] = currentPath.substring(0,currentPath.length).split("/").lastOption
+    if (lastOption.isDefined) {
+      lastOption.get
     }
     else {
-      adTag
+      "sonstiges"
     }
   }
 
@@ -104,8 +106,8 @@ class RawToApiConverter {
     */
   private[converter] def apiCommercialConfigurationFromRawChannel(rawChannel: RawChannel): ApiCommercialConfiguration = {
     ApiCommercialConfiguration(
-      adTag = Some(calculateAdTag(rawChannel)),
-      videoAdTag = Some(calculateVideoAdTag(rawChannel))
+      pathForAdTag = Some(calculatePathForAdTag(rawChannel)),
+      pathForVideoAdTag = Some(calculatePathForVideoAdTag(rawChannel))
     )
   }
 
@@ -126,7 +128,7 @@ class RawToApiConverter {
   }
 
   private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]): Seq[ApiReference] = {
-    references.map(ref => ApiReference(ref.label, ref.path))
+    references.map(ref ⇒ ApiReference(ref.label, ref.path))
   }
 
   private[converter] def apiThemeFromRawChannel(rawChannel: RawChannel): Option[ApiThemeConfiguration] =
