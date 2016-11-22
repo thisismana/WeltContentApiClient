@@ -78,10 +78,10 @@ case class RawChannel(id: RawChannelId,
     children.foreach(_.updateParentRelations(Some(this)))
   }
 
-  def getBreadcrumb(): Seq[RawChannel] = {
+  def getBreadcrumb: Seq[RawChannel] = {
     parent match {
       case None ⇒ this.copy(id = root.id.copy(label = "Home")) :: Nil
-      case Some(p) ⇒ p.getBreadcrumb() :+ this
+      case Some(p) ⇒ p.getBreadcrumb :+ this
     }
   }
 
