@@ -9,7 +9,7 @@ import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.{ApiChannel, ApiConfiguration, ApiPressedContent}
 import de.welt.contentapi.raw.models.RawChannel
 import de.welt.contentapi.raw.client.services.RawTreeService
-import de.welt.contentapi.utils.Env.Live
+import de.welt.contentapi.utils.Env.{Env, Live}
 import de.welt.contentapi.utils.Loggable
 
 import scala.collection.immutable.Seq
