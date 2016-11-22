@@ -2,11 +2,9 @@ package de.welt.contentapi.raw.models
 
 import java.time.Instant
 
-import de.welt.contentapi.raw.models.legacy.ApiChannel
 import play.api.libs.json.{JsValue, Json}
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 /**
   * Tree structure of the escenic channel/section tree. Simple representation:
@@ -100,92 +98,6 @@ case class RawChannel(id: RawChannelId,
     id.path = other.id.path
     id.label = other.id.label
     if (needsUpdate) metadata = metadata.copy(lastModifiedDate = Instant.now.toEpochMilli)
-  }
-
-
-  def diff(other: RawChannel): ChannelUpdate = {
-
-    if (this != other) {
-      log.debug(s"Cannot diff($this, $other, because they are not .equal()")
-      ChannelUpdate(Seq.empty, Seq.empty, Seq.empty)
-    } else {
-
-      val bothPresentIds = this.children.map(_.id).intersect(other.children.map(_.id))
-      val updatesFromChildren = bothPresentIds.flatMap { id ⇒
-        val tupleOfMatchingChannels = this.children.find(_.id == id).zip(other.children.find(_.id == id))
-
-        tupleOfMatchingChannels.map { tuple ⇒
-          tuple._1.diff(tuple._2)
-        }
-      }
-      // elements that are no longer in `other.children`
-      val deletedByOther = this.children.diff(other.children)
-      // additional elements from `other.children`
-      val addedByOther = other.children.diff(this.children)
-
-      log.debug(s"[$this] added locally: $addedByOther")
-      log.debug(s"[$this] deleted locally: $deletedByOther")
-
-      val moved = {
-        lazy val thisRoot = this.root
-
-        // if we can find it in our tree, it hasn't been added but only moved
-        val notAddedButMoved = addedByOther.filter { elem ⇒ thisRoot.findByEscenicId(elem.id.escenicId).isDefined }
-        log.debug(s"[$this] not added but moved: $notAddedButMoved")
-
-        lazy val otherRoot = other.root
-        // if we can find the deleted elem, it has been moved
-        val notDeletedButMoved = deletedByOther.filter { elem ⇒ otherRoot.findByEscenicId(elem.id.escenicId).isDefined }
-        log.debug(s"[$this] not deleted but moved: $notDeletedButMoved")
-
-        notAddedButMoved ++ notDeletedButMoved
-      }
-      log.debug(s"[$this] moved: $moved")
-
-      val deleted = deletedByOther.diff(moved)
-      val added = addedByOther.diff(moved)
-
-      log.debug(s"[$this] deleted globally: $deleted")
-      log.debug(s"[$this] added globally: $added")
-
-      val u = ChannelUpdate(added, deleted, moved).merge(updatesFromChildren)
-      log.debug(s"[$this] Changes: $u\n\n")
-      u
-    }
-  }
-
-  def merge(other: RawChannel): ChannelUpdate = {
-
-    val channelUpdate = diff(other)
-
-    channelUpdate.deleted.foreach { deletion ⇒
-      deletion.parent.foreach { parent ⇒
-        parent.children = parent.children.diff(Seq(deletion))
-      }
-    }
-
-    channelUpdate.added.foreach { addition ⇒
-      this.children = this.children :+ addition
-    }
-
-    channelUpdate.moved.foreach { moved ⇒
-      // remove from current parent
-      moved.parent.foreach { parent ⇒
-        parent.children = parent.children.diff(Seq(moved))
-      }
-      // add to new parent
-      val newParentId = other.findByEscenicId(moved.id.escenicId)
-        .flatMap(_.parent)
-        .map(_.id.escenicId)
-
-      newParentId.foreach { parentId ⇒
-        root.findByEscenicId(parentId).foreach { newParent ⇒
-          newParent.children = newParent.children :+ moved
-        }
-      }
-    }
-    // for logging
-    channelUpdate
   }
 
   /** equals solely on the ```ChannelId``` */
@@ -321,9 +233,7 @@ case class RawMetadata(changedBy: String = "system",
 
 object RawChannelStage {
 
-  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageCommercialFormat
-  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageContentFormat
-  import de.welt.contentapi.raw.models.RawFormats.rawChannelStageModuleFormat
+  import de.welt.contentapi.raw.models.RawFormats.{rawChannelStageCommercialFormat, rawChannelStageContentFormat, rawChannelStageModuleFormat}
 
   /**
     * http://stackoverflow.com/questions/17021847/noise-free-json-format-for-sealed-traits-with-play-2-2-library
