@@ -47,10 +47,10 @@ case class ApiMetaRobots(noIndex: Option[Boolean] = None, noFollow: Option[Boole
 /**
   * Some overrides for commercial settings (ASMI). Per default all commercial configuration based on the section path.
   *
-  * @param adTag      ad tag for all banner ads
-  * @param videoAdTag ad tag for all video ads
+  * @param pathForAdTag      path used to build the ad tag in client
+  * @param pathForVideoAdTag path used to build the video ad tag in client
   */
-case class ApiCommercialConfiguration(adTag: Option[String] = None, videoAdTag: Option[String] = None)
+case class ApiCommercialConfiguration(pathForAdTag: Option[String] = None, pathForVideoAdTag: Option[String] = None)
 
 /**
   * Branding or sponsoring of section and content pages. This is only the name of the branding. The impl is part of
