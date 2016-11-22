@@ -18,7 +18,7 @@ trait PressedContentService {
   def find(id: String, showRelated: Boolean = true)
           (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedContent]
 
-  def convert(apiContent: ApiContent, related: Option[Seq[ApiContent]]): ApiPressedContent
+  def convert(apiContent: ApiContent, related: Option[Seq[ApiContent]] = None): ApiPressedContent
 }
 
 @Singleton
@@ -31,7 +31,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
       .find(id, showRelated)
       .map(response ⇒ convert(response.content, response.related))
 
-  override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]]): ApiPressedContent = {
+  override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]] = None): ApiPressedContent = {
     rawTreeService.get.map { rawTree =>
 
       val maybeRawChannel: Option[RawChannel] = apiContent
