@@ -43,11 +43,6 @@ sealed trait ContentClientConfig {
         lazy val file: String = s3Config.flatMap(_.getString("pressed.file"))
           .getOrElse(throw BadConfigurationException("'welt.aws.s3.pressed.file' not configured"))
       }
-
-      object sectionMetadata {
-        lazy val bucket: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.bucket"))
-        lazy val file: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.file"))
-      }
     }
   }
 
