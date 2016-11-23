@@ -20,7 +20,7 @@ case class PressedS3ClientImpl @Inject()(s3Client: S3Client, contentClientConfig
 
   override def find(path: String): Option[(ApiPressedSection, Instant)] = {
 
-    s3Client.getWithLastModified(bucket + path, file).flatMap {
+    s3Client.getWithLastModified(bucket, path + file).flatMap {
 
       case (json, lastMod) ⇒
 
