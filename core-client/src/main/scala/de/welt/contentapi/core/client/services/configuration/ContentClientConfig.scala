@@ -30,7 +30,6 @@ sealed trait ContentClientConfig {
     lazy val endpoint: Option[String] = s3Config.flatMap(_.getString("endpoint"))
 
     object s3 {
-
       object janus {
         lazy val bucket: String = s3Config.flatMap(_.getString("janus.bucket"))
           .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.bucket' not configured"))
@@ -38,7 +37,30 @@ sealed trait ContentClientConfig {
           .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.file' not configured"))
 
       }
+      object pressed {
+        lazy val bucket: String = s3Config.flatMap(_.getString("pressed.bucket"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.pressed.bucket' not configured"))
+        lazy val file: String = s3Config.flatMap(_.getString("pressed.file"))
+          .getOrElse(throw BadConfigurationException("'welt.aws.s3.pressed.file' not configured"))
+      }
+
+      object sectionMetadata {
+        lazy val bucket: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.bucket"))
+        lazy val file: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.file"))
+      }
     }
+  }
+
+  object digger {
+    private lazy val diggerConfig = configuration.getConfig("welt.digger")
+    lazy val host: String = diggerConfig.flatMap(_.getString("host"))
+      .getOrElse(throw BadConfigurationException("'welt.digger.host' not configured"))
+    lazy val endpoint: String = diggerConfig.flatMap(_.getString("endpoint"))
+      .getOrElse(throw BadConfigurationException("'welt.digger.endpoint' not configured"))
+    lazy val username: String = diggerConfig.flatMap(_.getString("username"))
+      .getOrElse(throw BadConfigurationException("'welt.digger.username' not configured"))
+    lazy val password: String = diggerConfig.flatMap(_.getString("password"))
+      .getOrElse(throw BadConfigurationException("'welt.digger.password' not configured"))
   }
 
   object datadog {
