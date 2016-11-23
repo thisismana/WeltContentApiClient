@@ -37,3 +37,5 @@ You will need a [bintray](https://bintray.com/) account. Log in through sbt:
 Then you can publish new releases with:
 
 	./activator publish
+
+.
