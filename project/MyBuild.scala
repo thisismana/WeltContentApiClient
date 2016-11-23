@@ -5,21 +5,19 @@ import sbt.Keys._
 import sbt._
 import scoverage.ScoverageSbtPlugin.autoImport._
 
+
 object MyBuild extends Build {
 
-  val forScala2_4 = if (System.getenv("PLAY24") == null) {
-    false
-  } else {
-    System.getenv("PLAY24").toBoolean
-  }
   val isSnapshot = true
+  val buildNumber = if (System.getenv("BUILD_NUMBER") != null) System.getenv("BUILD_NUMBER") else "local"
+  val forScala2_4 = if (System.getenv("PLAY24") == null) false else System.getenv("PLAY24").toBoolean
+
+  val playVersion = if (forScala2_4) "2.4.8" else "2.5.3"
+  private val actualVersion: String = s"0.5.$buildNumber"
 
   scalaVersion := "2.11.8"
-  val playVersion = if (forScala2_4) "2.4.8" else "2.5.3"
 
   def withTests(project: Project) = project % "test->test;compile->compile"
-
-  private val actualVersion: String = "0.5.0"
 
   val frontendCompilationSettings = Seq(
     organization := "de.welt",
