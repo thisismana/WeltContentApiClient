@@ -16,6 +16,8 @@ object testHelper {
       def emptyWithIdAndChildren(id: Long, children: Seq[RawChannel]) =
         RawChannel(RawChannelId(path = "", escenicId = id, label = id.toString), children = children)
 
+      def emptyWithIdAndChildrenAndConfig(id: Long, children: Seq[RawChannel], config: RawChannelConfiguration) =
+        RawChannel(RawChannelId(path = "", escenicId = id, label = id.toString), children = children, config = config)
     }
 
 
