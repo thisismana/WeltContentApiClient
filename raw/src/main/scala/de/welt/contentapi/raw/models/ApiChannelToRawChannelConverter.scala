@@ -11,23 +11,18 @@ import de.welt.contentapi.raw.models.legacy._
   */
 object ApiChannelToRawChannelConverter {
   def apply(root: ApiChannel): RawChannel = RawChannel(
-    id = rawChannelId(
-      channelId = root.id,
-      apiChannelData = root.data
+    id = RawChannelId(
+      path = root.id.path,
+      label = root.data.label,
+      escenicId = root.id.ece
     ),
     config = config(root.data),
     // Info:
     // All old stage configuration are ignored. Currently not used by any app.
     stages = None,
-    metadata = root.metadata.map(metadata).getOrElse(RawMetadata()),
+    metadata = root.metadata.map(metadata).getOrElse(RawMetadata()), // re-create with defaults
     parent = None, // do not write parent to prevent loops while serializing JSON
     children = root.children.map(child ⇒ ApiChannelToRawChannelConverter(child))
-  )
-
-  private def rawChannelId(channelId: ChannelId, apiChannelData: ApiChannelData): RawChannelId = RawChannelId(
-    path = channelId.path,
-    label = apiChannelData.label,
-    escenicId = channelId.ece
   )
 
   private def config(apiChannelData: ApiChannelData): RawChannelConfiguration = {
@@ -79,7 +74,7 @@ object ApiChannelToRawChannelConverter {
 
   private def header(apiChannelData: ApiChannelData): Option[RawChannelHeader] = {
     val header = RawChannelHeader(
-      sponsoring = apiChannelData.siteBuilding.map(_.theme),
+      sponsoring = apiChannelData.siteBuilding.map(_.theme), // todo (pada): mix-up of theme and sponsoring?
       label = Option(apiChannelData.label).filter(_.nonEmpty),
       // Info:
       // After the migration we split sponsoring and logo.
