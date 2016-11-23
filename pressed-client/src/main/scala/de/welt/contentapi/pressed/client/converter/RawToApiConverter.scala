@@ -53,8 +53,6 @@ class RawToApiConverter {
         "sonstiges" // is root channel but not advertised, so use fallback
       case Some(parent) if parent != rawChannel.root ⇒
         calcAdTag(parent, predicate) // channel is not advertised but has parents that may be, so go up in tree
-      case _ ⇒
-        "orElse"
     }
 
   def trimPathForAdTag(path: String ) = {
