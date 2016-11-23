@@ -38,12 +38,6 @@ sealed trait ContentClientConfig {
           .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.file' not configured"))
 
       }
-
-      object sectionMetadata {
-        lazy val bucket: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.bucket"))
-        lazy val file: Option[String] = s3Config.flatMap(_.getString("sectionMetadata.file"))
-      }
-
     }
   }
 

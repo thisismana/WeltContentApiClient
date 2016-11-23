@@ -22,8 +22,8 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
     val bucket = "le-bucket"
     val file = "le-file"
     val config = Configuration(
-      "welt.aws.s3.rawTree.bucket" → bucket,
-      "welt.aws.s3.rawTree.file" → file
+      RawTreeServiceImpl.bucketConfigKey → bucket,
+      RawTreeServiceImpl.fileConfigKey → file
     )
 
     val emptyS3ResponseMock = mock[S3Client]

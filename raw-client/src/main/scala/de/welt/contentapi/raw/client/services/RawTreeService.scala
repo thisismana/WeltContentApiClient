@@ -20,11 +20,12 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
                                    config: Configuration,
                                    environment: Environment,
                                    cache: CacheApi) extends RawTreeService with Loggable {
+  import RawTreeServiceImpl._
 
-  val bucket = config.getString("welt.aws.s3.rawTree.bucket")
-    .getOrElse(throw config.reportError("welt.aws.s3.rawTree.bucket", "welt.aws.s3.rawTree.bucket bucket not configured"))
-  val file = config.getString("welt.aws.s3.rawTree.file")
-    .getOrElse(throw config.reportError("welt.aws.s3.rawTree.file", "welt.aws.s3.rawTree.file file not configured"))
+  val bucket = config.getString(bucketConfigKey)
+    .getOrElse(throw config.reportError(bucketConfigKey, bucketConfigKey + " bucket not configured"))
+  val file = config.getString(fileConfigKey)
+    .getOrElse(throw config.reportError(fileConfigKey, fileConfigKey + " file not configured"))
 
   // todo (all): let's talk about the folder structure
   protected def objectKeyForEnv(env: Env) = environment.mode match {
@@ -49,4 +50,9 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
       }
     }
   }
+}
+
+object RawTreeServiceImpl {
+  val bucketConfigKey = "welt.aws.s3.rawTree.bucket"
+  val fileConfigKey = "welt.aws.s3.rawTree.file"
 }

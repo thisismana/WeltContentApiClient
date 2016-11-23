@@ -6,22 +6,22 @@ import javax.inject.{Inject, Singleton}
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
 import com.amazonaws.util.StringInputStream
-import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.utils.Loggable
+import play.api.Configuration
 
 import scala.io.{Codec, Source}
 
 sealed trait S3Client extends Loggable {
 
-  val config: ContentClientConfig
+  val config: Configuration
   implicit val codec: Codec = Codec.UTF8
 
   lazy val client: Option[AmazonS3Client] = for {
-    endpoint <- config.aws.endpoint
+    endpoint <- config.getString("welt.aws.s3.endpoint")
   } yield {
     val s3Client = new AmazonS3Client()
     s3Client.setEndpoint(endpoint)
-    log.debug(s"s3 connected to ${config.aws.endpoint}")
+    log.debug(s"s3 connected to $endpoint")
     s3Client
   }
 
@@ -79,4 +79,4 @@ sealed trait S3Client extends Loggable {
 }
 
 @Singleton
-class S3ClientImpl @Inject()(override val config: ContentClientConfig) extends S3Client {}
+class S3ClientImpl @Inject()(override val config: Configuration) extends S3Client {}
