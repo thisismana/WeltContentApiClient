@@ -84,7 +84,7 @@ trait AbstractService[T] extends Loggable with Status {
   }
 
   /**
-    * Refactoring?: always funkotron prefix? This is wrong for: AMPotron
+    * // todo (mana): Refactoring?: always funkotron prefix? This is wrong for: AMPotron
     */
   protected def initializeMetricsContext(name: String): Timer.Context = {
     metrics.defaultRegistry.timer(MetricRegistry.name(s"funkotron.$name", "requestTimer")).time()
