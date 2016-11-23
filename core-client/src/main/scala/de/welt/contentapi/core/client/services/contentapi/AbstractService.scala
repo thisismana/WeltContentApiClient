@@ -83,7 +83,7 @@ trait AbstractService[T] extends Loggable with Status {
       }
   }
 
-  private def initializeMetricsContext(name: String): Timer.Context = {
+  protected def initializeMetricsContext(name: String): Timer.Context = {
     metrics.defaultRegistry.timer(MetricRegistry.name(s"funkotron.$name", "requestTimer")).time()
   }
 }
