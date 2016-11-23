@@ -2,7 +2,7 @@ package de.welt.contentapi.pressed.client.converter
 
 import de.welt.contentapi.core.models.ApiReference
 import de.welt.contentapi.pressed.models._
-import de.welt.contentapi.raw.models.{RawChannel, RawChannelMetaRobotsTag, RawSectionReference}
+import de.welt.contentapi.raw.models.{RawChannel, RawChannelCommercial, RawChannelMetaRobotsTag, RawSectionReference}
 
 class RawToApiConverter {
 
@@ -24,23 +24,7 @@ class RawToApiConverter {
     )
   }
 
-  private[converter] def getBreadcrumb(self: RawChannel): Seq[ApiReference] = {
-    var current = self
-    var breadcrumbFromRawChannel: Seq[ApiReference] = Seq(ApiReference(
-      label = Some(current.id.label),
-      href = Some(current.id.path)
-    ))
-    while (current.parent.isDefined) {
-      current = current.parent.get
-      breadcrumbFromRawChannel = breadcrumbFromRawChannel :+ ApiReference(
-          label = Some(current.id.label),
-          href = Some(current.id.path)
-      )
-    }
-    // breadcrumb should start from root channel -> must be reversed
-    // / -> /sport/ -> /sport/fussball/
-    breadcrumbFromRawChannel.reverse
-  }
+  private[converter] def getBreadcrumb(raw: RawChannel): Seq[ApiReference] = raw.getBreadcrumb.map(b⇒ ApiReference(Some(b.id.label), Some(b.id.path)))
 
   /** Converter method that takes a rawChannel and returns an ApiConfiguration from its data
     *
@@ -55,34 +39,27 @@ class RawToApiConverter {
     theme = apiThemeFromRawChannel(rawChannel)
   )
 
-  private[converter] def calculatePathForAdTag(rawChannel: RawChannel): String = {
-    var currentChannel = rawChannel
-    while (!currentChannel.config.commercial.definesAdTag && currentChannel.parent.isDefined) {
-      currentChannel = currentChannel.parent.get
-    }
-    val currentPath: String = currentChannel.id.path
-    val lastOption: Option[String] = currentPath.substring(0,currentPath.length).split("/").lastOption
-    if (lastOption.isDefined) {
-      lastOption.get
-    }
-    else {
-      "sonstiges"
-    }
-  }
+  def calculatePathForVideoAdTag(rawChannel: RawChannel) = calcAdTag(rawChannel, c ⇒ c.definesVideoAdTag)
+  def calculatePathForAdTag(rawChannel: RawChannel) = calcAdTag(rawChannel, c ⇒ c.definesAdTag)
 
-  private[converter] def calculatePathForVideoAdTag(rawChannel: RawChannel): String = {
-    var currentChannel = rawChannel
-    while (!currentChannel.config.commercial.definesVideoAdTag && currentChannel.parent.isDefined) {
-      currentChannel = currentChannel.parent.get
+  private def calcAdTag(rawChannel: RawChannel, predicate: RawChannelCommercial ⇒ Boolean): String =
+
+    rawChannel.parent match {
+      case None ⇒
+        "home" // root
+      case Some(parent) if predicate.apply(rawChannel.config.commercial) ⇒
+        trimPathForAdTag(rawChannel.id.path) // channel is advertised -> calculate Tag
+      case Some(parent) if parent == rawChannel.root && !predicate.apply(rawChannel.config.commercial) ⇒
+        "sonstiges" // is root channel but not advertised, so use fallback
+      case Some(parent) if parent != rawChannel.root ⇒
+        calcAdTag(parent, predicate) // channel is not advertised but has parents that may be, so go up in tree
+      case _ ⇒
+        "orElse"
     }
-    val currentPath: String = currentChannel.id.path
-    val lastOption: Option[String] = currentPath.substring(0,currentPath.length).split("/").lastOption
-    if (lastOption.isDefined) {
-      lastOption.get
-    }
-    else {
-      "sonstiges"
-    }
+
+  def trimPathForAdTag(path: String ) = {
+    val pathWithoutLeadingAndTrailingSlashes = path.stripPrefix("/").stripSuffix("/").trim
+    Option(pathWithoutLeadingAndTrailingSlashes).filter(_.nonEmpty).getOrElse("sonstiges")
   }
 
   private[converter] def apiMetaConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiMetaConfiguration] = {
