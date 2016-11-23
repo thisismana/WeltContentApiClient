@@ -1,4 +1,4 @@
-package de.welt.contentapi.raw_client.services
+package de.welt.contentapi.raw.client.services
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
@@ -35,17 +35,18 @@ class AdminSectionServiceImpl @Inject()(config: Configuration,
   override def updateChannel(channel: RawChannel, updatedChannelData: RawChannelConfiguration, user: String, updatedStages: Option[Seq[RawChannelStage]] = None)
                             (implicit env: Env): Option[RawChannel] = {
 
-    // update channel (lastModified), currently adData, fields, stages and siteBuilding allowed only
+    // update channel
     channel.config = channel.config.copy(
       commercial = updatedChannelData.commercial,
       header = updatedChannelData.header,
       theme = updatedChannelData.theme
     )
+    // update meta data
     channel.metadata = channel.metadata.copy(
       lastModifiedDate = Instant.now.toEpochMilli,
       changedBy = user
-      //      , isRessort = todo (pada) → is this important here?
     )
+    // update the stages/modules
     channel.stages = updatedStages
 
     log.info(s"$channel changed by $user")

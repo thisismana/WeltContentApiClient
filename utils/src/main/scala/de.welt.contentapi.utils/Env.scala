@@ -17,6 +17,11 @@ object Env {
     */
   case object Live extends Env
 
+  /**
+    * No env provided. May be used by system tasks.
+    */
+  case object UndefinedEnv extends Env
+
   def apply(env: String): Env = env match {
     case "preview" ⇒ Preview
     case "live" ⇒ Live

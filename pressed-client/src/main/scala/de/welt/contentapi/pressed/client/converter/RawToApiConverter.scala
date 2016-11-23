@@ -88,8 +88,8 @@ class RawToApiConverter {
 
   private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiSponsoringConfiguration] = {
     rawChannel.config.header.map {
-        header => ApiSponsoringConfiguration(header.sponsoring)
-      }
+      header => ApiSponsoringConfiguration(header.sponsoring)
+    }
   }
 
   private[converter] def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {

@@ -12,14 +12,14 @@ object MyBuild extends Build {
   } else {
     System.getenv("PLAY24").toBoolean
   }
-  val isSnapshot = false
+  val isSnapshot = true
 
   scalaVersion := "2.11.8"
   val playVersion = if (forScala2_4) "2.4.8" else "2.5.3"
 
   def withTests(project: Project) = project % "test->test;compile->compile"
 
-  private val actualVersion: String = "0.4.0"
+  private val actualVersion: String = "0.5.0"
 
   val frontendCompilationSettings = Seq(
     organization := "de.welt",

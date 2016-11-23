@@ -1,8 +1,8 @@
-package de.welt.contentapi.raw_client.services
+package de.welt.contentapi.raw.client.services
 
 import de.welt.contentapi.core.client.services.configuration.ContentClientConfigImpl
 import de.welt.contentapi.core.client.services.s3.S3Client
-import de.welt.contentapi.raw_client.models.SdpSectionData
+import de.welt.contentapi.raw.client.models.SdpSectionData
 import de.welt.contentapi.utils.Env.{Live, Preview}
 import de.welt.testing.DisabledCache
 import org.mockito.Mockito.when
@@ -22,8 +22,8 @@ class SectionServiceTest extends PlaySpec with MockitoSugar {
     val bucket = "le-bucket"
     val file = "le-file"
     val config = Configuration(
-      "welt.aws.s3.rawTree.bucket" → bucket,
-      "welt.aws.s3.rawTree.file" → file
+      RawTreeServiceImpl.bucketConfigKey → bucket,
+      RawTreeServiceImpl.fileConfigKey → file
     )
 
     val emptyS3ResponseMock = mock[S3Client]

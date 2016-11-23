@@ -3,7 +3,7 @@ package de.welt.contentapi.core.models
 import java.time.Instant
 
 import de.welt.contentapi.raw.models.RawChannelCommercial
-import de.welt.contentapi.raw_client.models.SdpSectionData
+import de.welt.contentapi.raw.client.models.SdpSectionData
 import org.scalatestplus.play.PlaySpec
 
 //noinspection TypeAnnotation

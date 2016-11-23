@@ -1,10 +1,11 @@
-package de.welt.contentapi.raw_client.services
+package de.welt.contentapi.raw.client.services
 
 import com.google.inject.{Inject, Singleton}
 import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core.client.services.s3.S3Client
-import de.welt.contentapi.raw_client.models.{SdpSectionData, SdpSectionDataReads}
+import de.welt.contentapi.raw.client.models.{SdpSectionData, SdpSectionDataReads}
 import de.welt.contentapi.utils.Loggable
+import play.api.Configuration
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsError, JsSuccess, Json}
 
@@ -17,15 +18,15 @@ trait SdpSectionDataService {
 }
 
 @Singleton
-class SdpSectionDataServiceImpl @Inject()(s3: S3Client, cache: CacheApi, funkConfig: ContentClientConfig)
+class SdpSectionDataServiceImpl @Inject()(s3: S3Client, cache: CacheApi, configuration: Configuration)
   extends SdpSectionDataService with Loggable {
 
   import SdpSectionDataReads._
 
-  lazy val file = funkConfig.aws.s3.sectionMetadata.file
-  lazy val bucket = funkConfig.aws.s3.sectionMetadata.bucket
+  lazy val file = configuration.getString("welt.aws.s3.sdp.file")
+  lazy val bucket = configuration.getString("welt.aws.s3.sdp.bucket")
 
-  override def getSectionData: SdpSectionData = cache.getOrElse("s3-section-data", 2.hours) {
+  override def getSectionData: SdpSectionData = cache.getOrElse("s3-section-data", 15.minutes) {
 
     val data = for {
       b ← bucket
