@@ -5,29 +5,33 @@ import javax.inject.Inject
 
 import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core.client.services.s3.S3Client
-import de.welt.contentapi.pressed.models.ApiPressedSection
-import play.api.libs.json.Json
+import de.welt.contentapi.pressed.models.{ApiPressedSection, PressedReads}
+import de.welt.contentapi.utils.Loggable
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 sealed trait PressedS3Client {
   def find(path: String): Option[(ApiPressedSection, Instant)]
 }
 
-case class PressedS3ClientImpl @Inject()(s3Client: S3Client, contentClientConfig: ContentClientConfig) extends PressedS3Client {
+case class PressedS3ClientImpl @Inject()(s3Client: S3Client, contentClientConfig: ContentClientConfig) extends PressedS3Client with Loggable {
+
+  val bucket = contentClientConfig.aws.s3.pressed.bucket
+  val file = contentClientConfig.aws.s3.pressed.file
 
   override def find(path: String): Option[(ApiPressedSection, Instant)] = {
-    import de.welt.contentapi.pressed.models.PressedReads.apiPressedSectionReads
-    val bucket = contentClientConfig.aws.s3.pressed.bucket + path
-    val file = contentClientConfig.aws.s3.pressed.file
 
-    val maybeS3ResponseTuple: Option[(String, Instant)] = s3Client
-      .getWithLastModified(bucket, file)
+    s3Client.getWithLastModified(bucket + path, file).flatMap {
 
-    val maybeLastMod: Option[Instant] = maybeS3ResponseTuple.map(_._2)
+      case (json, lastMod) ⇒
 
-    val maybeApiPressedSection: Option[ApiPressedSection] = maybeS3ResponseTuple
-      .map(_._1).map(Json.parse)
-      .flatMap(_.validate[ApiPressedSection](apiPressedSectionReads).asOpt)
+        Json.parse(json).validate[ApiPressedSection](PressedReads.apiPressedSectionReads) match {
+          case JsSuccess(value, _) ⇒
+            Some(value, lastMod)
+          case err@JsError(_) ⇒
+            log.warn(s"Unable to parse content at '$bucket$path$file'. Reason: '${err.toString}'")
+            None
+        }
+    }
 
-    for (a <- maybeApiPressedSection; b <- maybeLastMod) yield (a, b)
   }
 }

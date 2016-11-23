@@ -23,22 +23,12 @@ case class PressedSectionServiceImpl @Inject()(pressedS3Client: PressedS3Client,
   /** Primarily gets Pressed Section from S3, if pressed is older than 30 minutes or is not present -> fallback to digger rest call
     *
     * @param path path for section to be pressed
-    * @param env can be Live or Preview, but is Live as default
+    * @param env  can be Live or Preview, but is Live as default
     * @return a future ApiPressedSection or deliver HttpClient/ServerError from AbstractService
     */
   override def findByPath(path: String, env: Env = Live): Future[ApiPressedSection] =
-    pressedS3Client
-      .find(path)
-      .flatMap { response ⇒
-        if (response._2.plus(ttlInMinutes, ChronoUnit.MINUTES).isAfter(Instant.now())) {
-          Some(response._1)
-        } else {
-          Option.empty
-        }
-      } match {
-      case Some(s) ⇒ Future.successful(s)
-      case _ ⇒ diggerClient.findByPath(path)
-    }
-
-
+    pressedS3Client.find(path)
+      .collect {
+        case (section, lastMod) if lastMod.plus(ttlInMinutes, ChronoUnit.MINUTES).isAfter(Instant.now()) ⇒ Future.successful(section)
+      }.getOrElse(diggerClient.findByPath(path))
 }
