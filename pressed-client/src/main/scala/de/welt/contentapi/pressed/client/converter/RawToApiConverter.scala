@@ -47,10 +47,12 @@ class RawToApiConverter {
     rawChannel.parent match {
       case None ⇒
         "home" // root
+        // todo (harry): unused declaration below
       case Some(parent) if predicate.apply(rawChannel.config.commercial) ⇒
         trimPathForAdTag(rawChannel.id.path) // channel is advertised -> calculate Tag
       case Some(parent) if parent == rawChannel.root && !predicate.apply(rawChannel.config.commercial) ⇒
         "sonstiges" // is root channel but not advertised, so use fallback
+        // todo (harry): since this should be the last option, you can simplify this to `case Some(parent) =>`
       case Some(parent) if parent != rawChannel.root ⇒
         calcAdTag(parent, predicate) // channel is not advertised but has parents that may be, so go up in tree
     }
