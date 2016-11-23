@@ -116,7 +116,7 @@ case class RawChannel(id: RawChannelId,
   */
 case class RawChannelId(var path: String,
                         var label: String,
-                        escenicId: Long = -1) {
+                        escenicId: Long) {
 
   override def equals(obj: Any): Boolean = obj match {
     case RawChannelId(_, _, otherEce) ⇒ this.escenicId.hashCode == otherEce.hashCode
