@@ -7,7 +7,6 @@ import de.welt.contentapi.core.client.services.contentapi.ContentService
 import de.welt.contentapi.core.models.{ApiContent, ApiResponse, ApiSectionData}
 import de.welt.contentapi.pressed.client.converter.RawToApiConverter
 import de.welt.contentapi.pressed.models.ApiPressedContent
-import de.welt.contentapi.raw_client.services.RawTreeService
 import de.welt.testing.testHelper.raw.channel._
 import de.welt.testing.testHelper.raw.configuration._
 import de.welt.contentapi.raw.client.services.RawTreeService
