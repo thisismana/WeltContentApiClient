@@ -39,7 +39,8 @@ class AdminSectionServiceImpl @Inject()(config: Configuration,
     channel.config = channel.config.copy(
       commercial = updatedChannelData.commercial,
       header = updatedChannelData.header,
-      theme = updatedChannelData.theme
+      theme = updatedChannelData.theme,
+      metadata = updatedChannelData.metadata
     )
     // update meta data
     channel.metadata = channel.metadata.copy(
