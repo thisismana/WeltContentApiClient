@@ -37,12 +37,6 @@ sealed trait ContentClientConfig {
           .getOrElse(throw BadConfigurationException("'welt.aws.s3.janus.file' not configured"))
 
       }
-      object pressed {
-        lazy val bucket: String = s3Config.flatMap(_.getString("pressed.bucket"))
-          .getOrElse(throw BadConfigurationException("'welt.aws.s3.pressed.bucket' not configured"))
-        lazy val file: String = s3Config.flatMap(_.getString("pressed.file"))
-          .getOrElse(throw BadConfigurationException("'welt.aws.s3.pressed.file' not configured"))
-      }
     }
   }
 
