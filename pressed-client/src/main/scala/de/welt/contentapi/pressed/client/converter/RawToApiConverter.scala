@@ -2,7 +2,7 @@ package de.welt.contentapi.pressed.client.converter
 
 import de.welt.contentapi.core.models.ApiReference
 import de.welt.contentapi.pressed.models._
-import de.welt.contentapi.raw.models.{RawChannel, RawChannelMetaRobotsTag, RawSectionReference}
+import de.welt.contentapi.raw.models.{RawChannel, RawChannelCommercial, RawChannelMetaRobotsTag, RawSectionReference}
 
 class RawToApiConverter {
 
@@ -24,6 +24,7 @@ class RawToApiConverter {
     )
   }
 
+  /** todo (harry): this is implemented in [[RawChannel.getBreadcrumb]] */
   private[converter] def getBreadcrumb(self: RawChannel): Seq[ApiReference] = {
     var current = self
     var breadcrumbFromRawChannel: Seq[ApiReference] = Seq(ApiReference(
@@ -33,8 +34,8 @@ class RawToApiConverter {
     while (current.parent.isDefined) {
       current = current.parent.get
       breadcrumbFromRawChannel = breadcrumbFromRawChannel :+ ApiReference(
-          label = Some(current.id.label),
-          href = Some(current.id.path)
+        label = Some(current.id.label),
+        href = Some(current.id.path)
       )
     }
     // breadcrumb should start from root channel -> must be reversed
@@ -76,7 +77,7 @@ class RawToApiConverter {
       currentChannel = currentChannel.parent.get
     }
     val currentPath: String = currentChannel.id.path
-    val lastOption: Option[String] = currentPath.substring(0,currentPath.length).split("/").lastOption
+    val lastOption: Option[String] = currentPath.substring(0, currentPath.length).split("/").lastOption
     if (lastOption.isDefined) {
       lastOption.get
     }
@@ -113,8 +114,8 @@ class RawToApiConverter {
 
   private[converter] def apiSponsoringConfigurationFromRawChannel(rawChannel: RawChannel): Option[ApiSponsoringConfiguration] = {
     rawChannel.config.header.map {
-        header => ApiSponsoringConfiguration(header.sponsoring)
-      }
+      header => ApiSponsoringConfiguration(header.sponsoring)
+    }
   }
 
   private[converter] def apiHeaderConfigurationFromRawChannel(rawChannel: RawChannel) = {
