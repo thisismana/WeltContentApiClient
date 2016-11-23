@@ -41,6 +41,11 @@ class MigrationTest extends PlaySpec {
           write(Json.prettyPrint(json))
           close()
         }
+        /**
+          * If you have write permissions:
+          *
+          * aws s3 cp --region eu-central-1 /tmp/migrated.json s3://up-production-front-end-configuration-eu-central-1/rawTree/dev/Live/config.json
+          */
         log.info("File written to /tmp/migrated.json")
       } finally {
         result.close()

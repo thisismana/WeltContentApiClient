@@ -42,7 +42,7 @@ object ApiChannelToRawChannelConverter {
     description = fields.get("description"),
     // Info:
     // We clean the keywords from a string to Seq[String]
-    keywords = fields.get("keywords").map(_.split(",")),
+    keywords = fields.get("keywords").map(_.split(",").filterNot(_.isEmpty)),
     // Info:
     // New field
     sectionBreadcrumbDisabled = None,
@@ -74,7 +74,7 @@ object ApiChannelToRawChannelConverter {
 
   private def header(apiChannelData: ApiChannelData): Option[RawChannelHeader] = {
     val header = RawChannelHeader(
-      sponsoring = apiChannelData.siteBuilding.map(_.theme), // todo (pada): mix-up of theme and sponsoring?
+      sponsoring = apiChannelData.siteBuilding.map(_.theme).collect { case s if !s.isEmpty ⇒ s },
       label = Option(apiChannelData.label).filter(_.nonEmpty),
       // Info:
       // After the migration we split sponsoring and logo.
