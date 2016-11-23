@@ -42,14 +42,13 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
       val maybeApiChannel: Option[ApiChannel] = maybeRawChannel
         .map(converter.getApiChannelFromRawChannel)
 
-      val apiConfiguration: ApiConfiguration = converter
-        .apiConfigurationFromRawChannel(rawTree)
+      val maybeApiConfiguration: Option[ApiConfiguration] = maybeRawChannel.map(converter.apiConfigurationFromRawChannel)
 
       ApiPressedContent(
         content = apiContent,
         related = maybeRelatedContent,
         channel = maybeApiChannel,
-        configuration = Some(apiConfiguration)
+        configuration = maybeApiConfiguration
       )
     } getOrElse {
       // Fallback if S3.get or Json.parse fails
