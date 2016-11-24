@@ -11,5 +11,7 @@ import de.welt.contentapi.core.models.ApiContent
 case class ApiPressedContent(content: ApiContent,
                              related: Option[Seq[ApiContent]] = None,
                              channel: Option[ApiChannel] = None,
-                             configuration: Option[ApiConfiguration] = None)
+                             configuration: Option[ApiConfiguration] = None) {
+  lazy val unwrappedRelated: Seq[ApiContent] = related.getOrElse(Nil)
+}
 
