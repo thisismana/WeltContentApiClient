@@ -78,7 +78,7 @@ node {
                     extensions                       : [],
                     submoduleCfg                     : [],
                     userRemoteConfigs                : [[
-                                                                refspec: '+refs/pull/*:refs/remotes/origin/pr/* +refs/heads/master:refs/remotes/origin/master',
+                                                                refspec: '+refs/pull/*:refs/remotes/origin/pr/*:refs/heads/*',
                                                                 url: 'git@github.com:WeltN24/WeltContentApiClient.git'
                                                         ]]
             ]
