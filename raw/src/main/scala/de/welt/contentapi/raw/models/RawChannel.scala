@@ -223,13 +223,9 @@ case class RawChannelHeader(sponsoring: Option[String] = None,
   *
   * @param changedBy        github id of last sitebuilder
   * @param lastModifiedDate timestamp of last change
-  * @param modified         was this channel configured via ConfigMcConfigFace or is it still like `default`
-  * @param isRessort        so far /icon, maybe blau and bilanz will be added (used for tree logic in angular app)
   */
 case class RawMetadata(changedBy: String = "system",
-                       lastModifiedDate: Long = Instant.now.toEpochMilli,
-                       modified: Boolean = false,
-                       isRessort: Boolean = false)
+                       lastModifiedDate: Long = Instant.now.toEpochMilli)
 
 object RawChannelStage {
 
