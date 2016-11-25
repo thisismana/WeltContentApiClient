@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.util.Timeout
 import de.welt.contentapi.core.client.services.exceptions.HttpClientErrorException
+import de.welt.contentapi.core.client.services.http.RequestHeaders
 import de.welt.contentapi.core.models.ApiReference
 import de.welt.contentapi.pressed.client.repository.{PressedDiggerClient, PressedS3Client}
 import de.welt.contentapi.pressed.models.{ApiChannel, ApiPressedSection}
@@ -21,11 +22,12 @@ class PressedSectionServiceTest extends FlatSpec
   with Matchers with MustVerb with MockitoSugar {
 
   implicit val ec = ExecutionContext.global
+  implicit val requestHeaders: Option[RequestHeaders] = None
 
   trait TestScope {
     val mockedS3Client: PressedS3Client = mock[PressedS3Client]
     val mockedDiggerClient: PressedDiggerClient = mock[PressedDiggerClient]
-    val pressService: PressedSectionService = PressedSectionServiceImpl(mockedS3Client, mockedDiggerClient, ec)
+    val pressService: PressedSectionService = PressedSectionServiceImpl(mockedS3Client, mockedDiggerClient)
 
     val pressedSection = ApiPressedSection(channel = Some(ApiChannel(Some(ApiReference(Some("label"), Some("/href/"))))))
 

@@ -36,10 +36,18 @@ trait AbstractService[T] extends Loggable with Status {
     */
   def jsonValidate: JsLookupResult => JsResult[T]
 
+  /**
+    * @param ids string interpolation parameter for endpoint. e.g. /foo/%s/bar/%s
+    * @param parameters
+    * @param enforcedHeaders manually set headers for the GET request
+    * @param forwardedRequestHeaders forwarded request headers from the controller e.g. API key
+    * @param executionContext
+    * @return
+    */
   def get(ids: Seq[String] = Nil,
           parameters: Seq[(String, String)] = Nil,
-          headers: RequestHeaders = Nil)
-         (implicit requestHeaders: Option[RequestHeaders] = None, executionContext: ExecutionContext): Future[T] = {
+          enforcedHeaders: RequestHeaders = Nil)
+         (implicit forwardedRequestHeaders: Option[RequestHeaders] = None, executionContext: ExecutionContext): Future[T] = {
 
     def parseJson(json: JsLookupResult): T = jsonValidate(json) match {
       case JsSuccess(value, _) => value
@@ -52,7 +60,7 @@ trait AbstractService[T] extends Loggable with Status {
 
     val getRequest: WSRequest = ws.url(url)
       .withQueryString(parameters: _*)
-      .withHeaders(headers ++ forwardHeaders(requestHeaders): _*)
+      .withHeaders(enforcedHeaders ++ forwardHeaders(forwardedRequestHeaders): _*)
       .withAuth(config.username, config.password, WSAuthScheme.BASIC)
 
     log.debug(s"HTTP GET to ${getRequest.uri}")

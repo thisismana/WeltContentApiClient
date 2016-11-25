@@ -7,7 +7,7 @@ import play.api.{Configuration, Environment}
 class RawClientModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration) = {
-    val client = new de.welt.contentapi.core.client.PlayModule()
+    val client = new de.welt.contentapi.core.client.CoreModule()
     client.bindings(environment, configuration) ++ Seq(
       // admin services
       bind(classOf[AdminSectionService]).to(classOf[AdminSectionServiceImpl]),

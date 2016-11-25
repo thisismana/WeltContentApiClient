@@ -35,7 +35,7 @@ class Raw2ApiBreadcrumbTests extends FlatSpec with Matchers with MustVerb {
 
   val converter: RawToApiConverter = new RawToApiConverter()
     "Breadcrumb" must "must be sorted from root to leafs with all 3 levels" in new TestScopeHierarchy {
-      val result: ApiChannel = converter.getApiChannelFromRawChannel(rawChannel = node111)
+      val result: ApiChannel = converter.apiChannelFromRawChannel(rawChannel = node111)
       val breadcrumb: Seq[ApiReference] = result.breadcrumb.getOrElse(Seq.empty)
       breadcrumb.map(_.href.getOrElse("")) shouldBe Seq("/", "/11/", "/11/111/")
     }
