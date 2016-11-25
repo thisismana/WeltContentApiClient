@@ -22,7 +22,7 @@ object ApiFormats {
 
 
 object ApiReads {
-  implicit lazy val apiSectionReferenceReads: Reads[ApiReference] = Json.reads[ApiReference]
+  implicit lazy val apiReferenceReads: Reads[ApiReference] = Json.reads[ApiReference]
   implicit lazy val apiOnwardReads: Reads[ApiOnward] = Json.reads[ApiOnward]
   implicit lazy val apiMetadataReads: Reads[ApiMetadata] = Json.reads[ApiMetadata]
   implicit lazy val apiSectionDataReads: Reads[ApiSectionData] = Json.reads[ApiSectionData]
