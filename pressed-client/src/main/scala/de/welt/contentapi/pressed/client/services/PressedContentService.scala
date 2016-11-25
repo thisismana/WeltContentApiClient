@@ -20,6 +20,7 @@ trait PressedContentService {
           (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext, env: Env = Live): Future[ApiPressedContent]
 
   def convert(apiContent: ApiContent, related: Option[Seq[ApiContent]] = None, env: Env = Live): ApiPressedContent
+  def pressSingleApiContent(apiContent: ApiContent, env: Env = Live): ApiPressedContent
 }
 
 @Singleton
@@ -35,7 +36,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
 
   override def convert(apiContent: ApiContent, maybeRelatedContent: Option[Seq[ApiContent]] = None, env: Env = Live): ApiPressedContent = {
     val maybeRelatedPressedContent: Option[Seq[ApiPressedContent]] = maybeRelatedContent
-      .map(related ⇒ related.map(content ⇒ convertRelatedContent(content, env = env)))
+      .map(related ⇒ related.map(content ⇒ pressSingleApiContent(content, env = env)))
 
     findRawChannel(apiContent, env = env).map { rawChannel ⇒
       val apiChannel: ApiChannel = converter.apiChannelFromRawChannel(rawChannel)
@@ -55,7 +56,7 @@ class PressedContentServiceImpl @Inject()(contentService: ContentService, conver
     }
   }
 
-  private def convertRelatedContent(apiContent: ApiContent, env: Env = Live): ApiPressedContent =
+  override def pressSingleApiContent(apiContent: ApiContent, env: Env = Live): ApiPressedContent =
     ApiPressedContent(
       content = apiContent,
       channel = findRawChannel(apiContent, env = env).map(converter.apiChannelFromRawChannel)
