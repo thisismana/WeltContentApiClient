@@ -10,8 +10,7 @@ object MyBuild extends Build {
 
   val isSnapshot = true
   val buildNumber = if (System.getenv("BUILD_NUMBER") != null) System.getenv("BUILD_NUMBER") else "local"
-//  val forScala2_4 = if (System.getenv("PLAY24") == null) false else System.getenv("PLAY24").toBoolean
-  val forScala2_4 = true
+  val forScala2_4 = if (System.getenv("PLAY24") == null) false else System.getenv("PLAY24").toBoolean
 
   val playVersion = if (forScala2_4) "2.4.8" else "2.5.3"
   private val actualVersion: String = s"0.5.$buildNumber"
