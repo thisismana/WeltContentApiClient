@@ -1,12 +1,12 @@
 package de.welt.contentapi.core.client.models
 
-case class ApiContentSearch(`type`: Option[MainTypeParam],
-                            subType: Option[SubTypeParam],
-                            section: Option[SectionParam],
-                            homeSection: Option[HomeSectionParam],
-                            sectionExcludes: Option[SectionExcludes],
-                            flags: Option[FlagParam],
-                            limit: Option[LimitParam]
+case class ApiContentSearch(`type`: Option[MainTypeParam] = None,
+                            subType: Option[SubTypeParam] = None,
+                            section: Option[SectionParam] = None,
+                            homeSection: Option[HomeSectionParam] = None,
+                            sectionExcludes: Option[SectionExcludes] = None,
+                            flags: Option[FlagParam] = None,
+                            limit: Option[LimitParam] = None
                            ) {
   def allParams: Seq[Option[SearchParam]
     ] = Seq(`type`, subType, section, homeSection, sectionExcludes, flags, limit)
