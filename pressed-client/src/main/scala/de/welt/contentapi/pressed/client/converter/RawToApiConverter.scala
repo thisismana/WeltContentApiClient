@@ -11,7 +11,7 @@ class RawToApiConverter {
     * @param rawChannel the rawChannel produced by ConfigMcConfigFace
     * @return a new ApiChannel with the data from the rawChannel
     */
-  def getApiChannelFromRawChannel(rawChannel: RawChannel): ApiChannel = {
+  def apiChannelFromRawChannel(rawChannel: RawChannel): ApiChannel = {
     ApiChannel(
       section = Some(getApiSectionReferenceFromRawChannel(rawChannel)),
       breadcrumb = Some(getBreadcrumb(rawChannel)))
@@ -57,7 +57,7 @@ class RawToApiConverter {
         calcAdTag(parent, predicate) // channel is not advertised but has parents that may be, so go up in tree
     }
 
-  def trimPathForAdTag(path: String ) = {
+  private[converter] def trimPathForAdTag(path: String): String = {
     val pathWithoutLeadingAndTrailingSlashes = path.stripPrefix("/").stripSuffix("/").trim
     Option(pathWithoutLeadingAndTrailingSlashes).filter(_.nonEmpty).getOrElse("sonstiges")
   }
@@ -99,7 +99,9 @@ class RawToApiConverter {
       rawChannel.config.header.map(_.unwrappedSectionReferences).getOrElse(Nil)
     )
     ApiHeaderConfiguration(
-      title = rawChannel.config.header.flatMap(_.label),
+      label = rawChannel.config.header.flatMap(_.label),
+      logo = rawChannel.config.header.flatMap(_.logo),
+      slogan = rawChannel.config.header.flatMap(_.slogan),
       sectionReferences = Some(apiSectionReferences)
     )
   }

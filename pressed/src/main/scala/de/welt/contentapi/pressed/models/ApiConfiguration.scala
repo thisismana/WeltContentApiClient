@@ -63,10 +63,14 @@ case class ApiSponsoringConfiguration(name: Option[String] = None)
 /**
   * Some configuration for the section or content page header. Not the real page header.
   *
-  * @param title             title of page
+  * @param label             label for the section/content page. Used by escenic section title but can be overridden by janus/cmcf
+  * @param logo              mapping name for the client. When a logo is configured by janus/cmcf it overrides the label
+  * @param slogan            optional slogan for the label/logo
   * @param sectionReferences section refs for linking
   */
-case class ApiHeaderConfiguration(title: Option[String] = None,
+case class ApiHeaderConfiguration(label: Option[String] = None,
+                                  logo: Option[String] = None,
+                                  slogan: Option[String] = None,
                                   sectionReferences: Option[Seq[ApiReference]] = None) {
   lazy val unwrappedSectionReferences: Seq[ApiReference] = sectionReferences.getOrElse(Nil)
 }

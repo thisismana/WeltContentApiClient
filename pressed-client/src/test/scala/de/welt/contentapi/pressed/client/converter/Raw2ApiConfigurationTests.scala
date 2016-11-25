@@ -68,7 +68,7 @@ class Raw2ApiConfigurationTests extends FlatSpec with Matchers with MustVerb {
     val apiConfiguration: ApiConfiguration = converter.apiConfigurationFromRawChannel(node100)
     apiConfiguration.commercial.flatMap(_.pathForAdTag).isDefined shouldBe true
       apiConfiguration.theme.flatMap(_.name).isDefined shouldBe true
-      apiConfiguration.header.flatMap(_.title).isDefined shouldBe true
+      apiConfiguration.header.flatMap(_.label).isDefined shouldBe true
       apiConfiguration.meta.flatMap(_.title).isDefined shouldBe true
       apiConfiguration.sponsoring.flatMap(_.name).isDefined shouldBe true
     }
