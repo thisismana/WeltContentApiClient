@@ -258,6 +258,7 @@ trait RawChannelStage {
   val label: String
   val references: Option[Seq[RawSectionReference]] = None
   val teaserLimit: Option[Int] = None
+  val commercial: Option[String] = None
 
   lazy val unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
 }
@@ -303,12 +304,10 @@ case class RawChannelStageModule(index: Int,
   * @param index      index of the stage (ordering)
   * @param label      display name of the stage
   * @param references optional section references. Example: Link to Mediathek A-Z.
-  * @param commercial mapping string with the name of the commercial. E.g. MediumRectangle
   */
 case class RawChannelStageCommercial(index: Int,
                                      label: String,
-                                     override val references: Option[Seq[RawSectionReference]] = None,
-                                     commercial: Option[String] = None) extends RawChannelStage {
+                                     override val references: Option[Seq[RawSectionReference]] = None) extends RawChannelStage {
   override val `type`: String = "commercial"
   override val teaserLimit: Option[Int] = None
 }
