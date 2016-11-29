@@ -289,14 +289,14 @@ case class RawChannelStageContent(index: Int,
   * @param index       index of the stage (ordering)
   * @param label       display name of the stage
   * @param references  optional section references. Example: Link to Mediathek A-Z.
-  * @param teaserLimit todo harry
-  * @param module      todo harry
+  * @param teaserLimit set hard limit for teaser count
+  * @param module      name used for matching existing Modules in Digger
   */
 case class RawChannelStageModule(index: Int,
                                  label: String,
+                                 module: String,
                                  override val references: Option[Seq[RawSectionReference]] = None,
-                                 override val teaserLimit: Option[Int] = None,
-                                 module: Option[String] = None) extends RawChannelStage {
+                                 override val teaserLimit: Option[Int] = None) extends RawChannelStage {
   override val `type`: String = "module"
 }
 
