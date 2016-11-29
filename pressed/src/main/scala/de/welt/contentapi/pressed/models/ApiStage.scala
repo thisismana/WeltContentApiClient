@@ -8,10 +8,10 @@ case class ApiStage(teasers: Seq[ApiTeaser],
 
 case class ApiStageConfiguration(layout: String,
                                  label: Option[String],
-                                 sectionReference: Option[Seq[ApiReference]] = None,
+                                 sectionReferences: Option[Seq[ApiReference]] = None,
                                  commercials: Option[Seq[String]] = None) {
 
-  def getUnwrappedCommercials = commercials.getOrElse(Nil)
+  lazy val getUnwrappedCommercials = commercials.getOrElse(Nil)
+  lazy val unwrappedSectionReferences: Seq[ApiReference] = sectionReferences.getOrElse(Seq.empty)
 }
-
 
