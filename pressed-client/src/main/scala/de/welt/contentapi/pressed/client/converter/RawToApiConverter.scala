@@ -105,8 +105,9 @@ class RawToApiConverter {
       sectionReferences = Some(apiSectionReferences)
     )
   }
-
-  private[converter] def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]): Seq[ApiReference] = {
+  /** Simple Raw Reference -> Api Reference Converter
+  */
+  def apiSectionReferencesFromRawSectionReferences(references: Seq[RawSectionReference]): Seq[ApiReference] = {
     references.map(ref ⇒ ApiReference(ref.label, ref.path))
   }
 
