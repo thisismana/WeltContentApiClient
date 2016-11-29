@@ -42,6 +42,7 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
         Json.parse(tree).validate[RawChannel] match {
           case s: JsSuccess[RawChannel] ⇒
             log.info(s"Loaded/Refreshed raw tree for $env")
+            // todo (mana): call update parents on raw tree
             s.asOpt
           case e: JsError ⇒
             log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
