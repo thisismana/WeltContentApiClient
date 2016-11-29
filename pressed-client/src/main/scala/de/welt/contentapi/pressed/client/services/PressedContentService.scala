@@ -24,7 +24,9 @@ trait PressedContentService {
 }
 
 @Singleton
-class PressedContentServiceImpl @Inject()(contentService: ContentService, converter: RawToApiConverter, rawTreeService: RawTreeService)
+class PressedContentServiceImpl @Inject()(contentService: ContentService,
+                                          converter: RawToApiConverter,
+                                          rawTreeService: RawTreeService)
   extends PressedContentService with Loggable {
 
   // TODO (harry) add metrics with timings
