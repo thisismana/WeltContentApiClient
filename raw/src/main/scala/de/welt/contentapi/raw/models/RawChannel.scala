@@ -2,7 +2,7 @@ package de.welt.contentapi.raw.models
 
 import java.time.Instant
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Json}
 
 import scala.annotation.tailrec
 
@@ -227,34 +227,41 @@ case class RawChannelHeader(sponsoring: Option[String] = None,
 case class RawMetadata(changedBy: String = "system",
                        lastModifiedDate: Long = Instant.now.toEpochMilli)
 
+
+sealed trait RawChannelStage {
+  val `type`: String
+  val index: Int
+}
+
 object RawChannelStage {
+
+  val module = "module"
+  val customModule = "custom-module"
+  val commercial = "commercial"
 
   import de.welt.contentapi.raw.models.RawFormats.{rawChannelStageCommercialFormat, rawChannelStageContentFormat, rawChannelStageModuleFormat}
 
   /**
     * http://stackoverflow.com/questions/17021847/noise-free-json-format-for-sealed-traits-with-play-2-2-library
     */
-  def unapply(rawChannelStage: RawChannelStage): Option[(String, JsValue)] = {
-    val (prod: Product, sub) = rawChannelStage match {
-      case customModule: RawChannelStageCustomModule => (customModule, Json.toJson(customModule)(rawChannelStageContentFormat))
-      case module: RawChannelStageModule => (module, Json.toJson(module)(rawChannelStageModuleFormat))
-      case commercial: RawChannelStageCommercial => (commercial, Json.toJson(commercial)(rawChannelStageCommercialFormat))
+  def unapply(rawChannelStage: RawChannelStage): Option[JsValue] = {
+    rawChannelStage match {
+      case customModule: RawChannelStageCustomModule ⇒ Some(Json.toJson(customModule))
+      case module: RawChannelStageModule ⇒ Some(Json.toJson(module))
+      case commercial: RawChannelStageCommercial ⇒ Some(Json.toJson(commercial))
     }
-    Some(prod.productPrefix -> sub)
   }
 
-  def apply(`class`: String, data: JsValue): RawChannelStage = {
-    (`class` match {
-      case "RawChannelStageCustomModule" => Json.fromJson[RawChannelStageCustomModule](data)(rawChannelStageContentFormat)
-      case "RawChannelStageModule" => Json.fromJson[RawChannelStageModule](data)(rawChannelStageModuleFormat)
-      case "RawChannelStageCommercial" => Json.fromJson[RawChannelStageCommercial](data)(rawChannelStageCommercialFormat)
-    }).get
+  def apply(data: JsValue): RawChannelStage = {
+    ((data \ "type").as[String] match {
+      case RawChannelStage.customModule => Json.fromJson[RawChannelStageCustomModule](data)
+      case RawChannelStage.module => Json.fromJson[RawChannelStageModule](data)
+      case RawChannelStage.commercial => Json.fromJson[RawChannelStageCommercial](data)
+    }) match {
+      case JsSuccess(value, _) ⇒ value
+      case JsError(err) ⇒ throw new IllegalArgumentException(err.toString())
+    }
   }
-}
-
-trait RawChannelStage {
-  val `type`: String
-  val index: Int
 }
 
 /**
@@ -272,12 +279,12 @@ trait RawChannelStage {
 case class RawChannelStageCustomModule(index: Int,
                                        module: String,
                                        references: Option[Seq[RawSectionReference]] = None,
-                                       labelOverride: String,
+                                       labelOverride: Option[String] = None,
                                        teaserLimitOverride: Option[Int] = None,
                                        sourceOverride: Option[String] = None,
-                                       desktopLayoutOverride: Option[String] = None
+                                       desktopLayoutOverride: Option[String] = None,
+                                       `type`: String = RawChannelStage.customModule
                                        ) extends RawChannelStage {
-  override val `type`: String = "content"
   lazy val unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
 }
 
@@ -288,16 +295,15 @@ case class RawChannelStageCustomModule(index: Int,
   * @param module      name used for matching existing Modules in Digger
   */
 case class RawChannelStageModule(index: Int,
-                                 module: String
+                                 module: String,
+                                 `type`: String = RawChannelStage.module
                                  ) extends RawChannelStage {
-  override val `type`: String = "module"
 }
 
 /**
   * @param index      index of the stage (ordering)
   * @param format     identifier of Advertorial, e.g. Billboard
   */
-case class RawChannelStageCommercial(index: Int, format: String) extends RawChannelStage {
-  override val `type`: String = "commercial"
+case class RawChannelStageCommercial(index: Int, format: String, `type`: String = RawChannelStage.commercial) extends RawChannelStage {
 }
 
