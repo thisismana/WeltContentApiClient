@@ -245,19 +245,20 @@ object RawChannelStage {
   /**
     * http://stackoverflow.com/questions/17021847/noise-free-json-format-for-sealed-traits-with-play-2-2-library
     */
-  def unapply(rawChannelStage: RawChannelStage): Option[JsValue] = {
-    rawChannelStage match {
-      case customModule: RawChannelStageCustomModule ⇒ Some(Json.toJson(customModule))
-      case module: RawChannelStageModule ⇒ Some(Json.toJson(module))
-      case commercial: RawChannelStageCommercial ⇒ Some(Json.toJson(commercial))
-    }
-  }
-
-  def apply(data: JsValue): RawChannelStage = {
-    ((data \ "type").as[String] match {
-      case RawChannelStage.customModule => Json.fromJson[RawChannelStageCustomModule](data)
-      case RawChannelStage.module => Json.fromJson[RawChannelStageModule](data)
-      case RawChannelStage.commercial => Json.fromJson[RawChannelStageCommercial](data)
+//  def unapply(rawChannelStage: RawChannelStage): Option[JsValue] = {
+//    rawChannelStage match {
+//      case customModule: RawChannelStageCustomModule ⇒ Some(Json.toJson(customModule))
+//      case module: RawChannelStageModule ⇒ Some(Json.toJson(module))
+//      case commercial: RawChannelStageCommercial ⇒ Some(Json.toJson(commercial))
+//    }
+//  }
+//
+// this is only used by tests
+  def apply(foo: JsValue): RawChannelStage = {
+    ((foo \ "type").as[String] match {
+      case RawChannelStage.customModule => Json.fromJson[RawChannelStageCustomModule](foo)
+      case RawChannelStage.module => Json.fromJson[RawChannelStageModule](foo)
+      case RawChannelStage.commercial => Json.fromJson[RawChannelStageCommercial](foo)
     }) match {
       case JsSuccess(value, _) ⇒ value
       case JsError(err) ⇒ throw new IllegalArgumentException(err.toString())

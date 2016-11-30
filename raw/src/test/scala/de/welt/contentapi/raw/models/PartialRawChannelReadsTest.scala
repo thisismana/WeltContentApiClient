@@ -8,6 +8,11 @@ class PartialRawChannelReadsTest extends PlaySpec {
   "PartialRawChannelReads" should {
 
     trait Fixture {
+      private val channelStage = RawChannelStage(Json.toJson(
+        RawChannelStageCustomModule(
+          index = 1,
+          module = "module",
+          sourceOverride = Some("source-override")))(RawWrites.rawChannelStageCustomModuleWrites))
       val j = JsObject(Map(
         "id" → JsObject(Map(
           "path" → JsString("le-path"),
@@ -17,11 +22,7 @@ class PartialRawChannelReadsTest extends PlaySpec {
         "config" → Json.toJson(RawChannelConfiguration())(RawWrites.rawChannelConfigurationWrites),
         "metadata" → Json.toJson(RawMetadata())(RawWrites.rawMetadataWrites),
         "stages" → JsArray(Seq(
-          Json.toJson(RawChannelStage(Json.toJson(
-            RawChannelStageCustomModule(
-              index = 1,
-              module = "module",
-              sourceOverride = Some("source-override")))(RawWrites.rawChannelStageContentWrites)))(RawWrites.rawChannelStageWrites)))
+          Json.toJson(channelStage)(RawWrites.rawChannelStageWrites)))
       ))
     }
 
