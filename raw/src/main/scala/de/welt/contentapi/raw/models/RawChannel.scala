@@ -231,6 +231,7 @@ case class RawMetadata(changedBy: String = "system",
 sealed trait RawChannelStage {
   val `type`: String
   val index: Int
+  val hidden: Boolean
 }
 
 object RawChannelStage {
@@ -278,6 +279,7 @@ object RawChannelStage {
   */
 case class RawChannelStageCustomModule(index: Int,
                                        module: String,
+                                       hidden: Boolean = false,
                                        references: Option[Seq[RawSectionReference]] = None,
                                        labelOverride: Option[String] = None,
                                        teaserLimitOverride: Option[Int] = None,
@@ -296,6 +298,7 @@ case class RawChannelStageCustomModule(index: Int,
   */
 case class RawChannelStageModule(index: Int,
                                  module: String,
+                                 hidden: Boolean = false,
                                  `type`: String = RawChannelStage.module
                                  ) extends RawChannelStage {
 }
@@ -304,6 +307,6 @@ case class RawChannelStageModule(index: Int,
   * @param index      index of the stage (ordering)
   * @param format     identifier of Advertorial, e.g. Billboard
   */
-case class RawChannelStageCommercial(index: Int, format: String, `type`: String = RawChannelStage.commercial) extends RawChannelStage {
+case class RawChannelStageCommercial(index: Int, format: String, hidden: Boolean = false,`type`: String = RawChannelStage.commercial) extends RawChannelStage {
 }
 
