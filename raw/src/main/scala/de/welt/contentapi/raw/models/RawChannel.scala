@@ -236,7 +236,7 @@ object RawChannelStage {
     */
   def unapply(rawChannelStage: RawChannelStage): Option[(String, JsValue)] = {
     val (prod: Product, sub) = rawChannelStage match {
-      case content: RawChannelStageContent => (content, Json.toJson(content)(rawChannelStageContentFormat))
+      case customModule: RawChannelStageCustomModule => (customModule, Json.toJson(customModule)(rawChannelStageContentFormat))
       case module: RawChannelStageModule => (module, Json.toJson(module)(rawChannelStageModuleFormat))
       case commercial: RawChannelStageCommercial => (commercial, Json.toJson(commercial)(rawChannelStageCommercialFormat))
     }
@@ -245,7 +245,7 @@ object RawChannelStage {
 
   def apply(`class`: String, data: JsValue): RawChannelStage = {
     (`class` match {
-      case "RawChannelStageContent" => Json.fromJson[RawChannelStageContent](data)(rawChannelStageContentFormat)
+      case "RawChannelStageCustomModule" => Json.fromJson[RawChannelStageCustomModule](data)(rawChannelStageContentFormat)
       case "RawChannelStageModule" => Json.fromJson[RawChannelStageModule](data)(rawChannelStageModuleFormat)
       case "RawChannelStageCommercial" => Json.fromJson[RawChannelStageCommercial](data)(rawChannelStageCommercialFormat)
     }).get
@@ -255,60 +255,49 @@ object RawChannelStage {
 trait RawChannelStage {
   val `type`: String
   val index: Int
-  val label: String
-  val references: Option[Seq[RawSectionReference]] = None
-  val teaserLimit: Option[Int] = None
-  val commercial: Option[String] = None
-
-  lazy val unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
 }
 
 /**
   * @param index          index of the stage (ordering)
-  * @param label          display name of the stage
+  * @param module         identifier for the used Module, e.g. ChannelHero
+  * @param labelOverride          display name of the stage
   * @param references     optional section references. Example: Link to Mediathek A-Z.
-  * @param teaserLimit    todo harry
+  * @param teaserLimitOverride    todo harry
   * @param sourceOverride the default source is always the current channel path. This is a override.
-  * @param desktopLayout  mapping string for a (desktop) layout name. The mapping is for Digger and Clients.
+  * @param desktopLayoutOverride  mapping string for a (desktop) layout name. The mapping is for Digger and Clients.
   *                       Why desktop and not mobile?
   *                       On a mobile device all teasers inside a stage are among each another. Only the desktop
   *                       breakpoint need some 'hints' to structure the teasers. Example: 1/3 1/3 1/3 teaser row.
   */
-case class RawChannelStageContent(index: Int,
-                                  label: String,
-                                  override val references: Option[Seq[RawSectionReference]] = None,
-                                  override val teaserLimit: Option[Int] = None,
-                                  sourceOverride: Option[String] = None,
-                                  desktopLayout: Option[String] = None) extends RawChannelStage {
+case class RawChannelStageCustomModule(index: Int,
+                                       module: String,
+                                       references: Option[Seq[RawSectionReference]] = None,
+                                       labelOverride: String,
+                                       teaserLimitOverride: Option[Int] = None,
+                                       sourceOverride: Option[String] = None,
+                                       desktopLayoutOverride: Option[String] = None
+                                       ) extends RawChannelStage {
   override val `type`: String = "content"
+  lazy val unwrappedReferences: Seq[RawSectionReference] = references.getOrElse(Nil)
 }
 
 /**
   * todo harry: WTF is a module?
   *
   * @param index       index of the stage (ordering)
-  * @param label       display name of the stage
-  * @param references  optional section references. Example: Link to Mediathek A-Z.
-  * @param teaserLimit set hard limit for teaser count
   * @param module      name used for matching existing Modules in Digger
   */
 case class RawChannelStageModule(index: Int,
-                                 label: String,
-                                 module: String,
-                                 override val references: Option[Seq[RawSectionReference]] = None,
-                                 override val teaserLimit: Option[Int] = None) extends RawChannelStage {
+                                 module: String
+                                 ) extends RawChannelStage {
   override val `type`: String = "module"
 }
 
 /**
   * @param index      index of the stage (ordering)
-  * @param label      display name of the stage
-  * @param references optional section references. Example: Link to Mediathek A-Z.
+  * @param format     identifier of Advertorial, e.g. Billboard
   */
-case class RawChannelStageCommercial(index: Int,
-                                     label: String,
-                                     override val references: Option[Seq[RawSectionReference]] = None) extends RawChannelStage {
+case class RawChannelStageCommercial(index: Int, format: String) extends RawChannelStage {
   override val `type`: String = "commercial"
-  override val teaserLimit: Option[Int] = None
 }
 
