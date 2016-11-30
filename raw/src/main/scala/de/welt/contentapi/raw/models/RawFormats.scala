@@ -40,7 +40,6 @@ object RawReads {
   implicit lazy val rawChannelStageCommercialReads = Json.reads[RawChannelStageCommercial]
   implicit lazy val rawChannelStageReads = new Reads[RawChannelStage] {
     override def reads(json: JsValue): JsResult[RawChannelStage] = {
-      val copyOfJson = json
       (json \ "type").as[String] match {
         case RawChannelStage.customModule =>
           Json.fromJson[RawChannelStageCustomModule](json)
@@ -48,10 +47,6 @@ object RawReads {
           Json.fromJson[RawChannelStageModule](json)
         case RawChannelStage.commercial =>
           Json.fromJson[RawChannelStageCommercial](json)
-        case _ =>
-          println(s"extractor -> ${(json \ "type").as[String]}")
-          Json.prettyPrint(copyOfJson)
-          JsError("nope")
       }
     }
   }
