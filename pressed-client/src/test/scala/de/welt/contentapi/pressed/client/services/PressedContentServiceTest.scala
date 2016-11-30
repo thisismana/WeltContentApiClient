@@ -18,6 +18,7 @@ import org.mockito.Matchers.any
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
+//noinspection ScalaStyle
 class PressedContentServiceTest extends FlatSpec
   with Matchers with MustVerb with MockitoSugar {
 
@@ -77,7 +78,7 @@ class PressedContentServiceTest extends FlatSpec
   "PressedContentService" must "enrich an ApiResponse based on its home section" in new TestScope {
     // Given
     when(contentService
-      .find("1234567890", showRelated = true)(None, executionContext))
+      .find(id = "1234567890", showRelated = true)(None, executionContext))
       .thenReturn(eventualApiResponse)
     when(rawTreeService.root(any())).thenReturn(Some(root))
 
@@ -93,7 +94,7 @@ class PressedContentServiceTest extends FlatSpec
     // Content from ApiResponse is present
     apiPressedContent.content.id shouldBe apiContent.id
     // Related from ApiResponse is present
-    apiPressedContent.related shouldBe relatedAsOptionSeq
+    apiPressedContent.related shouldBe relatedAsOptionSeq.map(_.map(x ⇒ ApiPressedContent(x)))
   }
 
 }

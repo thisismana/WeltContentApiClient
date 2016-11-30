@@ -4,9 +4,10 @@ import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
 import de.welt.contentapi.core.client.models.ApiContentSearch
-import de.welt.contentapi.core.models.ApiContent
-import de.welt.contentapi.core.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
+import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.core.client.services.http.RequestHeaders
+import de.welt.contentapi.core.models.ApiContent
+import play.api.Configuration
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 
@@ -30,7 +31,7 @@ sealed trait ContentSearchService {
     *         max allowed is `ContentSearchServiceImpl.maxResultSize`
     *         `ContentSearchServiceImpl.defaultResultSize` if `None` was passed
     */
-  def sanitizeLimit(maybeLimit: Option[Int]) :Int = {
+  def sanitizeLimit(maybeLimit: Option[Int]): Int = {
     maybeLimit.map(l => Math.abs(Math.min(l, maxResultSize))) getOrElse defaultResultSize
   }
 }
@@ -38,20 +39,19 @@ sealed trait ContentSearchService {
 @Singleton
 class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
                                          override val metrics: Metrics,
-                                         cfg: ContentClientConfig)
+                                         cfg: Configuration)
   extends AbstractService[Seq[ApiContent]] with ContentSearchService {
 
   import de.welt.contentapi.core.models.ApiReads.apiContentReads
 
-  override def config: ServiceConfiguration = cfg.getServiceConfig(serviceName)
-
-  override def jsonValidate: (JsLookupResult) => JsResult[Seq[ApiContent]] = json => json.validate[Seq[ApiContent]]
+  override val config: ServiceConfiguration = ServiceConfiguration(serviceName, cfg)
+  override val jsonValidate: (JsLookupResult) => JsResult[Seq[ApiContent]] = json => json.validate[Seq[ApiContent]]
 
   override def search(apiContentSearch: ApiContentSearch)
                      (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[Seq[ApiContent]] = {
 
 
-    get(Nil, apiContentSearch.getAllParamsUnwrapped, Nil)
+    get(urlArguments = Nil, parameters = apiContentSearch.getAllParamsUnwrapped)
   }
 
 }

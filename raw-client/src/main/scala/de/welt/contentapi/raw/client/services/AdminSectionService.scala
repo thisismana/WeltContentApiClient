@@ -4,14 +4,13 @@ import java.time.Instant
 import javax.inject.{Inject, Singleton}
 
 import com.google.common.base.Stopwatch
-import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw.models.{ChannelUpdate, RawChannel, RawChannelConfiguration, RawChannelStage}
 import de.welt.contentapi.utils.Env.{Env, Live, Preview}
 import de.welt.contentapi.utils.Loggable
-import play.api.{Configuration, Environment, Mode}
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Environment}
 
 trait AdminSectionService extends RawTreeService {
 
@@ -69,6 +68,7 @@ class AdminSectionServiceImpl @Inject()(config: Configuration,
       maybeRoot.foreach(root ⇒ saveChannel(root)(env))
       mergeResult
     }
+
     log.info(s"[Sync] starting sync. ")
     val stopwatch = Stopwatch.createStarted()
     val updates = legacySectionService.getSectionData.toChannel
@@ -194,7 +194,8 @@ object ChannelTools extends Loggable {
 
   /**
     * copies some data from the `legacyRoot` tree to the `current` tree
-    * @param current the destination where to write updates to
+    *
+    * @param current    the destination where to write updates to
     * @param legacyRoot the source object where to read updates from
     */
   def updateData(current: RawChannel, legacyRoot: RawChannel): Unit = {

@@ -1,7 +1,6 @@
 package de.welt.contentapi.raw.client.services
 
 import com.google.inject.{Inject, Singleton}
-import de.welt.contentapi.core.client.services.configuration.ContentClientConfig
 import de.welt.contentapi.core.client.services.s3.S3Client
 import de.welt.contentapi.raw.client.models.{SdpSectionData, SdpSectionDataReads}
 import de.welt.contentapi.utils.Loggable

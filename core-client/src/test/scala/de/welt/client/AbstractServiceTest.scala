@@ -82,9 +82,9 @@ class AbstractServiceTest extends PlaySpec
     }
 
     "forward the headers" in new TestScope {
-      implicit val requestHeaders: Option[RequestHeaders] = Some(Seq("foo" -> "bar"))
+      implicit val requestHeaders: Option[RequestHeaders] = Some(Seq("X-Unique-Id" -> "bar"))
       new TestService().get(Seq("fake-id"), Seq.empty)
-      verify(mockRequest).withHeaders(("foo", "bar"))
+      verify(mockRequest).withHeaders(("X-Unique-Id", "bar"))
     }
 
     "will return the expected result" in new TestScope {

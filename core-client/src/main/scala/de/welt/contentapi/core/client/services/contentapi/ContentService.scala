@@ -3,10 +3,11 @@ package de.welt.contentapi.core.client.services.contentapi
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
-import de.welt.contentapi.core.models.ApiResponse
-import de.welt.contentapi.core.client.services.configuration.{ContentClientConfig, ServiceConfiguration}
+import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
 import de.welt.contentapi.core.client.services.http.RequestHeaders
+import de.welt.contentapi.core.models.ApiResponse
 import de.welt.contentapi.utils.Loggable
+import play.api.Configuration
 import play.api.libs.json.{JsLookupResult, JsResult}
 import play.api.libs.ws.WSClient
 
@@ -23,14 +24,13 @@ trait ContentService {
 @Singleton
 class ContentServiceImpl @Inject()(override val ws: WSClient,
                                    override val metrics: Metrics,
-                                   funkConfig: ContentClientConfig)
+                                   cfg: Configuration)
   extends AbstractService[ApiResponse] with ContentService with Loggable {
 
   import de.welt.contentapi.core.models.ApiReads._
 
-  override def jsonValidate: JsLookupResult ⇒ JsResult[ApiResponse] = _.validate[ApiResponse]
-
-  override def config: ServiceConfiguration = funkConfig.getServiceConfig(serviceName)
+  override val jsonValidate: JsLookupResult ⇒ JsResult[ApiResponse] = _.validate[ApiResponse]
+  override val config: ServiceConfiguration = ServiceConfiguration(serviceName, cfg)
 
   override def find(id: String, showRelated: Boolean)
                    (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiResponse] = {
@@ -40,7 +40,7 @@ class ContentServiceImpl @Inject()(override val ws: WSClient,
     } else {
       Seq.empty
     }
-    get(Seq(id), parameters, Nil)
+    get(urlArguments = Seq(id), parameters = parameters)
   }
 }
 

@@ -2,7 +2,6 @@ package de.welt.client
 
 import java.io.File
 
-import de.welt.contentapi.core.client.services.configuration.ContentClientConfigImpl
 import de.welt.contentapi.core.client.services.s3.S3ClientImpl
 import org.scalatestplus.play.PlaySpec
 import play.api.{Configuration, Environment, Mode}
@@ -11,8 +10,6 @@ class S3ClientTest extends PlaySpec {
 
   val prodEnv = Environment(new File("."), getClass.getClassLoader, Mode.Prod)
   val devEnv = Environment(new File("."), getClass.getClassLoader, Mode.Dev)
-
-  class FunkConfigTestImpl(override val configuration: Configuration) extends ContentClientConfigImpl(configuration)
 
   "S3" should {
 

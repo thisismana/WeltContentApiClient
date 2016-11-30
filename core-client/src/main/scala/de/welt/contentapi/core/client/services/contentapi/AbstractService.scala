@@ -37,16 +37,14 @@ trait AbstractService[T] extends Loggable with Status {
   def jsonValidate: JsLookupResult => JsResult[T]
 
   /**
-    * @param ids string interpolation parameter for endpoint. e.g. /foo/%s/bar/%s
-    * @param parameters
-    * @param enforcedHeaders manually set headers for the GET request
+    * @param urlArguments            string interpolation arguments for endpoint. e.g. /foo/%s/bar/%s see [[java.lang.String#format}]]
+    * @param parameters              URL parameters to be sent with the request
     * @param forwardedRequestHeaders forwarded request headers from the controller e.g. API key
-    * @param executionContext
+    * @param executionContext        pass in an execution context for async processing/mapping
     * @return
     */
-  def get(ids: Seq[String] = Nil,
-          parameters: Seq[(String, String)] = Nil,
-          enforcedHeaders: RequestHeaders = Nil)
+  def get(urlArguments: Seq[String] = Nil,
+          parameters: Seq[(String, String)] = Nil)
          (implicit forwardedRequestHeaders: Option[RequestHeaders] = None, executionContext: ExecutionContext): Future[T] = {
 
     def parseJson(json: JsLookupResult): T = jsonValidate(json) match {
@@ -56,11 +54,11 @@ trait AbstractService[T] extends Loggable with Status {
 
     val context = initializeMetricsContext(config.serviceName)
 
-    val url: String = config.host + config.endpoint.format(ids: _*)
+    val url: String = config.host + config.endpoint.format(urlArguments: _*)
 
     val getRequest: WSRequest = ws.url(url)
       .withQueryString(parameters: _*)
-      .withHeaders(enforcedHeaders ++ forwardHeaders(forwardedRequestHeaders): _*)
+      .withHeaders(forwardHeaders(forwardedRequestHeaders): _*)
       .withAuth(config.username, config.password, WSAuthScheme.BASIC)
 
     log.debug(s"HTTP GET to ${getRequest.uri}")
@@ -79,16 +77,16 @@ trait AbstractService[T] extends Loggable with Status {
 
   /**
     * headers to be forwarded from client to server, e.g. the `X-Unique-Id`
-    * @param maybeHeaders [[Headers]] from the incoming [[play.api.mvc.Request]]
     *
+    * @param maybeHeaders [[Headers]] from the incoming [[play.api.mvc.Request]]
     * @return tuples of type String for headers to be forwarded
     */
   def forwardHeaders(maybeHeaders: Option[RequestHeaders]): RequestHeaders = {
     maybeHeaders.map(_.toMap[String, String]).flatMap(_.get("X-Unique-Id"))
-      match {
-        case Some(value) ⇒ Seq(("X-Unique-Id", value))
-        case _ ⇒ Nil
-      }
+    match {
+      case Some(value) ⇒ Seq(("X-Unique-Id", value))
+      case _ ⇒ Nil
+    }
   }
 
   protected def initializeMetricsContext(name: String): Timer.Context = {
