@@ -14,7 +14,7 @@ class CoreModule extends Module {
 
       bind(classOf[S3Client]).to(classOf[S3ClientImpl]),
 
-      bind(classOf[ContentService]).to(classOf[ContentServiceImpl]).eagerly,
+      bind(classOf[ContentService]).to(classOf[ContentServiceImpl]),
       bind(classOf[ContentSearchService]).to(classOf[ContentSearchServiceImpl])
     )
   }

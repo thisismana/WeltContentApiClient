@@ -40,10 +40,10 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
       s3Client.get(bucket, objectKeyForEnv(env)).flatMap { tree ⇒
         import de.welt.contentapi.raw.models.RawReads._
         Json.parse(tree).validate[RawChannel] match {
-          case s: JsSuccess[RawChannel] ⇒
+          case JsSuccess(root, _) ⇒
             log.info(s"Loaded/Refreshed raw tree for $env")
-            // todo (mana): call update parents on raw tree
-            s.asOpt
+            root.updateParentRelations()
+            Some(root)
           case e: JsError ⇒
             log.error(f"JsError parsing S3 file: '$bucket%s/$file%s'. " + JsError.toJson(e).toString())
             None
