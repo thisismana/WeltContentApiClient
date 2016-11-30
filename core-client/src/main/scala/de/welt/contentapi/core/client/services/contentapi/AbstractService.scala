@@ -6,6 +6,7 @@ import de.welt.contentapi.core.client.services.configuration.ServiceConfiguratio
 import de.welt.contentapi.core.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
 import de.welt.contentapi.core.client.services.http.RequestHeaders
 import de.welt.contentapi.utils.Loggable
+import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsError, JsLookupResult, JsResult, JsSuccess}
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest}
@@ -18,6 +19,14 @@ trait AbstractService[T] extends Loggable with Status {
   /** these need to be provided by the implementing services */
   val ws: WSClient
   val metrics: Metrics
+  val configuration: Configuration
+
+  /**
+    * this service's name
+    *
+    * @return service name
+    */
+  def serviceName: String
 
   /**
     * This must provide a [[ServiceConfiguration]]. It will be used to
@@ -25,7 +34,7 @@ trait AbstractService[T] extends Loggable with Status {
     *
     * @return a [[ServiceConfiguration]]
     */
-  def config: ServiceConfiguration
+  protected[contentapi] def config: ServiceConfiguration = ServiceConfiguration(s"welt.api.$serviceName", configuration)
 
   /**
     * This must provide a function that maps a [[JsLookupResult]] to a [[JsResult]].

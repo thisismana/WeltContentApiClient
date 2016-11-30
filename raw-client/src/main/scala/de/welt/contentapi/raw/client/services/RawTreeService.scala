@@ -38,8 +38,7 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
 
     cache.getOrElse(s"rawChannelData-$env", 10.minutes) {
       s3Client.get(bucket, objectKeyForEnv(env)).flatMap { tree ⇒
-        import de.welt.contentapi.raw.models.RawReads._
-        Json.parse(tree).validate[RawChannel] match {
+        Json.parse(tree).validate[RawChannel](de.welt.contentapi.raw.models.RawReads.rawChannelReads) match {
           case JsSuccess(root, _) ⇒
             log.info(s"Loaded/Refreshed raw tree for $env")
             root.updateParentRelations()

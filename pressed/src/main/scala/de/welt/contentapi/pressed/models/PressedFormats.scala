@@ -42,7 +42,7 @@ object PressedReads {
 
   implicit lazy val apiTeaserReads = Json.reads[ApiTeaser]
   implicit lazy val apiStageReads = Json.reads[ApiStage]
-  implicit lazy val apiPressedSectionReads = Json.reads[ApiPressedSection]
+  implicit lazy val apiPressedSectionReads: Reads[ApiPressedSection] = Json.reads[ApiPressedSection]
 }
 
 object PressedWrites {

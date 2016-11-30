@@ -6,6 +6,8 @@ import de.welt.contentapi.raw.models.RawChannelConfiguration
 import de.welt.contentapi.utils.Env.Live
 import de.welt.testing.DisabledCache
 import de.welt.testing.testHelper.raw.channel.emptyWithId
+import org.mockito.Matchers.anyString
+import org.mockito.Mockito.{verify, when}
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -19,8 +21,7 @@ class AdminSectionServiceTest extends PlaySpec with MockitoSugar {
     val configData = Map(
       RawTreeServiceImpl.bucketConfigKey → "le-bucket",
       RawTreeServiceImpl.fileConfigKey → "le-file")
-    private val configuration = Configuration.from(configData
-    )
+    private val configuration = Configuration.from(configData)
     val asService = new AdminSectionServiceImpl(configuration, s3, Environment.simple(), mock[SdpSectionDataService], DisabledCache)
   }
 
@@ -31,7 +32,8 @@ class AdminSectionServiceTest extends PlaySpec with MockitoSugar {
 
       // given
       val root = emptyWithId(0)
-      Mockito.when(s3.get(Matchers.anyString(), Matchers.anyString())).thenReturn(Some(Json.toJson(root)(channelWrites).toString))
+      private val json = Json.toJson(root)(channelWrites).toString
+      when(s3.get(anyString, anyString)).thenReturn(Some(json))
 
       // when
       asService.updateChannel(root, RawChannelConfiguration(), "le-user", None)
@@ -39,7 +41,7 @@ class AdminSectionServiceTest extends PlaySpec with MockitoSugar {
       // then
       val bucket = configData.getOrElse(RawTreeServiceImpl.bucketConfigKey, "")
       val file = configData.getOrElse(RawTreeServiceImpl.fileConfigKey, "")
-      Mockito.verify(s3).putPrivate(Matchers.eq(bucket), Matchers.startsWith(file), Matchers.anyString(), Matchers.contains("json"))
+      verify(s3).putPrivate(Matchers.eq(bucket), Matchers.startsWith(file), anyString(), Matchers.contains("json"))
 
     }
   }

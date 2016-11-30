@@ -14,7 +14,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait ContentSearchService {
-  protected val serviceName = "search"
+
   val defaultResultSize = 12
   val maxResultSize = 30
 
@@ -39,12 +39,12 @@ sealed trait ContentSearchService {
 @Singleton
 class ContentSearchServiceImpl @Inject()(override val ws: WSClient,
                                          override val metrics: Metrics,
-                                         cfg: Configuration)
+                                         override val configuration: Configuration)
   extends AbstractService[Seq[ApiContent]] with ContentSearchService {
 
   import de.welt.contentapi.core.models.ApiReads.apiContentReads
 
-  override val config: ServiceConfiguration = ServiceConfiguration(serviceName, cfg)
+  override val serviceName = "search"
   override val jsonValidate: (JsLookupResult) => JsResult[Seq[ApiContent]] = json => json.validate[Seq[ApiContent]]
 
   override def search(apiContentSearch: ApiContentSearch)

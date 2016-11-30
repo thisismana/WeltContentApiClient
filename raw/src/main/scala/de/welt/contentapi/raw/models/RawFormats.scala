@@ -1,6 +1,5 @@
 package de.welt.contentapi.raw.models
 
-import de.welt.contentapi.raw.models.legacy.{ApiChannel, ApiChannelData, ApiChannelMetadataNew}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -24,7 +23,6 @@ object RawFormats {
 
   implicit lazy val rawMetadataFormat = Format[RawMetadata](rawMetadataReads, rawMetadataWrites)
   implicit lazy val rawChannelConfigurationFormat = Format[RawChannelConfiguration](rawChannelConfigurationReads, rawChannelConfigurationWrites)
-  //  implicit lazy val rawChannelFormat = Format[RawChannel](rawChannelReads, rawChannelWrites)
 }
 
 object RawReads {
@@ -69,16 +67,14 @@ object RawWrites {
   implicit lazy val rawChannelStageModuleWrites = Json.writes[RawChannelStageModule]
   implicit lazy val rawChannelStageCommercialWrites = Json.writes[RawChannelStageCommercial]
   implicit lazy val rawChannelStageWrites = new Writes[RawChannelStage] {
-        override def writes(o: RawChannelStage): JsValue = o match {
-          case r: RawChannelStageCustomModule =>
-            Json.toJson(r)(rawChannelStageCustomModuleWrites)
-          case m: RawChannelStageModule =>
-            Json.toJson(m)(rawChannelStageModuleWrites)
-          case c: RawChannelStageCommercial =>
-            Json.toJson(c)(rawChannelStageCommercialWrites)
-          case _ =>
-            JsNull
-        }
+    override def writes(o: RawChannelStage): JsValue = o match {
+      case r: RawChannelStageCustomModule =>
+        Json.toJson(r)(rawChannelStageCustomModuleWrites)
+      case m: RawChannelStageModule =>
+        Json.toJson(m)(rawChannelStageModuleWrites)
+      case c: RawChannelStageCommercial =>
+        Json.toJson(c)(rawChannelStageCommercialWrites)
+    }
   }
 
   //Json.writes[RawChannelStage]

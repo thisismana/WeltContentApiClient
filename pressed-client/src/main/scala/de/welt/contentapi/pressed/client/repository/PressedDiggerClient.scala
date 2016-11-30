@@ -15,7 +15,6 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait PressedDiggerClient {
-  protected val serviceName = "digger"
 
   def findByPath(path: String, env: Env = Live)
                 (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedSection]
@@ -23,14 +22,13 @@ sealed trait PressedDiggerClient {
 
 case class PressedDiggerClientImpl @Inject()(override val ws: WSClient,
                                              override val metrics: Metrics,
-                                             cfg: Configuration)
+                                             override val configuration: Configuration)
   extends AbstractService[ApiPressedSection] with PressedDiggerClient {
-
-  override def config: ServiceConfiguration = ServiceConfiguration(serviceName, cfg)
 
   import de.welt.contentapi.pressed.models.PressedReads.apiPressedSectionReads
 
-  override def jsonValidate: (JsLookupResult) ⇒ JsResult[ApiPressedSection] = jsLookupResult ⇒
+  override val serviceName = "digger"
+  override val jsonValidate: (JsLookupResult) ⇒ JsResult[ApiPressedSection] = jsLookupResult ⇒
     jsLookupResult.validate[ApiPressedSection](apiPressedSectionReads)
 
   override def findByPath(path: String, env: Env = Live)
