@@ -19,7 +19,6 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{ExecutionContext, Future}
 
 trait LegacySectionService {
-  val serviceName: String = "legacy.section"
   def getByPath(path: String)(implicit requestHeaders: Option[RequestHeaders] = None,
                               executionContext: ExecutionContext): Future[ApiLegacyPressedSection]
 }
@@ -28,14 +27,14 @@ trait LegacySectionService {
 class LegacySectionServiceImpl @Inject()(pressedContentService: PressedContentService,
                                          treeService: RawTreeService,
                                          converter: RawToApiConverter,
-                                         cfg: Configuration,
+                                         override val configuration: Configuration,
                                          override val ws: WSClient,
                                          override val metrics: Metrics)
   extends AbstractService[ApiLegacySection] with LegacySectionService {
 
   import de.welt.contentapi.legacy.models.LegacyFormats._
 
-  override val config: ServiceConfiguration = ServiceConfiguration(serviceName, cfg)
+  override val serviceName: String = "legacy.section"
   override val jsonValidate: (JsLookupResult) ⇒ JsResult[ApiLegacySection] = json => json.validate[ApiLegacySection]
 
   override def getByPath(path: String)
