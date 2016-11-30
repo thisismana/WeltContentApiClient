@@ -256,6 +256,7 @@ trait RawChannelStage {
   val `type`: String
   val index: Int
   val label: String
+  val hidden: Boolean = false
   val references: Option[Seq[RawSectionReference]] = None
   val teaserLimit: Option[Int] = None
   val commercial: Option[String] = None
