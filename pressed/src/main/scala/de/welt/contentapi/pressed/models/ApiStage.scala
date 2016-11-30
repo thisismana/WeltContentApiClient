@@ -2,28 +2,24 @@ package de.welt.contentapi.pressed.models
 
 import de.welt.contentapi.core.models.ApiReference
 
-/**
-  * todo harry: add docs
-  * @param teasers
-  * @param configuration
+/** Stage Model for Rendering in Funkotron
+  * @param teasers All Teasers that belong to a Stage
+  * @param configuration Configuration for that stage, with layout, label etc.
   */
 case class ApiStage(teasers: Seq[ApiTeaser],
                     configuration: Option[ApiStageConfiguration] = None)
 
 /**
-  * todo harry: add docs
-  * @param layout
-  * @param hidden `true` == stage should not be rendered -- even with teasers
-  * @param label
-  * @param sectionReferences
-  * @param commercials
+  * @param layout "Default", "Hidden", "Carousel"
+  * @param label Label to show above a stage
+  * @param references References to render with href and label, e.g. Sub Ressorts
+  * @param commercials contains the format ids for the Ads
   */
-case class ApiStageConfiguration(layout: String,
-                                 hidden: Boolean,
+case class ApiStageConfiguration(layout: String = "Default",
                                  label: Option[String],
-                                 sectionReferences: Option[Seq[ApiReference]] = None,
+                                 references: Option[Seq[ApiReference]] = None,
                                  commercials: Option[Seq[String]] = None) {
   lazy val unwrappedCommercials: Seq[String] = commercials.getOrElse(Nil)
-  lazy val unwrappedSectionReferences: Seq[ApiReference] = sectionReferences.getOrElse(Nil)
+  lazy val unwrappedReferences: Seq[ApiReference] = references.getOrElse(Nil)
 }
 
