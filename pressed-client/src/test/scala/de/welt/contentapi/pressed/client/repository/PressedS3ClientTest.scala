@@ -50,7 +50,7 @@ class PressedS3ClientTest extends PlaySpec with MockitoSugar {
       when(s3Client.getWithLastModified(any(), any())).thenReturn(Some(s3Response))
 
       // When
-      private val maybeTuple: Option[(ApiPressedSection, Instant)] = pressedS3Client.find(path)
+      private val maybeTuple = pressedS3Client.find(path)
 
       // Then
       // compare the label, because equals method is not implemented

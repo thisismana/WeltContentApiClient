@@ -1,16 +1,15 @@
-package de.welt.client
+package de.welt.contentapi.core.client.services.contentapi
 
 import com.codahale.metrics.Timer.Context
 import com.kenshoo.play.metrics.Metrics
-import de.welt.contentapi.core.client.services.configuration.ServiceConfiguration
-import de.welt.contentapi.core.client.services.contentapi.AbstractService
 import de.welt.contentapi.core.client.services.exceptions.{HttpClientErrorException, HttpServerErrorException}
 import de.welt.contentapi.core.client.services.http.RequestHeaders
-import org.mockito.Matchers
 import org.mockito.Matchers.anyString
 import org.mockito.Mockito.{verify, when}
+import org.mockito.{Matchers, Mockito}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsLookupResult, JsResult, JsString}
@@ -41,12 +40,10 @@ class AbstractServiceTest extends PlaySpec
     when(mockWsClient.url(anyString)).thenReturn(mockRequest)
 
     class TestService extends AbstractService[String] {
-      override def config: ServiceConfiguration = TestService.config
-
+      override val serviceName: String = "test"
+      override val configuration: Configuration = TestService.configuration
       override val metrics: Metrics = metricsMock
-
-      override def jsonValidate: (JsLookupResult) => JsResult[String] = json => json.validate[String]
-
+      override val jsonValidate: (JsLookupResult) => JsResult[String] = json => json.validate[String]
       override val ws: WSClient = mockWsClient
 
       override protected def initializeMetricsContext(name: String): Context = mockTimerContext
@@ -55,7 +52,13 @@ class AbstractServiceTest extends PlaySpec
   }
 
   object TestService {
-    val config = ServiceConfiguration("test", "http://www.example.com", "/test/%s", "user", "pass")
+    val configuration = Configuration("welt.api.test" → Map(
+      "host" → "http://www.example.com",
+      "endpoint" → "/test/%s",
+      "credentials.username" → "user",
+      "credentials.password" → "pass"
+    ))
+//    val config = ServiceConfiguration("test", configuration)
   }
 
   "AbstractService" should {
@@ -72,8 +75,9 @@ class AbstractServiceTest extends PlaySpec
     }
 
     "forward the auth data" in new TestScope {
-      new TestService().get(Seq("fake-id"), Seq("foo" -> "bar"))
-      verify(mockRequest).withAuth(TestService.config.username, TestService.config.password, WSAuthScheme.BASIC)
+      private val service = new TestService()
+      service.get(Seq("fake-id"), Seq("foo" -> "bar"))
+      verify(mockRequest).withAuth(service.config.username, service.config.password, WSAuthScheme.BASIC)
     }
 
     "forward the query string data" in new TestScope {
