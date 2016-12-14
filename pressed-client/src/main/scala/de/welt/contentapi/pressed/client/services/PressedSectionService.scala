@@ -15,7 +15,7 @@ trait PressedSectionService {
   val ttlInMinutes: Long = 30
 
   def findByPath(path: String, env: Env = Live)
-                (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedSection]
+                (implicit requestHeaders: RequestHeaders, executionContext: ExecutionContext): Future[ApiPressedSection]
 }
 
 case class PressedSectionServiceImpl @Inject()(pressedS3Client: PressedS3Client,
@@ -28,7 +28,7 @@ case class PressedSectionServiceImpl @Inject()(pressedS3Client: PressedS3Client,
     * @return a future ApiPressedSection or deliver HttpClient/ServerError from AbstractService
     */
   override def findByPath(path: String, env: Env = Live)
-                         (implicit requestHeaders: Option[RequestHeaders], executionContext: ExecutionContext): Future[ApiPressedSection] =
+                         (implicit requestHeaders: RequestHeaders, executionContext: ExecutionContext): Future[ApiPressedSection] =
 
   env match {
     case Preview ⇒ diggerClient.findByPath(path)

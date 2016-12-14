@@ -4,37 +4,36 @@ import org.scalatestplus.play.PlaySpec
 
 class ApiContentSearchTest extends PlaySpec {
 
-  val sectionPath: String = "/dickButt/"
-  val homeSectionPath: String = "/dickButt/"
-  val excludes: String = "-derpSection,-derpinaSection"
-  val maxResultSize: Int = 10
-  val page: Int = 1
-  val contentType: String = "live"
-  val subType: String = "ticker"
-  val flags: String = "highlight"
+  val sectionPath = "/dickButt/"
+  val homeSectionPath = "/dickButt/"
+  val excludes = List("-derpSection", "-derpinaSection")
+  val maxResultSize = 10
+  val page = 1
+  val contentType = "live"
+  val subType = "ticker"
+  val flags = "highlight"
 
   "ApiContentSearch" should {
 
-    "use all declared fields for creating the query paremeters" in {
-      val query: ApiContentSearch = ApiContentSearch(`type`= Some(MainTypeParam(contentType)))
-      val expectedListOfParams: Seq[(String, String)] = List(("type", "live"))
-
+    "use all declared fields for creating the query parameters" in {
+      val query: ApiContentSearch = ApiContentSearch(`type` = new MainTypeParam(contentType))
       query.allParams.size mustBe query.getClass.getDeclaredFields.length
     }
 
     "create a list of key value strings from all passed parameters which can be passed into the model" in {
       val query: ApiContentSearch = ApiContentSearch(
-        `type`= Some(MainTypeParam(contentType)),
-        subType = Some(SubTypeParam(subType)),
-        section = Some(SectionParam(sectionPath)),
-        homeSection = Some(HomeSectionParam(homeSectionPath)),
-        sectionExcludes = Some(SectionExcludes(excludes)),
-        flags = Some(FlagParam(flags)),
-        limit = Some(LimitParam(maxResultSize.toString)),
-        page = Some(PageParam(page.toString))
+        `type` = new MainTypeParam(contentType),
+        subType = new SubTypeParam(subType),
+        section = new SectionParam(sectionPath),
+        homeSection = new HomeSectionParam(homeSectionPath),
+        sectionExcludes = SectionExcludes(excludes),
+        flags = new FlagParam(flags),
+        limit = LimitParam(maxResultSize),
+        page = PageParam(page)
       )
 
-      val expectedListOfParams: Seq[(String, String)] = List(("type", "live"),
+      val expectedListOfParams: Seq[(String, String)] = List(
+        ("type", "live"),
         ("subType", "ticker"),
         ("sectionPath", "/dickButt/"),
         ("sectionHome", "/dickButt/"),
@@ -48,7 +47,7 @@ class ApiContentSearchTest extends PlaySpec {
 
     "create a list of key value strings only from defined parameters" in {
       val query: ApiContentSearch = ApiContentSearch(
-        `type`= Some(MainTypeParam(contentType))
+        `type` = new MainTypeParam(contentType)
       )
       val expectedListOfParams: Seq[(String, String)] = List(("type", "live"))
 
