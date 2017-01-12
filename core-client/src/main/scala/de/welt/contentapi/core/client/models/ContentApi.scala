@@ -1,6 +1,7 @@
 package de.welt.contentapi.core.client.models
 
 import de.welt.contentapi.utils.Loggable
+import de.welt.contentapi.core.client.utilities.Strings._
 
 case class ApiContentSearch(`type`: MainTypeParam = MainTypeParam(),
                             subType: SubTypeParam = SubTypeParam(),
@@ -33,18 +34,26 @@ abstract class ListParam[T](override val value: List[T]) extends AbstractParam[L
 
   override def valueToStringOpt: List[T] ⇒ Option[String] = {
     case Nil ⇒ None
-    case nonEmpty ⇒ Some(nonEmpty.mkString(operator))
+    case list ⇒
+      val cleanedList = list.map(PrimitiveParam[T]().valueToStringOpt).collect {
+        case Some(v) ⇒ v
+      }.mkString(operator)
+      Some(cleanedList)
   }
 }
 
 abstract class ValueParam[T](override val value: T) extends AbstractParam[T] with Loggable {
-  override def valueToStringOpt: T ⇒ Option[String] = {
-    case s: String if s.nonEmpty ⇒ Some(s)
+  override def valueToStringOpt: T ⇒ Option[String] = PrimitiveParam[T]().valueToStringOpt
+}
+
+case class PrimitiveParam[T]() extends Loggable {
+  def valueToStringOpt: T ⇒ Option[String] = {
+    case s: String if containsTextContent(s) ⇒ Some(stripWhiteSpaces(s))
     case _: String ⇒ None
     case i: Int if i != Int.MinValue ⇒ Some(i.toString)
     case _: Int ⇒ None
     case unknown@_ ⇒
-      log.info(s"Unknown value type: ${unknown.getClass.toString}")
+      log.warn(s"Unknown value type: ${unknown.getClass.toString}")
       None
   }
 }
@@ -56,7 +65,7 @@ case class MainTypeParam(override val value: List[String] = Nil) extends ListPar
   override val name: String = "type"
 }
 
-case class SubTypeParam(override val value: List[String] = Nil) extends ListParam[String] (value){
+case class SubTypeParam(override val value: List[String] = Nil) extends ListParam[String](value) {
   def this(singleValue: String) {
     this(List(singleValue))
   }

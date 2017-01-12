@@ -2,6 +2,7 @@ package de.welt.contentapi.core.client.services.contentapi
 
 import com.codahale.metrics.Timer.Context
 import com.kenshoo.play.metrics.Metrics
+import de.welt.contentapi.core.client.models.{ApiContentSearch, MainTypeParam}
 import de.welt.contentapi.core.client.services.exceptions.{HttpClientErrorException, HttpRedirectException, HttpServerErrorException}
 import de.welt.contentapi.core.client.services.http.RequestHeaders
 import org.mockito.Matchers
@@ -93,6 +94,17 @@ class AbstractServiceTest extends PlaySpec
     "strip whitespaces and newline from the parameter" in new TestScope {
       new TestService().get(Seq("with-whitespace \n"))
       verify(mockWsClient).url("http://www.example.com/test/with-whitespace")
+    }
+
+    "strip nonbreaking whitespace from parameters" in new TestScope {
+      new TestService().get(Seq("strange-whitespaces"), ApiContentSearch(MainTypeParam(List("\u00A0", " ", "\t", "\n"))).getAllParamsUnwrapped)
+      verify(mockRequest).withQueryString()
+    }
+
+    "not strip valid parameters" in new TestScope {
+      val parameters = ApiContentSearch(MainTypeParam(List("param1", "\u00A0param2\u00A0", "\u00A0"))).getAllParamsUnwrapped
+      new TestService().get(Seq("strange-whitespaces"), parameters)
+      verify(mockRequest).withQueryString("type" → Seq("param1", "param2").mkString(MainTypeParam().operator))
     }
 
     "strip empty elements from the query string" in new TestScope {

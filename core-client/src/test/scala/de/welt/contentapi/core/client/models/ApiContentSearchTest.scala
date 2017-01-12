@@ -54,5 +54,14 @@ class ApiContentSearchTest extends PlaySpec {
       query.getAllParamsUnwrapped mustBe expectedListOfParams
     }
 
+    "main type is ','ed" in {
+      val mainTypeParam = ApiContentSearch(MainTypeParam(List("main1", "main2"))).getAllParamsUnwrapped
+      mainTypeParam must contain("type" → "main1,main2")
+    }
+
+    "home section is '|'ed" in {
+      val homeParam = ApiContentSearch(homeSection = HomeSectionParam(List("home1", "home2"))).getAllParamsUnwrapped
+      homeParam must contain("sectionHome" → "home1|home2")
+    }
   }
 }
