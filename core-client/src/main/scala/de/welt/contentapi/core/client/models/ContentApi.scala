@@ -118,7 +118,7 @@ case class HomeSectionParam(override val value: List[String] = Nil) extends List
 
   override val name: String = "sectionHome"
 
-  override def operator: String = "|" // disjunction by for sectionPath
+  override def operator: String = "|" // disjunction by for sectionHome
 }
 
 case class SectionExcludes(override val value: List[String] = Nil) extends ListParam[String](value) {
