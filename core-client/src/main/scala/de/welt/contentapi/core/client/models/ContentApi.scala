@@ -15,7 +15,7 @@ case class ApiContentSearch(`type`: MainTypeParam = MainTypeParam(),
                             limit: LimitParam = LimitParam(),
                             page: PageParam = PageParam()
                            ) {
-  protected def allParams = Seq(`type`, subType, section, homeSection, sectionExcludes, flags, limit, page)
+  protected[models] def allParams = Seq(`type`, subType, section, homeSection, sectionExcludes, flags, limit, page)
 
   /**
     * Returns tuples of params ant their respective values {{{type -> news}}}.
@@ -50,7 +50,7 @@ sealed trait AbstractParam[T] {
   def asTuple: Option[(String, String)] = valueToStringOpt(value).map { v ⇒ (name, v) }
 }
 
-private abstract class ListParam[T](override val value: List[T]) extends AbstractParam[List[T]] {
+protected abstract class ListParam[T](override val value: List[T]) extends AbstractParam[List[T]] {
   // conjunction by default
   def operator: String = ","
 
@@ -64,7 +64,7 @@ private abstract class ListParam[T](override val value: List[T]) extends Abstrac
   }
 }
 
-private abstract class ValueParam[T](override val value: T) extends AbstractParam[T] with Loggable {
+protected abstract class ValueParam[T](override val value: T) extends AbstractParam[T] with Loggable {
   override def valueToStringOpt: T ⇒ Option[String] = PrimitiveParam[T]().valueToStringOpt
 }
 
