@@ -23,7 +23,7 @@ class EnvironmentTest extends PlaySpec {
     }
 
     "find the root module in empty" in {
-      Environment.hasNoParent(Map()) mustBe None
+      Environment.findCurrentModule(Map()) mustBe None
     }
 
     /**
@@ -32,7 +32,7 @@ class EnvironmentTest extends PlaySpec {
       * common
       */
     "find the root module in an simple setup" in {
-      Environment.hasNoParent(Map(
+      Environment.findCurrentModule(Map(
         "common" → mutable.Buffer.empty,
         "article" → mutable.Buffer("common")
       )) mustBe Some("article")
@@ -46,7 +46,7 @@ class EnvironmentTest extends PlaySpec {
       * common
       */
     "find the root module deeper hierarchies" in {
-      Environment.hasNoParent(Map(
+      Environment.findCurrentModule(Map(
         "common" → mutable.Buffer.empty,
         "article" → mutable.Buffer("common"),
         "author" → mutable.Buffer("article")
@@ -61,7 +61,7 @@ class EnvironmentTest extends PlaySpec {
       *      common
       */
     "find the root module broader hierarchies" in {
-      Environment.hasNoParent(Map(
+      Environment.findCurrentModule(Map(
         "common" → mutable.Buffer.empty,
         "article" → mutable.Buffer("common"),
         "section" → mutable.Buffer("common"),

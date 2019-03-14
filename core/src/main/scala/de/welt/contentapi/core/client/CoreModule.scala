@@ -9,7 +9,7 @@ import de.welt.contentapi.core.client.services.CapiExecutionContext
 import de.welt.contentapi.core.client.services.configuration.{ApiConfiguration, Environment, Mode}
 import de.welt.contentapi.utils.Loggable
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class CoreModule extends AbstractModule with Loggable {
 
@@ -35,7 +35,12 @@ class CoreModule extends AbstractModule with Loggable {
           .withCredentials(credentials)
           .withRegion(region)
           .build()
-      } getOrElse (throw new RuntimeException("Could not create s3 client."))
+      } match {
+        case Success(value) ⇒ value
+        case Failure(th) ⇒
+          log.error("Could not initialize AWS S3 Client.", th)
+          throw th
+      }
     }
 
   @Provides

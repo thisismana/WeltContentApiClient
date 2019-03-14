@@ -31,7 +31,7 @@ class PressedS3ClientImpl @Inject()(s3Client: S3Client) extends PressedS3Client 
 
   override def find(path: String): Option[(ApiPressedSectionResponse, Instant)] = {
 
-    s3Client.getWithLastModified(bucket, file).flatMap {
+    s3Client.getWithLastModified(bucket, file.replaceFirst("__PATH__", path)).flatMap {
 
       case (json, lastMod) ⇒
         Json.parse(json).validate[ApiPressedSectionResponse](apiPressedSectionResponseReads) match {

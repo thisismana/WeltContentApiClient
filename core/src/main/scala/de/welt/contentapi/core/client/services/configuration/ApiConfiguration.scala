@@ -5,7 +5,7 @@ import java.io.File
 import com.amazonaws.AmazonClientException
 import com.amazonaws.auth.profile.internal._
 import com.amazonaws.auth.profile.internal.securitytoken.STSProfileCredentialsServiceLoader
-import com.amazonaws.auth.{AWSCredentialsProvider, AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
+import com.amazonaws.auth.{AWSCredentialsProvider, AWSCredentialsProviderChain, EC2ContainerCredentialsProviderWrapper}
 import com.amazonaws.profile.path.AwsProfileFileLocationProvider
 import com.amazonaws.regions.{Region, Regions}
 import com.google.common.base.Stopwatch
@@ -18,7 +18,8 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
-case class ConfigurationException(message: String) extends RuntimeException(message)
+//noinspection ScalaStyle
+case class ConfigurationException(message: String = null, cause: Throwable = null) extends RuntimeException(message, cause)
 
 object Environment extends Loggable {
   type Provider = Map[String, String]
@@ -27,7 +28,21 @@ object Environment extends Loggable {
 
   private[configuration] def extract(provider: Provider, key: String): Option[String] = provider.get(key)
 
-  private val maybe_env_from_config_resource: Provider ⇒ String = provider ⇒
+  /**
+    * We expect a mode to be provided via the resource:config.resources, which
+    * may accept overrides from environment variables (ENV.MODE)
+    *
+    * content_api {
+    * mode = "dev"
+    * mode = ${?MODE}
+    * }
+    *
+    * This is required to allow loading env-dependent configs from ssm.
+    *
+    * Also, there should be a dedicated test config that will be loaded during testing, provide it
+    * via: `-Dconfig.resource=application.test.conf` to the JVM
+    */
+  private val envFromConfigFile: Provider ⇒ String = provider ⇒
     extract(provider, "config.resource")
       .orElse(Some("application.conf"))
       .map(resourceName ⇒ ConfigFactory.parseResourcesAnySyntax(resourceName).resolve())
@@ -46,19 +61,27 @@ object Environment extends Loggable {
     } yield key → value
   }
 
-  protected[configuration] val hasNoParent: Map[String, mutable.Buffer[String]] ⇒ Option[String] = foo ⇒ foo.find {
-    case (name, _) ⇒ !foo.exists {
+  protected[configuration] val findCurrentModule: Map[String, mutable.Buffer[String]] ⇒ Option[String] = projectSetup ⇒ projectSetup.find {
+    case (name, _) ⇒ !projectSetup.exists {
       case (_, dependencies) ⇒ dependencies.contains(name)
     }
   }.map(_._1)
 
-  val stage: Mode = maybe_env_from_config_resource(System.getProperties.asScala.toMap) match {
+  val stage: Mode = envFromConfigFile(System.getProperties.asScala.toMap) match {
     case "production" ⇒ Production
     case "staging" ⇒ Staging
     case "dev" ⇒ Development
     case _ ⇒ Test
   }
 
+  /**
+    * Detect the app currently running. In production mode there should always be exactly one `version.conf` file
+    * in the classpath. This is because sub-projects are bundled as jars an their `version.conf` must be accessed
+    * differently by the class loader.
+    *
+    * However, in dev-mode a flat project structure is created that will contain all the `version.conf` files for
+    * all the projects that this module depends on. So we need to calculate the currently running app.
+    */
   val app: String = {
     if (!stage.isDev) {
       // every module should contain a `version.conf` from which we infer the running app
@@ -68,6 +91,10 @@ object Environment extends Loggable {
       ).getOrElse("local")
     } else {
       // all modules are flat in dev mode, so we need some logic here to figure out the current running app:
+      // 1. find all `version.conf` files visible by the class loader
+      // 2. Try to parse them as one of our `parseVersionConfFile` files (there may be version.conf files from 3rd party jars as well)
+      // 3. Each of our version conf files exposes their sub-project-dependencies, we're searching for the root of this
+      //      dependency tree
       val projectStructure = (getClass.getClassLoader.getResources("version.conf").asScala
         .map(res ⇒
           Try(ConfigFactory.parseURL(res)).flatMap(parseVersionConfFile)
@@ -75,20 +102,20 @@ object Environment extends Loggable {
         case Success(value) ⇒ value
       }).toMap
 
-      val currentModule = hasNoParent(projectStructure)
+      val currentModule = findCurrentModule(projectStructure)
       // find the module that does not appear in any other module's dependencies (meaning: it has not parent)
-      log.debug(s"active modules: ${projectStructure.keys.mkString(",")}. current module: $currentModule")
+      log.debug(s"visible modules: ${projectStructure.keys.mkString(",")}. detected module: $currentModule")
       currentModule.getOrElse("local")
     }
   }
-  log.info(s"Environment loaded as: app=$app, stage=$stage")
+  log.info(s"Environment loaded: app=$app stage=$stage")
 }
 
 /**
-  * provide configuration required by the WCAPI itself
+  * provide static configuration required by the WCAPI itself
   *
-  * - Services accessing AWS/S3
-  * - API
+  * - Services accessing AWS/S3 that are part of the WCAPI
+  * - API (ServiceConfigurations)
   */
 class ApiConfiguration extends Loggable {
 
@@ -149,48 +176,73 @@ class ApiConfiguration extends Loggable {
 
   }
 
-  def reportError(path: String, message: String, c: Config = configuration) = {
-    val origin = Option(if (c.hasPath(path)) c.getValue(path).origin else c.root.origin)
-      .map(o ⇒ s" (Cfg-Source: ${o.toString})")
-      .getOrElse("")
-    val ex = ConfigurationException(s"$message$origin")
-    log.error(s"Configuration error.$origin", ex)
-    throw ex
+  //noinspection ScalaStyle
+  def reportError(path: String, userMessage: String, th: Throwable = null, c: Config = configuration): Nothing = {
+    val message = Option(if (c.hasPath(path)) c.getValue(path).origin else c.root.origin)
+      .map(origin ⇒ s"Configuration Error. $userMessage [config source: ${origin.toString}]")
+      .getOrElse(s"Configuration Error. $userMessage")
+
+    reportError(message, ConfigurationException(message, th))
+  }
+
+  private def reportError(message: String, th: Throwable): Nothing = {
+    log.error(message, th)
+    throw th
   }
 
   object aws {
-    lazy val credentials: Option[AWSCredentialsProvider] = {
+
+    //noinspection ScalaStyle
+    val loadConfig: File ⇒ Try[mutable.Map[String, BasicProfile]] = file ⇒ if (null != file && file.exists()) {
+      log.info(s"Trying to read file ${file.getName} for AWS credentials.")
+      Try(
+        BasicProfileConfigLoader.INSTANCE.loadProfiles(file).getProfiles.asScala.map {
+          case (k, v) ⇒ k.replaceFirst("^profile ", "") → v
+        }).recover {
+        case th: Throwable ⇒
+          log.info(s"Could not load ${file.getName}", th)
+          mutable.Map.empty[String, BasicProfile]
+      }
+    } else {
+      Success(mutable.Map.empty[String, BasicProfile])
+    }
+
+    def credentials: Try[AWSCredentialsProvider] = {
+      //    lazy val credentials: Try[AWSCredentialsProvider] = {
       log.debug("Providing aws credentials chain: profile[frontend] -> InstanceProfile")
 
       // ProfileAssumeRoleCredentialsProvider
       // issue: https://github.com/aws/aws-sdk-java/issues/803
       // workaround: https://gist.github.com/adrian-baker/81ec8e7cd8f8e15d343157ac9116faac
-      val allProfiles = BasicProfileConfigLoader.INSTANCE.loadProfiles(
-        AwsProfileFileLocationProvider.DEFAULT_CONFIG_LOCATION_PROVIDER.getLocation
-      ).getProfiles.asScala.map { case (k, v) ⇒ k.replaceFirst("^profile ", "") → v } ++
-        BasicProfileConfigLoader.INSTANCE.loadProfiles(
-          AwsProfileFileLocationProvider.DEFAULT_CREDENTIALS_LOCATION_PROVIDER.getLocation
-        ).getProfiles.asScala
 
-      val frontendProfile = allProfiles.getOrElse("frontend", throw new RuntimeException("Profile 'frontend' not found."))
-      val profiles = new AllProfiles(allProfiles.asJava)
+      val allProfiles: mutable.Map[String, BasicProfile] = (for {
+        configs ← loadConfig(AwsProfileFileLocationProvider.DEFAULT_CONFIG_LOCATION_PROVIDER.getLocation)
+        profiles ← loadConfig(AwsProfileFileLocationProvider.DEFAULT_CREDENTIALS_LOCATION_PROVIDER.getLocation)
+      } yield configs ++ profiles).getOrElse(mutable.Map.empty)
 
-      val profileCredentialsProvider = if (frontendProfile.isRoleBasedProfile) {
-        new ProfileAssumeRoleCredentialsProvider(STSProfileCredentialsServiceLoader.getInstance(), profiles, frontendProfile)
-      } else {
-        new ProfileStaticCredentialsProvider(frontendProfile)
+      val maybeProfileCredentialsProvider = allProfiles.get("frontend").map { frontendProfile ⇒
+        if (frontendProfile.isRoleBasedProfile) {
+          new ProfileAssumeRoleCredentialsProvider(
+            STSProfileCredentialsServiceLoader.getInstance(),
+            new AllProfiles(allProfiles.asJava),
+            frontendProfile)
+        } else {
+          new ProfileStaticCredentialsProvider(frontendProfile)
+        }
       }
-      val provider = new AWSCredentialsProviderChain(
-        profileCredentialsProvider,
-        InstanceProfileCredentialsProvider.getInstance()
-      )
+      // InstanceProfileCredentialsProvider is used on production
+      // non-AWS-envs must provide the 'frontend' aws profile
+      val chain: List[AWSCredentialsProvider] = List(maybeProfileCredentialsProvider).flatten ++
+        List(new EC2ContainerCredentialsProviderWrapper())
+
+      val provider = new AWSCredentialsProviderChain(chain.asJava)
 
       // this is a bit of a convoluted way to check whether we actually have credentials.
       // I guess in an ideal world there would be some sort of isConfigued() method...
       try {
         provider.getCredentials
         log.debug("Returning Provider")
-        Some(provider)
+        Success(provider)
       } catch {
         case ex: AmazonClientException =>
           log.error(ex.getMessage, ex)
@@ -218,5 +270,5 @@ class ApiConfiguration extends Loggable {
 
 }
 
-// create one "static" instance of this configuration to be used by the capi
+// create one "static" instance of this configuration to be used by the CAPI and later on by the consumers of the CAPI
 object ApiConfiguration extends de.welt.contentapi.core.client.services.configuration.ApiConfiguration

@@ -15,11 +15,11 @@ case class BasicAuth(username: BasicUsername, password: BasicPassword) extends C
 case class BasicUsername(v: String)
 
 case class BasicPassword(v: String) {
-  override def toString: String = "***"
+  override def toString: String = "basic(***)"
 }
 
 case class ApiKey(v: String) extends Credentials {
-  override def toString: String = "***"
+  override def toString: String = "api_key(***)"
 }
 
 /**
@@ -106,7 +106,7 @@ object ServiceConfiguration extends Loggable {
         value
       case Failure(th) ⇒
         log.error("Could not configure Service.", th)
-        ApiConfiguration.reportError("api." + serviceName, s"Service '$serviceName' was not configured correctly.")
+        ApiConfiguration.reportError("api." + serviceName, s"Service '$serviceName' was not configured correctly.", th)
     }
   }
 }

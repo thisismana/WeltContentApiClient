@@ -1,24 +1,28 @@
 package de.welt.contentapi.core.client.services.aws.ssm
 
-import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.regions.Region
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParameterRequest, GetParametersByPathRequest}
 import de.welt.contentapi.core.client.services.configuration.ApiConfiguration
+import de.welt.contentapi.utils.Loggable
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success}
 
-class ParameterStore(region: Region) {
+class ParameterStore(region: Region) extends Loggable {
 
-  private lazy val credentials: Option[AWSCredentialsProvider] = ApiConfiguration.aws.credentials
-  private lazy val ssm = credentials.map { credentials ⇒
-    AWSSimpleSystemsManagementClientBuilder
-      .standard()
+  private lazy val ssm = ApiConfiguration.aws.credentials.map { credentials ⇒
+    AWSSimpleSystemsManagementClientBuilder.standard()
       .withCredentials(credentials)
       .withRegion(region.getName)
       .build()
-  }.getOrElse(throw new RuntimeException("Failed to initialize AWSSimpleSystemsManagement"))
+  } match {
+    case Success(value) ⇒ value
+    case Failure(th) ⇒
+      log.error("Could not initialize AWS SSM Client.", th)
+      throw th
+  }
 
   def get(key: String): String = {
     val parameterRequest = new GetParameterRequest().withWithDecryption(true).withName(key)
@@ -33,10 +37,9 @@ class ParameterStore(region: Region) {
         .withPath(path)
         .withWithDecryption(true)
         .withRecursive(false)
+
       val reqWithToken = nextToken.map(req.withNextToken).getOrElse(req)
-
       val result = ssm.getParametersByPath(reqWithToken)
-
       val resultMap = acc ++ result.getParameters.asScala.map { param ⇒
         param.getName → param.getValue
       }

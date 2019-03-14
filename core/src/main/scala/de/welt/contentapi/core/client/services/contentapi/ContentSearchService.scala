@@ -55,7 +55,7 @@ sealed trait ContentSearchService {
 @Singleton
 class ContentSearchServiceImpl @Inject()(ws: WSClient,
                                          metrics: Metrics,
-                                         capi: CapiExecutionContext)
+                                         override implicit val capi: CapiExecutionContext)
   extends AbstractService[ApiSearchResponse](ws, metrics, capi) with ContentSearchService {
 
   import AbstractService.implicitConversions._
@@ -73,5 +73,5 @@ class ContentSearchServiceImpl @Inject()(ws: WSClient,
   override def batchGetForId(ids: Seq[String])(implicit requestHeaders: Option[RequestHeaders]): Future[Seq[ApiContent]] =
     super
       .execute(urlArguments = Nil, parameters = Seq("id" → ids.mkString("|")))
-      .map(_.results)(capi)
+      .map(_.results)
 }
