@@ -8,7 +8,7 @@ import de.welt.contentapi.utils.Loggable
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class ParameterStore(region: Region) extends Loggable {
 
@@ -24,9 +24,11 @@ class ParameterStore(region: Region) extends Loggable {
       throw th
   }
 
-  def get(key: String): String = {
-    val parameterRequest = new GetParameterRequest().withWithDecryption(true).withName(key)
-    ssm.getParameter(parameterRequest).getParameter.getValue
+  def parameterByKey(key: String): Try[String] = {
+    val parameterRequest = new GetParameterRequest()
+      .withWithDecryption(true)
+      .withName(key)
+    Try(ssm.getParameter(parameterRequest).getParameter.getValue)
   }
 
   def getPath(path: String): Map[String, String] = {
