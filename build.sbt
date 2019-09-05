@@ -47,7 +47,7 @@ val frontendDependencyManagementSettings = Seq(
 val coreDependencySettings = Seq(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % "2.27.0" % Test,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.2" % Test
+    "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test
   )
 )
 val clientDependencySettings = Seq(
@@ -64,10 +64,9 @@ val clientDependencySettings = Seq(
     "com.amazonaws" % "aws-java-sdk-s3" % AWSVersion,
     "com.amazonaws" % "aws-java-sdk-ssm" % AWSVersion,
     "com.amazonaws" % "aws-java-sdk-sts" % AWSVersion,
-    "com.kenshoo" %% "metrics-play" % "2.7.0_0.8.0",
-//    "de.welt" %% "metrics-play" % "2.7.0_6",
+    "de.welt" %% "metrics-play" % "2.7.3_7",
 
-    "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.2" % Test,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test,
     "org.mockito" % "mockito-core" % "2.27.0" % Test
   )
 )
