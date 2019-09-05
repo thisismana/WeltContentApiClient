@@ -39,6 +39,7 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
     capiContext.actorSystem.scheduler.schedule(1.minute, 1.minute, new Runnable() {
       override def run(): Unit = update()
     } )
+    update()
   }
 
   def update(): Unit = {
