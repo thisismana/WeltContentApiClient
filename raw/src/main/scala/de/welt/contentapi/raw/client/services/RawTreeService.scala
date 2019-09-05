@@ -36,8 +36,9 @@ class RawTreeServiceImpl @Inject()(s3Client: S3Client,
     log.info("RawTree will not be loaded when started in Mode.Test. If you require section data, please mock it.")
   } else {
     // start cron to update the tree automatically
-    capiContext.actorSystem.scheduler.schedule(1.minute, 1.minute, () ⇒ update())
-    update()
+    capiContext.actorSystem.scheduler.schedule(1.minute, 1.minute, new Runnable() {
+      override def run(): Unit = update()
+    } )
   }
 
   def update(): Unit = {
